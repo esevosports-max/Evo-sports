@@ -1,0 +1,383 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+generator clientDefault {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // Hashed credentials password
+  roleId        String?
+  role          Role?     @relation(fields: [roleId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  clubRequest   ClubRegistrationRequest?
+  player        Player?
+  staff         Staff?
+  club          Club?     @relation("ClubPresident")
+}
+
+
+model ClubRegistrationRequest {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clubName        String
+  clubLogo        String?  // Base64 or image path
+  creationDate    DateTime
+  address         String
+  stadiumName     String
+  pdfFilename     String?  // Base64 or filename
+  phone           String?  // Phone number
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?
+  chosenPlan      String   @default("Club")
+  trialSelected   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique // e.g., "ADMIN", "COACH", "ATHLETE"
+  description String?
+  users       User[]
+  permissions Permission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  action      String   @unique // e.g., "users:read", "sessions:create", "analytics:view"
+  description String?
+  roles       Role[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Club {
+  id              String   @id @default(cuid())
+  name            String
+  logo            String?
+  creationDate    DateTime
+  address         String
+  stadiumName     String
+  stadiumCapacity String?
+  phone           String?
+  presidentId     String?  @unique
+  president       User?    @relation("ClubPresident", fields: [presidentId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  players         Player[]
+  staff           Staff[]
+  categories      TeamCategory[]
+  calendarEvents  CalendarEvent[]
+  dailyQuestionnaires DailyQuestionnaire[]
+  polls           Poll[]
+  chatChannels    ChatChannel[]
+
+  // Subscription fields
+  subscriptionPlan    String?   @default("Standard") // e.g. "Standard", "Premium", "Elite"
+  subscriptionStatus  String?   @default("Actif")    // e.g. "Actif", "En attente", "Expiré"
+  subscriptionExpires DateTime?
+  subscriptionPaid    Boolean   @default(true)
+  subscriptionMethod  String?   @default("Gratuit") // e.g. "BARIDIMOB", "SERIAL", "CHEQUE", "Gratuit"
+}
+
+model CalendarEvent {
+  id           String   @id @default(cuid())
+  clubId       String
+  club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  title        String
+  type         String   // "MATCH" | "TRAINING" | "MEETING" | "MEDICAL_EXAM" | "EXCURSION"
+  date         String   // "YYYY-MM-DD"
+  time         String   // "HH:MM"
+  location     String
+  details      String?
+  creatorName  String?
+  creatorRole  String?
+  assignedTeam String?
+  score        String?  // e.g. "3 - 1" or null
+  status       String   @default("PROGRAMME") // "PROGRAMME", "EN_COURS", "TERMINE", "N_A"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model TeamCategory {
+  id           String   @id @default(cuid())
+  clubId       String
+  club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  name         String
+  league       String
+  coach        String
+  maxPlayers   Int      @map("playersCount") @default(0)
+  staffMembers Staff[]  @relation("StaffCategories")
+  players      Player[]
+  composition  Composition?
+  dailyQuestionnaires DailyQuestionnaire[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+
+model Staff {
+  id         String         @id @default(cuid())
+  userId     String         @unique
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clubId     String
+  club       Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  title      String?        // e.g., Directeur Sportif, Secrétaire Général
+  categories TeamCategory[] @relation("StaffCategories")
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+}
+
+model Player {
+  id              String          @id @default(cuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clubId          String
+  club            Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  position        String?         // e.g., Attaquant, Gardien
+  number          Int?            // Jersey number
+  teamCategoryId  String?
+  teamCategory    TeamCategory?   @relation(fields: [teamCategoryId], references: [id], onDelete: SetNull)
+  age             Int?
+  height          String?
+  weight          String?
+  foot            String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  physicalIndices PhysicalIndex[]
+  dailyResponses  DailyResponse[]
+  physicalTests   PhysicalTest[]
+
+  // Injury fields
+  isInjured       Boolean         @default(false)
+  injuryType      String?
+  injurySeverity  String?         // "Bénigne" | "Modérée" | "Grave"
+  injuryDuration  String?         // e.g., "3 semaines"
+  injuryDate      DateTime?
+  injuryReturn    DateTime?
+  injuryStatus    String?         // e.g., "Soins & Physiothérapie"
+  injuryProgress  Int             @default(5)
+  injuryDeclaredBy String?
+
+  // Medical Record fields
+  bloodGroup      String?
+  allergies       String?
+  lastCheckup     String?
+  clearance       String?         @default("Autorisé")
+  medicalNotes     String[]
+}
+
+model PhysicalIndex {
+  id              String   @id @default(cuid())
+  playerId        String
+  player          Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  questionnaireId String?
+  sleepHours      Float?   // sommeil: heures (heures de sommeil)
+  sleepQuality Int?     // sommeil: qualité (qualité du sommeil)
+  stress       Int?     // stress index (indice de stress)
+  soreness     Int?     // courbatures index (indice de courbatures/douleurs)
+  fatigue      Int?     // fatigue index (indice de fatigue)
+  rpe          Int?     // RPE (Rate of Perceived Exertion)
+  rpeDuration  Int?     // RPE training duration in minutes
+  heartRate    Int?     // Battements de coeur (fréquence cardiaque en BPM)
+  date         DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Composition {
+  id             String       @id @default(cuid())
+  teamCategoryId String       @unique
+  teamCategory   TeamCategory @relation(fields: [teamCategoryId], references: [id], onDelete: Cascade)
+  formation      Json         // e.g. {"defenders": 4, "midfielders": 3, "forwards": 3}
+  slots          Json         // [{ id, type, label, x, y, playerId }]
+  substitutes    Json         // Array of player IDs: ["id1", "id2"]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model DailyQuestionnaire {
+  id             String          @id @default(cuid())
+  clubId         String
+  club           Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  teamCategoryId String?
+  teamCategory   TeamCategory?   @relation(fields: [teamCategoryId], references: [id], onDelete: SetNull)
+  timeLimit      Int             // in minutes
+  createdAt      DateTime        @default(now())
+  scheduledFor   DateTime        @default(now())
+  expiresAt      DateTime
+  active         Boolean         @default(true)
+  isApplied      Boolean         @default(false)
+  responses      DailyResponse[]
+}
+
+model DailyResponse {
+  id              String             @id @default(cuid())
+  questionnaireId String
+  questionnaire   DailyQuestionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+  playerId        String
+  player          Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  sleepQuality    Int
+  fatigue         Int
+  stress          Int
+  soreness        Int
+  heartRate       Int
+  createdAt       DateTime           @default(now())
+
+  @@unique([questionnaireId, playerId])
+}
+
+model PhysicalTest {
+  id           String   @id @default(cuid())
+  playerId     String
+  player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  vma          Float    // VMA (km/h)
+  vo2Max       Float    // VO2 Max (ml/kg/min)
+  sprint10m    Float    // Sprint 10m (s)
+  sprint30m    Float    // Sprint 30m (s)
+  cmj          Float    // Countermovement Jump (cm)
+  sj           Float    // Squat Jump (cm)
+  illinois     Float    // Illinois Agility Test (s)
+  fat          Float    // Body Fat Percentage (%)
+  date         DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SerialCode {
+  id           String   @id @default(cuid())
+  code         String   @unique // 16 digits
+  identifier   String   @unique // 6 characters
+  plan         String   // e.g. "1 Équipe", "Club", "Professionnel", "Elite"
+  duration     String   // "MONTHLY" | "YEARLY"
+  used         Boolean  @default(false)
+  usedByClubId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PaymentSubmission {
+  id              String   @id @default(cuid())
+  clubId          String
+  clubName        String
+  plan            String   // selected plan e.g. "1 Équipe", "Club", "Professionnel", "Elite"
+  duration        String   // "MONTHLY" | "YEARLY"
+  amount          Float
+  method          String   // "BARIDIMOB" | "CHEQUE"
+  attachment      String?  // base64 or path to receipt/check photo
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?  // motif de refus
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Poll {
+  id             String       @id @default(cuid())
+  clubId         String
+  club           Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?
+  type           String       // e.g. "GENERAL", "MATCH", "TRAINING", "EVENT"
+  status         String       @default("ACTIVE") // "ACTIVE", "SCHEDULED", "FINISHED"
+  scheduledFor   DateTime?
+  expiresAt      DateTime
+  creatorId      String
+  creatorName    String
+  creatorRole    String?
+  targetTeams    Json?        // Array of team category IDs, e.g. ["cuid1", "cuid2"] or null for all
+  targetRoles    Json?        // Array of roles, e.g. ["STAFF", "JOUEUR"] or null for all
+  targetUserIds  Json?        // Array of specific user IDs allowed to vote, or null for all targets
+  options        PollOption[]
+  votes          PollVote[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model PollOption {
+  id        String     @id @default(cuid())
+  pollId    String
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text      String
+  votes     PollVote[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model PollVote {
+  id        String     @id @default(cuid())
+  pollId    String
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId  String
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId    String
+  userName  String
+  choiceText String
+  createdAt DateTime   @default(now())
+
+  @@unique([pollId, userId])
+}
+
+model ChatChannel {
+  id           String        @id @default(cuid())
+  clubId       String
+  club         Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  isPrivate    Boolean       @default(false)
+  isCustom     Boolean       @default(false)
+  canReply     Boolean       @default(true)
+  creatorId    String
+  creatorName  String
+  targetTeams  Json?         // Array of team category IDs (null means all teams or not restricted)
+  targetRoles  Json?         // Array of role names (null means everyone)
+  targetUserIds Json?        // Array of specific user IDs allowed to view
+  messages     ChatMessage[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id              String             @id @default(cuid())
+  channelId       String
+  channel         ChatChannel        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  senderId        String
+  senderName      String
+  senderRole      String?
+  senderClubName  String?
+  senderClubLogo  String?
+  content         String
+  views           ChatMessageView[]
+  createdAt       DateTime           @default(now())
+}
+
+model ChatMessageView {
+  id          String      @id @default(cuid())
+  messageId   String
+  message     ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId      String
+  userName    String
+  userRole    String?
+  viewedAt    DateTime    @default(now())
+
+  @@unique([messageId, userId])
+}
