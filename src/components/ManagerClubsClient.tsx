@@ -274,7 +274,32 @@ export default function ManagerClubsClient({
     try {
       await updateClubDetailsAction(
         editingClub.id,
-       } catch (err) {
+        editName,
+        editStadium,
+        editAddress,
+        editPlan,
+        editStatus,
+        new Date(editExpires).toISOString(),
+        editPaid
+      )
+      setClubs((prev) =>
+        prev.map((c) =>
+          c.id === editingClub.id
+            ? {
+                ...c,
+                name: editName,
+                stadiumName: editStadium,
+                address: editAddress,
+                subscriptionPlan: editPlan,
+                subscriptionStatus: editStatus,
+                subscriptionExpires: new Date(editExpires).toISOString(),
+                subscriptionPaid: editPaid,
+              }
+            : c
+        )
+      )
+      setEditingClub(null)
+    } catch (err) {
       console.error(err)
       alert(tLoc.errUpdate)
     } finally {
@@ -605,6 +630,7 @@ export default function ManagerClubsClient({
               >
                 {loading ? tLoc.btnSaving : tLoc.btnSave}
               </button>
+            </div>
           </div>
         </div>
       )}

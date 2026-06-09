@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useLanguage } from "@/components/LanguageProvider"
-import { createStaffMember, deleteStaffMember } from "@/app/dashboard/staff/actions"
+import { createStaffMember, deleteStaffMember, updateStaffMember } from "@/app/dashboard/staff/actions"
 
 const ROLE_LABELS_DICT: Record<string, Record<string, string>> = {
   FR: {
@@ -252,6 +252,11 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
   const [editRole, setEditRole] = useState("ENTRAINEUR_ADJOINT")
   const [editAssignedTeams, setEditAssignedTeams] = useState<string[]>([]) // Category IDs!
 
+  const filteredStaff = initialStaff.filter((m) => {
+    if (selectedFilter === "ALL") return true
+    return m.roleTag === selectedFilter
+  })
+
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setSuccessMsg("")
@@ -324,8 +329,28 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
 
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault()
-    // For now edit/save in DB can be simulated or we can extend actions.ts
-    // Let's implement editing as simulated for the UI, but database updates can be performed if needed.
+    if (!editingMember || !editName || !editEmail) return
+
+    startTransition(async () => {
+      const res = await updateStaffMember(editingMember.id, {
+        name: editName,
+        email: editEmail,
+        roleTag: editRole,
+        categoryIds: editAssignedTeams
+      })
+
+      if (res.success) {
+        setSuccessMsg(tLoc.msgSaved)
+        setEditingMember(null)
+        router.refresh()
+        setTimeout(() => setSuccessMsg(""), 4000)
+      } else {
+        setErrorMsg(res.error || tLoc.msgCreateError)
+        setTimeout(() => setErrorMsg(""), 5000)
+      }
+    })
+  }
+
   // VIEW: CREATE STAFF PAGE
   if (activeView === "create") {
     return (

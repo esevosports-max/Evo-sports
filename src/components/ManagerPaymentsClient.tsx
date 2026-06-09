@@ -812,7 +812,50 @@ export default function ManagerPaymentsClient({
         matchesPrice = priceVal.includes("144 000 DA")
       } else if (priceFilter === "192000") {
         matchesPrice = priceVal.includes("192 000 DA")
-      } else if (pric      {/* Header Section */}
+      } else if (priceFilter === "240000") {
+        matchesPrice = priceVal.includes("240 000 DA")
+      }
+    }
+
+    // Cycle filter
+    let matchesCycle = true
+    if (cycleFilter !== "ALL") {
+      const isAnnuel = club.subscriptionPlan?.includes("Annuel")
+      if (cycleFilter === "YEARLY") {
+        matchesCycle = !!isAnnuel && !!club.subscriptionPaid
+      } else if (cycleFilter === "MONTHLY") {
+        matchesCycle = !isAnnuel && !!club.subscriptionPaid
+      }
+    }
+
+    // Method filter
+    let matchesMethod = true
+    if (methodFilter !== "ALL") {
+      if (methodFilter === "BARIDIMOB") {
+        matchesMethod = club.subscriptionMethod === "BARIDIMOB"
+      } else if (methodFilter === "SERIAL") {
+        matchesMethod = club.subscriptionMethod === "SERIAL"
+      } else if (methodFilter === "CHEQUE") {
+        matchesMethod = club.subscriptionMethod === "CHEQUE"
+      } else if (methodFilter === "GRATUIT") {
+        matchesMethod = !club.subscriptionPaid || club.subscriptionMethod === "Gratuit"
+      } else if (methodFilter === "EN_ATTENTE") {
+        matchesMethod = club.subscriptionMethod === "EN_ATTENTE"
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesType && matchesPrice && matchesCycle && matchesMethod
+  })
+
+  // Calculations for KPIs
+  const totalClubs = clubs.length
+  const paidClubs = clubs.filter(c => c.subscriptionPaid && c.subscriptionStatus !== "Bloqué").length
+  const freeClubs = clubs.filter(c => !c.subscriptionPaid && c.subscriptionStatus !== "Bloqué").length
+  const blockedClubs = clubs.filter(c => c.subscriptionStatus === "Bloqué").length
+
+  return (
+    <div className="space-y-6">
+      {/* Header Section */}
       <section className="rounded-2xl border border-zinc-200/50 bg-white p-8 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
@@ -1002,6 +1045,7 @@ export default function ManagerPaymentsClient({
                 <th className="pb-3 pr-4">{tLoc.thStatus}</th>
                 <th className="pb-3 pr-4">{tLoc.thExpiry}</th>
                 <th className="pb-3 text-right">{tLoc.thActions}</th>
+              </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100/60 text-xs font-semibold">
               {filteredClubs.length === 0 ? (
@@ -1153,7 +1197,37 @@ export default function ManagerPaymentsClient({
                   <th className="pb-3 pr-4">{tLoc.thSubPlan}</th>
                   <th className="pb-3 pr-4">{tLoc.thMethod}</th>
                   <th className="pb-3 pr-4">{tLoc.labelAmount}</th>
-                  <th className="pb-3 pr-4">{tLoc                      <td className="py-4 pr-4 text-zinc-500">
+                  <th className="pb-3 pr-4">{tLoc.thSubDate}</th>
+                  <th className="pb-3 pr-4">{tLoc.thStatus}</th>
+                  <th className="pb-3 text-right">{tLoc.thActions}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100/60 text-xs font-semibold">
+                {submissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-zinc-400 font-medium">
+                      {tLoc.noSubFound}
+                    </td>
+                  </tr>
+                ) : (
+                  submissions.map((sub) => (
+                    <tr key={sub.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                      <td className="py-4 pr-4">
+                        <p className="font-bold text-zinc-900 dark:text-white uppercase">{sub.clubName}</p>
+                        <p className="text-[9px] text-zinc-400 font-medium">ID Club: {sub.clubId}</p>
+                      </td>
+                      <td className="py-4 pr-4">
+                        <span className="inline-flex rounded bg-zinc-100 dark:bg-zinc-850 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-350">
+                          {plansMap[sub.plan] || sub.plan} ({sub.duration === "YEARLY" ? (language === "AR" ? "سنوي" : language === "EN" ? "Yearly" : "Annuel") : (language === "AR" ? "شهري" : language === "EN" ? "Monthly" : "Mensuel")})
+                        </span>
+                      </td>
+                      <td className="py-4 pr-4 font-mono font-bold uppercase text-zinc-750 dark:text-zinc-300">
+                        {sub.method}
+                      </td>
+                      <td className="py-4 pr-4 font-bold text-emerald-600 dark:text-emerald-400">
+                        {sub.amount.toLocaleString()} DA
+                      </td>
+                      <td className="py-4 pr-4 text-zinc-500">
                         {new Date(sub.createdAt).toLocaleDateString(language === "AR" ? "ar-EG" : language === "EN" ? "en-US" : "fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                       </td>
                       <td className="py-4 pr-4">

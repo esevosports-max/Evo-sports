@@ -139,3 +139,71 @@ export async function deleteStaffMember(staffId: string) {
     return { success: false, error: e.message || "Erreur lors de la suppression" }
   }
 }
+
+export async function updateStaffMember(
+  staffId: string,
+  data: {
+    name: string
+    email: string
+    roleTag: string
+    categoryIds: string[]
+  }
+) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userRole = session.user.role?.name
+    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS" && userRole !== "DIRECTEUR_SPORTIF" && userRole !== "SECRETAIRE_GENERAL") {
+      throw new Error("Action réservée aux gestionnaires")
+    }
+
+    const staff = await db.staff.findUnique({
+      where: { id: staffId },
+      include: { user: { include: { role: true } } }
+    })
+
+    if (!staff) {
+      throw new Error("Membre du staff introuvable")
+    }
+
+    if (userRole === "SECRETAIRE_GENERAL") {
+      const targetRole = staff.user?.role?.name
+      if (targetRole === "PRESIDENT" || targetRole === "SECRETAIRE_GENERAL" || targetRole === "DIRECTEUR_SPORTIF") {
+        throw new Error("Vous n'êtes pas autorisé à modifier ce rôle")
+      }
+    }
+
+    let staffRole = await db.role.findUnique({
+      where: { name: data.roleTag }
+    })
+
+    await db.user.update({
+      where: { id: staff.userId },
+      data: {
+        name: data.name,
+        email: data.email,
+        roleId: staffRole?.id || null
+      }
+    })
+
+    await db.staff.update({
+      where: { id: staffId },
+      data: {
+        title: staffRole?.description || data.roleTag,
+        categories: {
+          set: data.categoryIds.map(id => ({ id }))
+        }
+      }
+    })
+
+    revalidatePath("/dashboard/staff")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error updating staff member:", e)
+    return { success: false, error: e.message || "Erreur lors de la modification" }
+  }
+}
+

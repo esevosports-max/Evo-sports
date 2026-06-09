@@ -94,5 +94,54 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return null
       }
     })
-  ]
+  ],
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt({ token, user, account }) {
+      if (user) {
+        token.id = user.id as string
+        token.role = user.role as { name: string; permissions: string[] }
+      }
+      
+      if (account?.provider === "google" && token.email) {
+        try {
+          let dbUser = await db.user.findUnique({
+            where: { email: token.email },
+            include: { role: { include: { permissions: true } } }
+          })
+          
+          if (!dbUser) {
+            let role = await db.role.findFirst({ where: { name: "PRESIDENT" } })
+            if (!role) {
+              const { seedRBAC } = await import("@/lib/rbac")
+              await seedRBAC()
+              role = await db.role.findFirst({ where: { name: "PRESIDENT" } })
+            }
+            
+            dbUser = await db.user.create({
+              data: {
+                name: token.name,
+                email: token.email,
+                image: token.picture,
+                roleId: role?.id,
+              },
+              include: { role: { include: { permissions: true } } }
+            })
+          }
+          
+          if (dbUser) {
+            token.id = dbUser.id
+            token.role = dbUser.role ? {
+              name: dbUser.role.name,
+              permissions: dbUser.role.permissions.map((p) => p.action)
+            } : undefined
+          }
+        } catch (err) {
+          console.error("Google user sync error in JWT callback:", err)
+        }
+      }
+      
+      return token
+    }
+  }
 })
