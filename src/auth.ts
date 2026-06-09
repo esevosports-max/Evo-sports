@@ -31,36 +31,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             await seedRBAC()
           }
 
-          // Create standard football club demo users if they don't exist yet
-          const demoUsers = [
-            { name: "Manager EVO Sports", email: "manager@example.com", roleName: "MANAGER_EVO_SPORTS" },
-            { name: "Président de Club", email: "president@example.com", roleName: "PRESIDENT" },
-            { name: "Directeur Sportif", email: "directeur@example.com", roleName: "DIRECTEUR_SPORTIF" },
-            { name: "Secrétaire Général", email: "secretaire@example.com", roleName: "SECRETAIRE_GENERAL" },
-            { name: "Entraîneur Principal", email: "entraineur@example.com", roleName: "ENTRAINEUR_PRINCIPAL" },
-            { name: "Entraîneur Adjoint", email: "adjoint@example.com", roleName: "ENTRAINEUR_ADJOINT" },
-            { name: "Préparateur Physique", email: "preparateur@example.com", roleName: "PREPARATEUR_PHYSIQUE" },
-            { name: "Entraîneur Gardiens", email: "gardiens@example.com", roleName: "ENTRAINEUR_GARDIENS" },
-            { name: "Médecin du Club", email: "medecin@example.com", roleName: "MEDECIN" },
-            { name: "Joueur de Foot", email: "joueur@example.com", roleName: "JOUEUR" },
-          ]
-
-          for (const demo of demoUsers) {
-            const exists = await db.user.findUnique({ where: { email: demo.email } })
-            if (!exists) {
-              const role = await db.role.findUnique({ where: { name: demo.roleName } })
-              if (role) {
-                await db.user.create({
-                  data: {
-                    name: demo.name,
-                    email: demo.email,
-                    password: "password", // Simple plain password for demo purposes
-                    roleId: role.id,
-                  }
-                })
-              }
-            }
-          }
 
           // Fetch the user from the database and include role and permissions
           const user = await db.user.findUnique({
