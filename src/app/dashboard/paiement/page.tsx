@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
   "1 Équipe": { monthly: 10000, yearly: 100000 },
@@ -11,6 +12,7 @@ const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
 }
 
 export default function PaymentPage() {
+  const router = useRouter()
   const [clubInfo, setClubInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -49,6 +51,7 @@ export default function PaymentPage() {
         
         if (isActive && !isExpired) {
           setActionType("VIEW")
+          router.refresh()
         } else {
           setActionType("RENEW")
         }
@@ -377,6 +380,15 @@ export default function PaymentPage() {
               className="flex-1 rounded-xl bg-gradient-to-b from-emerald-500 to-teal-600 text-white px-6 py-3.5 text-xs font-black uppercase tracking-wider shadow-md hover:from-emerald-400 hover:to-teal-500 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all text-center cursor-pointer font-sport italic"
             >
               Renouveler l&apos;abonnement
+            </button>
+
+            <button
+              onClick={() => {
+                window.location.href = "/dashboard"
+              }}
+              className="flex-1 rounded-xl bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 px-6 py-3.5 text-xs font-black uppercase tracking-wider shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all text-center cursor-pointer font-sport italic flex items-center justify-center gap-1.5 border border-zinc-850 dark:border-zinc-200"
+            >
+              🚪 Sortir (Tableau de Bord)
             </button>
 
             {clubInfo?.subscriptionPlan !== "Elite" && (
