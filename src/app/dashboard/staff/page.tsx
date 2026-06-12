@@ -99,7 +99,8 @@ export default async function StaffPage() {
       role: roleMapLabels[roleTag] || s.title || "Staff",
       roleTag,
       email: s.user?.email || "email@example.com",
-      phone: "+33 6 -- -- -- --", // Field not on DB Staff yet, default or placeholder
+      phone: s.user?.phone || "Non renseigné",
+      isBlocked: s.user?.blocked || false,
       joined: s.createdAt.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
       avatarColor: colorMap[roleTag] || "bg-zinc-500",
       assignedTeams: s.categories.map((c) => c.name),

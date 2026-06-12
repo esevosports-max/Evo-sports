@@ -13,6 +13,8 @@ export async function createPlayer(data: {
   weight: string
   foot: string
   teamCategoryId: string
+  email: string
+  password: string
 }) {
   try {
     const session = await auth()
@@ -93,14 +95,24 @@ export async function createPlayer(data: {
       })
     }
 
-    const emailPrefix = data.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ".")
-    const email = `${emailPrefix}.${Date.now()}@evo-sports.com`
+    if (!data.email || !data.password) {
+      throw new Error("L'email et le mot de passe sont obligatoires.")
+    }
+
+    const emailNormalized = data.email.toLowerCase().trim()
+    const existingUser = await db.user.findUnique({
+      where: { email: emailNormalized }
+    })
+
+    if (existingUser) {
+      throw new Error("Cette adresse email est déjà utilisée.")
+    }
 
     const playerUser = await db.user.create({
       data: {
         name: data.name,
-        email,
-        password: "PlayerPassword123", // default password
+        email: emailNormalized,
+        password: data.password,
         roleId: playerRole?.id || null
       }
     })
@@ -157,5 +169,141 @@ export async function deletePlayer(playerId: string) {
   } catch (e: any) {
     console.error("Error deleting player:", e)
     return { success: false, error: e.message || "Erreur lors de la suppression" }
+  }
+}
+
+export async function updatePlayer(data: {
+  id: string
+  name: string
+  number: number
+  position: string
+  age: number
+  height: string
+  weight: string
+  foot: string
+  teamCategoryId: string
+  email: string
+  password?: string
+}) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userRole = session.user.role?.name
+    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
+      throw new Error("Action réservée aux gestionnaires")
+    }
+
+    const player = await db.player.findUnique({
+      where: { id: data.id },
+      include: { user: true }
+    })
+
+    if (!player) {
+      throw new Error("Joueur introuvable")
+    }
+
+    if (!data.teamCategoryId) {
+      throw new Error("La sélection d'une équipe est obligatoire.")
+    }
+
+    // Check if Jersey number is already taken in this team category by someone else
+    const duplicateNumber = await db.player.findFirst({
+      where: {
+        teamCategoryId: data.teamCategoryId,
+        number: data.number,
+        id: { not: data.id }
+      }
+    })
+
+    if (duplicateNumber) {
+      throw new Error("Ce numéro est déjà choisi par un autre joueur de cette équipe.")
+    }
+
+    // Check if email is already taken by someone else
+    const emailNormalized = data.email.toLowerCase().trim()
+    const existingUser = await db.user.findFirst({
+      where: {
+        email: emailNormalized,
+        id: { not: player.userId }
+      }
+    })
+
+    if (existingUser) {
+      throw new Error("Cette adresse email est déjà utilisée par un autre compte.")
+    }
+
+    // Update User record
+    const userUpdateData: any = {
+      name: data.name,
+      email: emailNormalized,
+    }
+    if (data.password && data.password.trim() !== "") {
+      userUpdateData.password = data.password
+    }
+
+    await db.user.update({
+      where: { id: player.userId },
+      data: userUpdateData
+    })
+
+    // Update Player record
+    await db.player.update({
+      where: { id: data.id },
+      data: {
+        position: data.position,
+        number: data.number,
+        teamCategoryId: data.teamCategoryId,
+        age: data.age,
+        height: data.height,
+        weight: data.weight,
+        foot: data.foot
+      }
+    })
+
+    revalidatePath("/dashboard/effectifs")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error updating player:", e)
+    return { success: false, error: e.message || "Erreur lors de la mise à jour" }
+  }
+}
+
+export async function toggleBlockPlayer(playerId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userRole = session.user.role?.name
+    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
+      throw new Error("Action réservée aux gestionnaires")
+    }
+
+    const player = await db.player.findUnique({
+      where: { id: playerId },
+      include: { user: true }
+    })
+
+    if (!player || !player.user) {
+      throw new Error("Joueur ou compte utilisateur introuvable")
+    }
+
+    // Toggle blocked status
+    await db.user.update({
+      where: { id: player.userId },
+      data: {
+        blocked: !player.user.blocked
+      }
+    })
+
+    revalidatePath("/dashboard/effectifs")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error toggling player block status:", e)
+    return { success: false, error: e.message || "Erreur de changement de statut" }
   }
 }

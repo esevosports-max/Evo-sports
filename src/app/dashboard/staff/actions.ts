@@ -66,10 +66,23 @@ export async function createStaffMember(data: {
       data: {
         name: fullName,
         email: data.email,
+        phone: data.phone,
         password: "StaffPassword123", // Default password
         roleId: staffRole?.id || null
       }
     })
+
+    // Ensure exclusive assignment by disconnecting this category from all other staff
+    for (const catId of data.categoryIds) {
+      await db.teamCategory.update({
+        where: { id: catId },
+        data: {
+          staffMembers: {
+            set: []
+          }
+        }
+      })
+    }
 
     // Create Staff record
     await db.staff.create({
@@ -145,6 +158,8 @@ export async function updateStaffMember(
   data: {
     name: string
     email: string
+    phone: string
+    password?: string
     roleTag: string
     categoryIds: string[]
   }
@@ -185,9 +200,23 @@ export async function updateStaffMember(
       data: {
         name: data.name,
         email: data.email,
+        phone: data.phone,
+        ...(data.password ? { password: data.password } : {}),
         roleId: staffRole?.id || null
       }
     })
+
+    // Ensure exclusive assignment by disconnecting this category from all other staff
+    for (const catId of data.categoryIds) {
+      await db.teamCategory.update({
+        where: { id: catId },
+        data: {
+          staffMembers: {
+            set: []
+          }
+        }
+      })
+    }
 
     await db.staff.update({
       where: { id: staffId },
@@ -206,4 +235,50 @@ export async function updateStaffMember(
     return { success: false, error: e.message || "Erreur lors de la modification" }
   }
 }
+
+export async function toggleBlockStaffMember(staffId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userRole = session.user.role?.name
+    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS" && userRole !== "DIRECTEUR_SPORTIF" && userRole !== "SECRETAIRE_GENERAL") {
+      throw new Error("Action réservée aux gestionnaires")
+    }
+
+    const staff = await db.staff.findUnique({
+      where: { id: staffId },
+      include: { user: { include: { role: true } } }
+    })
+
+    if (!staff) {
+      throw new Error("Membre du staff introuvable")
+    }
+
+    if (userRole === "SECRETAIRE_GENERAL") {
+      const targetRole = staff.user?.role?.name
+      if (targetRole === "PRESIDENT" || targetRole === "SECRETAIRE_GENERAL" || targetRole === "DIRECTEUR_SPORTIF") {
+        throw new Error("Vous n'êtes pas autorisé à bloquer ce rôle")
+      }
+    }
+
+    const isBlockedNow = !staff.user.blocked
+
+    await db.user.update({
+      where: { id: staff.userId },
+      data: {
+        blocked: isBlockedNow
+      }
+    })
+
+    revalidatePath("/dashboard/staff")
+    return { success: true, blocked: isBlockedNow }
+  } catch (e: any) {
+    console.error("Error toggling block for staff member:", e)
+    return { success: false, error: e.message || "Erreur lors du blocage" }
+  }
+}
+
 

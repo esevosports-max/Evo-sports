@@ -115,6 +115,9 @@ export default async function EffectifsPage() {
     return {
       id: p.id,
       name: p.user?.name || "Joueur Inconnu",
+      email: p.user?.email || "",
+      password: p.user?.password || "",
+      isBlocked: p.user?.blocked || false,
       number: p.number || 0,
       position: p.position || "Milieu",
       age: p.age ?? 23,

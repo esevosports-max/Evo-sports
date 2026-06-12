@@ -24,7 +24,7 @@ interface TrainingEvent {
   title: string
   date: string
   time: string
-  assignedTeam: "Séniors A" | "Séniors B" | "U19 Nationaux" | "U17 R1"
+  assignedTeam: string
   location: string
   details?: string
   completed?: boolean
@@ -88,19 +88,16 @@ export default function EntrainementClient({
   roleName,
   userName,
   coachCategories = [],
+  initialTrainings = [],
+  clubRosters = {},
 }: {
   roleName: string
   userName: string
   coachCategories?: string[]
+  initialTrainings?: TrainingEvent[]
+  clubRosters?: Record<string, Omit<PlayerPresence, "present">[]>
 }) {
   const { language } = useLanguage()
-  // Pre-seed trainings imported from planning calendar
-  const [scheduledTrainings] = useState<TrainingEvent[]>([
-    { id: "t1", title: "Entraînement Tactique", date: "2026-06-02", time: "10:00", assignedTeam: "Séniors A", location: "Terrain synthétique", details: "Exercices de transition offensive & RPE", completed: false },
-    { id: "t2", title: "Entraînement de Cohésion", date: "2026-06-04", time: "18:00", assignedTeam: "Séniors B", location: "Terrain Principal", details: "Appuis courts & conservation", completed: false },
-    { id: "t3", title: "Entraînement Physique", date: "2026-06-10", time: "10:00", assignedTeam: "U19 Nationaux", location: "Plaine des sports", details: "Développement cardio & VMA", completed: false },
-    { id: "t4", title: "Entraînement Vitesse", date: "2026-06-17", time: "10:00", assignedTeam: "U17 R1", location: "Terrain d'honneur", details: "Sprint court & explosivité", completed: false },
-  ])
 
   // Trainings list that can mutate with state
   const [trainingsList, setTrainingsList] = useState<TrainingEvent[]>([])
@@ -111,9 +108,9 @@ export default function EntrainementClient({
   // Load completed state persistently from localStorage on mount
   useEffect(() => {
     const loadedCompletedMap: Record<string, CompletedData> = {}
-    let filtered = scheduledTrainings
+    let filtered = initialTrainings
     if (roleName === "ENTRAINEUR_PRINCIPAL" || roleName === "ENTRAINEUR_ADJOINT") {
-      filtered = scheduledTrainings.filter((t) => coachCategories.includes(t.assignedTeam))
+      filtered = initialTrainings.filter((t) => coachCategories.includes(t.assignedTeam))
     }
     const updatedList = filtered.map((t) => {
       const isCompleted = localStorage.getItem(`completed_training_id_${t.id}`) === "true"
@@ -132,7 +129,7 @@ export default function EntrainementClient({
     })
     setTrainingsList(updatedList)
     setCompletedDataMap(loadedCompletedMap)
-  }, [scheduledTrainings, roleName, coachCategories])
+  }, [initialTrainings, roleName, coachCategories])
 
   // Active view states
   // 'select' | 'live' | 'sheet'
@@ -157,9 +154,27 @@ export default function EntrainementClient({
       { id: "1", name: "Échauffement cohésion", duration: 15 },
       { id: "2", name: "Rondo conservation (une touche)", duration: 20 },
     ])
-    const preRoster = CLUB_ROSTERS[event.assignedTeam] || []
-    setRoster(preRoster.map((player) => ({ ...player, present: true })))
+    const preRoster = clubRosters[event.assignedTeam] || CLUB_ROSTERS[event.assignedTeam] || []
+    setRoster(preRoster.map((player) => ({ ...player, present: true } as PlayerPresence)))
     setActiveView("live")
+  }
+
+  // Delete handler for training sessions
+  const handleDeleteTraining = async (id: string, title: string) => {
+    if (!confirm(`Voulez-vous vraiment supprimer la séance "${title}" ?`)) return
+
+    try {
+      const { deleteEvent } = await import("../app/dashboard/planning/actions")
+      const res = await deleteEvent(id)
+      if (res.success) {
+        setTrainingsList((prev) => prev.filter((t) => t.id !== id))
+      } else {
+        alert(res.error || "Erreur lors de la suppression")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Une erreur est survenue")
+    }
   }
 
   // Selection Handler for consulting an already completed session
@@ -426,12 +441,21 @@ export default function EntrainementClient({
                       Consulter le Bilan 📊
                     </button>
                   ) : (
-                    <button
-                      onClick={() => handleStartSession(train)}
-                      className="w-full rounded-xl bg-gradient-to-b from-zinc-50 to-zinc-200 hover:from-zinc-100 hover:to-zinc-250 border border-zinc-300 text-emerald-800 font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                    >
-                      Démarrer l&apos;entraînement ⚡
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleStartSession(train)}
+                        className="flex-1 rounded-xl bg-gradient-to-b from-zinc-50 to-zinc-200 hover:from-zinc-100 hover:to-zinc-250 border border-zinc-300 text-emerald-800 font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                      >
+                        Démarrer l&apos;entraînement ⚡
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTraining(train.id, train.title)}
+                        className="px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-650 font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
+                        title="Supprimer la séance"
+                      >
+                        Supprimer ✕
+                      </button>
+                    </div>
                   )}
                 </div>
               ))}

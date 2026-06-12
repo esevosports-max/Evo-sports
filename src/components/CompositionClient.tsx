@@ -491,11 +491,8 @@ export default function CompositionClient({
     return () => clearTimeout(timeout)
   }
 
-  // Handle formation validation and update
-  const handleApplyFormation = (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-    setValidationError("")
-
+  // Auto-apply formation when custom inputs change
+  useEffect(() => {
     const totalOutfield = inputDefenders + inputMidfielders + inputForwards
     const totalPlayers = totalOutfield + 1 // including GK
 
@@ -508,6 +505,17 @@ export default function CompositionClient({
 
     if (inputDefenders < 1 || inputMidfielders < 1 || inputForwards < 1) {
       setValidationError("Chaque ligne (DEF, MIL, ATT) doit contenir au moins 1 joueur.")
+      return
+    }
+
+    setValidationError("")
+
+    // Check if the formation actually changed
+    if (
+      formation.defenders === inputDefenders &&
+      formation.midfielders === inputMidfielders &&
+      formation.forwards === inputForwards
+    ) {
       return
     }
 
@@ -548,45 +556,13 @@ export default function CompositionClient({
 
     setSlots(updatedSlots)
     saveCompositionLocally(updatedSlots, substitutes, newFormation)
-    showToast(`Schéma tactique configuré en ${newFormation.defenders}-${newFormation.midfielders}-${newFormation.forwards}. N'oubliez pas d'enregistrer !`)
-  }
+  }, [inputDefenders, inputMidfielders, inputForwards])
 
   // Quick Preset Formations helper
   const handlePreset = (def: number, mid: number, fwd: number) => {
     setInputDefenders(def)
     setInputMidfielders(mid)
     setInputForwards(fwd)
-    
-    // Auto-apply preset
-    const newFormation = { defenders: def, midfielders: mid, forwards: fwd }
-    setFormation(newFormation)
-    setValidationError("")
-
-    const currentAssignments = {
-      GK: slots.find((s) => s.type === "GK")?.playerId ?? null,
-      DEF: slots.filter((s) => s.type === "DEF" && s.playerId).map((s) => s.playerId as string),
-      MID: slots.filter((s) => s.type === "MID" && s.playerId).map((s) => s.playerId as string),
-      FWD: slots.filter((s) => s.type === "FWD" && s.playerId).map((s) => s.playerId as string),
-    }
-
-    const defaultSlots = generateDefaultSlots(def, mid, fwd)
-    const updatedSlots = defaultSlots.map((slot) => {
-      if (slot.type === "GK") {
-        return { ...slot, playerId: currentAssignments.GK }
-      } else if (slot.type === "DEF") {
-        const player = currentAssignments.DEF.shift() ?? null
-        return { ...slot, playerId: player }
-      } else if (slot.type === "MID") {
-        const player = currentAssignments.MID.shift() ?? null
-        return { ...slot, playerId: player }
-      } else {
-        const player = currentAssignments.FWD.shift() ?? null
-        return { ...slot, playerId: player }
-      }
-    })
-
-    setSlots(updatedSlots)
-    saveCompositionLocally(updatedSlots, substitutes, newFormation)
     showToast(`Schéma tactique configuré en ${def}-${mid}-${fwd}. N'oubliez pas d'enregistrer !`)
   }
 
@@ -809,7 +785,7 @@ export default function CompositionClient({
           
           {/* Custom Formation Input Form */}
           <div className="rounded-2xl border border-zinc-200/50 bg-white p-4 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 flex flex-wrap items-center justify-between gap-4">
-            <form onSubmit={handleApplyFormation} className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+            <form onSubmit={(e) => e.preventDefault()} className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
               <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-400">
                 Composition Custom (X-Y-Z) :
               </span>
@@ -899,12 +875,6 @@ export default function CompositionClient({
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="px-4 py-2 text-xs font-black text-white bg-emerald-500 hover:bg-emerald-400 active:scale-95 rounded-xl shadow-md cursor-pointer transition-all uppercase tracking-wider"
-              >
-                Appliquer
-              </button>
             </form>
 
             <div className="text-right text-xs font-bold text-zinc-450 dark:text-zinc-400">

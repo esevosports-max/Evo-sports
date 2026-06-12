@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useLanguage } from "@/components/LanguageProvider"
-import { createStaffMember, deleteStaffMember, updateStaffMember } from "@/app/dashboard/staff/actions"
+import { createStaffMember, deleteStaffMember, updateStaffMember, toggleBlockStaffMember } from "@/app/dashboard/staff/actions"
 
 const ROLE_LABELS_DICT: Record<string, Record<string, string>> = {
   FR: {
@@ -230,6 +230,7 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
   const [isPending, startTransition] = useTransition()
   const [activeView, setActiveView] = useState<"list" | "create">("list")
   const [selectedFilter, setSelectedFilter] = useState("ALL")
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "BLOCKED">("ALL")
   const [successMsg, setSuccessMsg] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
 
@@ -249,12 +250,16 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
   const [editingMember, setEditingMember] = useState<StaffMember | null>(null)
   const [editName, setEditName] = useState("")
   const [editEmail, setEditEmail] = useState("")
+  const [editPhone, setEditPhone] = useState("")
+  const [editPassword, setEditPassword] = useState("")
   const [editRole, setEditRole] = useState("ENTRAINEUR_ADJOINT")
   const [editAssignedTeams, setEditAssignedTeams] = useState<string[]>([]) // Category IDs!
 
   const filteredStaff = initialStaff.filter((m) => {
-    if (selectedFilter === "ALL") return true
-    return m.roleTag === selectedFilter
+    if (selectedFilter !== "ALL" && m.roleTag !== selectedFilter) return false
+    if (statusFilter === "ACTIVE" && m.isBlocked) return false
+    if (statusFilter === "BLOCKED" && !m.isBlocked) return false
+    return true
   })
 
   const handleCreateSubmit = (e: React.FormEvent) => {
@@ -319,10 +324,44 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
     })
   }
 
+  const handleToggleBlock = (id: string, name: string, isBlocked: boolean) => {
+    const actionLabel = isBlocked 
+      ? (language === "EN" ? "unblock" : language === "AR" ? "إلغاء حظر" : "débloquer") 
+      : (language === "EN" ? "block" : language === "AR" ? "حظر" : "bloquer")
+
+    const confirmMsg = language === "EN" 
+      ? `Are you sure you want to ${actionLabel} ${name}?` 
+      : language === "AR" 
+      ? `هل أنت متأكد أنك تريد ${actionLabel} ${name}؟` 
+      : `Voulez-vous vraiment ${actionLabel} ${name} ?`
+
+    if (!confirm(confirmMsg)) {
+      return
+    }
+
+    startTransition(async () => {
+      const res = await toggleBlockStaffMember(id)
+      if (res.success) {
+        const successLabel = isBlocked
+          ? (language === "EN" ? `Staff member ${name} unblocked.` : language === "AR" ? `تم إلغاء حظر ${name}.` : `Membre du staff ${name} débloqué.`)
+          : (language === "EN" ? `Staff member ${name} blocked.` : language === "AR" ? `تم حظر ${name}.` : `Membre du staff ${name} bloqué.`)
+        
+        setSuccessMsg(successLabel)
+        router.refresh()
+        setTimeout(() => setSuccessMsg(""), 4000)
+      } else {
+        setErrorMsg(res.error || tLoc.msgCreateError)
+        setTimeout(() => setErrorMsg(""), 5000)
+      }
+    })
+  }
+
   const handleOpenEdit = (member: StaffMember) => {
     setEditingMember(member)
     setEditName(member.name)
     setEditEmail(member.email)
+    setEditPhone(member.phone || "")
+    setEditPassword("")
     setEditRole(member.roleTag)
     setEditAssignedTeams(member.assignedTeamIds || [])
   }
@@ -335,6 +374,8 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
       const res = await updateStaffMember(editingMember.id, {
         name: editName,
         email: editEmail,
+        phone: editPhone,
+        password: editPassword || undefined,
         roleTag: editRole,
         categoryIds: editAssignedTeams
       })
@@ -398,7 +439,6 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                 onChange={(e) => setCreateRole(e.target.value)}
                 className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
               >
-                {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="PRESIDENT">{rolesLabelMap["PRESIDENT"]}</option>}
                 {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
                 {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="SECRETAIRE_GENERAL">{rolesLabelMap["SECRETAIRE_GENERAL"]}</option>}
                 <option value="ENTRAINEUR_PRINCIPAL">{rolesLabelMap["ENTRAINEUR_PRINCIPAL"]}</option>
@@ -607,33 +647,50 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
         </div>
       )}
 
-      {/* Role Filter Tabs */}
-      <div className="flex gap-2 bg-zinc-100/80 dark:bg-zinc-850 p-1.5 rounded-2xl overflow-x-auto scrollbar-none">
-        {[
-          { key: "ALL", label: language === "EN" ? "All" : language === "AR" ? "الكل" : "Tous" },
-          { key: "PRESIDENT", label: rolesLabelMap["PRESIDENT"] },
-          { key: "DIRECTEUR_SPORTIF", label: rolesLabelMap["DIRECTEUR_SPORTIF"] },
-          { key: "ENTRAINEUR_PRINCIPAL", label: rolesLabelMap["ENTRAINEUR_PRINCIPAL"] },
-          { key: "ENTRAINEUR_ADJOINT", label: rolesLabelMap["ENTRAINEUR_ADJOINT"] },
-          { key: "PREPARATEUR_PHYSIQUE", label: rolesLabelMap["PREPARATEUR_PHYSIQUE"] },
-          { key: "ENTRAINEUR_GARDIENS", label: rolesLabelMap["ENTRAINEUR_GARDIENS"] },
-          { key: "MEDECIN", label: rolesLabelMap["MEDECIN"] },
-        ].map((item) => {
-          const isActive = selectedFilter === item.key
-          return (
-            <button
-              key={item.key}
-              onClick={() => setSelectedFilter(item.key)}
-              className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-150 shrink-0 cursor-pointer ${
-                isActive
-                  ? "bg-gradient-to-b from-zinc-800 to-zinc-950 text-white shadow-sm dark:from-zinc-100 dark:to-white dark:text-zinc-950"
-                  : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-              }`}
-            >
-              {item.label}
-            </button>
-          )
-        })}
+      {/* Filter Controls Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Role/Function Filter Select */}
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedFilter}
+            onChange={(e) => setSelectedFilter(e.target.value)}
+            className="rounded-2xl border border-zinc-250 bg-white px-3.5 py-2 text-[10px] font-black uppercase tracking-wider text-zinc-700 shadow-inner outline-none transition-all focus:border-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-350 cursor-pointer"
+          >
+            {[
+              { key: "ALL", label: language === "EN" ? "All Roles" : language === "AR" ? "كل الأدوار" : "Toutes les fonctions" },
+              { key: "DIRECTEUR_SPORTIF", label: rolesLabelMap["DIRECTEUR_SPORTIF"] },
+              { key: "SECRETAIRE_GENERAL", label: rolesLabelMap["SECRETAIRE_GENERAL"] },
+              { key: "ENTRAINEUR_PRINCIPAL", label: rolesLabelMap["ENTRAINEUR_PRINCIPAL"] },
+              { key: "ENTRAINEUR_ADJOINT", label: rolesLabelMap["ENTRAINEUR_ADJOINT"] },
+              { key: "PREPARATEUR_PHYSIQUE", label: rolesLabelMap["PREPARATEUR_PHYSIQUE"] },
+              { key: "ENTRAINEUR_GARDIENS", label: rolesLabelMap["ENTRAINEUR_GARDIENS"] },
+              { key: "MEDECIN", label: rolesLabelMap["MEDECIN"] },
+            ].map((item) => (
+              <option key={item.key} value={item.key}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Status Filter Dropdown Choice */}
+        <div className="flex items-center gap-2">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as "ALL" | "ACTIVE" | "BLOCKED")}
+            className="rounded-2xl border border-zinc-250 bg-white px-3.5 py-2 text-[10px] font-black uppercase tracking-wider text-zinc-700 shadow-inner outline-none transition-all focus:border-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-350 cursor-pointer"
+          >
+            <option value="ALL">
+              {language === "EN" ? "All Statuses" : language === "AR" ? "كل الحالات" : "Tous les statuts"}
+            </option>
+            <option value="ACTIVE">
+              {language === "EN" ? "Active Only" : language === "AR" ? "النشطون فقط" : "Actifs uniquement"}
+            </option>
+            <option value="BLOCKED">
+              {language === "EN" ? "Blocked Only" : language === "AR" ? "المحظورون فقط" : "Bloqués uniquement"}
+            </option>
+          </select>
+        </div>
       </div>
 
       {/* Table */}
@@ -706,7 +763,7 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                   </td>
                   <td className="py-3.5 px-4">
                     {member.isBlocked ? (
-                      <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-red-500/10 text-red-655">
+                      <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-red-500/10 text-red-605">
                         <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
                         {tLoc.statusBlocked}
                       </span>
@@ -734,8 +791,21 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                             {tLoc.btnEdit}
                           </button>
                           <button 
+                            onClick={() => handleToggleBlock(member.id, member.name, !!member.isBlocked)}
+                            className={`px-2.5 py-1 rounded-lg border font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer ${
+                              member.isBlocked
+                                ? "border-emerald-500 hover:bg-emerald-500/10 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400"
+                                : "border-amber-500 hover:bg-amber-500/10 text-amber-600 dark:border-amber-400 dark:text-amber-400"
+                            }`}
+                          >
+                            {member.isBlocked
+                              ? (language === "EN" ? "Unblock" : language === "AR" ? "إلغاء الحظر" : "Débloquer")
+                              : (language === "EN" ? "Block" : language === "AR" ? "حظر" : "Bloquer")
+                            }
+                          </button>
+                          <button 
                             onClick={() => handleDelete(member.id, member.name)}
-                            className="px-2.5 py-1 rounded-lg border border-red-500 hover:bg-red-500/10 text-red-600 dark:border-red-400 dark:text-red-400 font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg border border-red-500 hover:bg-red-500/10 text-red-655 dark:border-red-400 dark:text-red-400 font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer"
                           >
                             {tLoc.btnDelete}
                           </button>
@@ -800,20 +870,47 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
               </div>
 
               <div>
+                <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">{tLoc.phone}</label>
+                <input
+                  type="text"
+                  required
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">
+                  {tLoc.loginPassword}
+                  <span className="text-[8px] font-medium text-zinc-400 lowercase italic">
+                    {language === "EN" ? " (leave empty to keep unchanged)" : language === "AR" ? " (اتركه فارغاً لعدم التغيير)" : " (laisser vide pour ne pas modifier)"}
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                />
+              </div>
+
+              <div>
                 <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">{tLoc.thRole}</label>
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                  disabled={editingMember?.roleTag === "PRESIDENT"}
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold disabled:opacity-75 disabled:cursor-not-allowed"
                 >
-                  {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="PRESIDENT">{rolesLabelMap["PRESIDENT"]}</option>}
-                  {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
-                  {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="SECRETAIRE_GENERAL">{rolesLabelMap["SECRETAIRE_GENERAL"]}</option>}
-                  <option value="ENTRAINEUR_PRINCIPAL">{rolesLabelMap["ENTRAINEUR_PRINCIPAL"]}</option>
-                  <option value="ENTRAINEUR_ADJOINT">{rolesLabelMap["ENTRAINEUR_ADJOINT"]}</option>
-                  <option value="PREPARATEUR_PHYSIQUE">{rolesLabelMap["PREPARATEUR_PHYSIQUE"]}</option>
-                  <option value="ENTRAINEUR_GARDIENS">{rolesLabelMap["ENTRAINEUR_GARDIENS"]}</option>
-                  <option value="MEDECIN">{rolesLabelMap["MEDECIN"]}</option>
+                  {editingMember?.roleTag === "PRESIDENT" && <option value="PRESIDENT">{rolesLabelMap["PRESIDENT"]}</option>}
+                  {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && editingMember?.roleTag !== "PRESIDENT" && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
+                  {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && editingMember?.roleTag !== "PRESIDENT" && <option value="SECRETAIRE_GENERAL">{rolesLabelMap["SECRETAIRE_GENERAL"]}</option>}
+                  {editingMember?.roleTag !== "PRESIDENT" && <option value="ENTRAINEUR_PRINCIPAL">{rolesLabelMap["ENTRAINEUR_PRINCIPAL"]}</option>}
+                  {editingMember?.roleTag !== "PRESIDENT" && <option value="ENTRAINEUR_ADJOINT">{rolesLabelMap["ENTRAINEUR_ADJOINT"]}</option>}
+                  {editingMember?.roleTag !== "PRESIDENT" && <option value="PREPARATEUR_PHYSIQUE">{rolesLabelMap["PREPARATEUR_PHYSIQUE"]}</option>}
+                  {editingMember?.roleTag !== "PRESIDENT" && <option value="ENTRAINEUR_GARDIENS">{rolesLabelMap["ENTRAINEUR_GARDIENS"]}</option>}
+                  {editingMember?.roleTag !== "PRESIDENT" && <option value="MEDECIN">{rolesLabelMap["MEDECIN"]}</option>}
                 </select>
               </div>
 

@@ -24,6 +24,8 @@ model User {
   password      String?   // Hashed credentials password
   roleId        String?
   role          Role?     @relation(fields: [roleId], references: [id])
+  phone         String?
+  blocked       Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   clubRequest   ClubRegistrationRequest?

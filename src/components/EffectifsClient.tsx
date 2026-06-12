@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { createPlayer, deletePlayer } from "@/app/dashboard/effectifs/actions"
+import { createPlayer, deletePlayer, updatePlayer as updatePlayerAction, toggleBlockPlayer } from "@/app/dashboard/effectifs/actions"
 
 interface Category {
   id: string
@@ -14,6 +14,9 @@ interface Category {
 interface Player {
   id: string
   name: string
+  email: string
+  password?: string
+  isBlocked?: boolean
   number: number
   position: string
   age: number
@@ -69,6 +72,8 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
   // Form states
   const [newFirstName, setNewFirstName] = useState("")
   const [newLastName, setNewLastName] = useState("")
+  const [newEmail, setNewEmail] = useState("")
+  const [newPassword, setNewPassword] = useState("")
   const [newNum, setNewNum] = useState(12)
   const [newPos, setNewPos] = useState<"Gardien" | "Défenseur" | "Milieu" | "Attaquant">("Milieu")
   const [newAge, setNewAge] = useState(22)
@@ -76,6 +81,143 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
   const [newWeight, setNewWeight] = useState("75kg")
   const [newFoot, setNewFoot] = useState<"Gaucher" | "Droitier" | "Ambidextre">("Droitier")
   const [selectedCatId, setSelectedCatId] = useState<string>("")
+
+  // Edit modal states
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
+
+  const [editFirstName, setEditFirstName] = useState("")
+  const [editLastName, setEditLastName] = useState("")
+  const [editEmail, setEditEmail] = useState("")
+  const [editPassword, setEditPassword] = useState("")
+  const [editNum, setEditNum] = useState(12)
+  const [editPos, setEditPos] = useState<"Gardien" | "Défenseur" | "Milieu" | "Attaquant">("Milieu")
+  const [editAge, setEditAge] = useState(22)
+  const [editHeight, setEditHeight] = useState("180cm")
+  const [editWeight, setEditWeight] = useState("75kg")
+  const [editFoot, setEditFoot] = useState<"Gaucher" | "Droitier" | "Ambidextre">("Droitier")
+  const [editCatId, setEditCatId] = useState<string>("")
+
+  const handleEditClick = (player: Player) => {
+    setEditingPlayer(player)
+    
+    // Split full name into first and last name
+    const parts = player.name.split(" ")
+    const lastName = parts.pop() || ""
+    const firstName = parts.join(" ")
+    
+    setEditFirstName(firstName)
+    setEditLastName(lastName)
+    setEditEmail(player.email || "")
+    setEditPassword("") // Leave empty by default
+    setEditNum(player.number)
+    setEditPos(player.position as any)
+    setEditAge(player.age)
+    setEditHeight(player.height)
+    setEditWeight(player.weight || "75kg")
+    setEditFoot(player.foot as any)
+    setEditCatId(player.teamCategoryId || "")
+    
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditPlayer = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingPlayer) return
+    setSuccessMsg("")
+    setErrorMsg("")
+
+    const formattedFirstName = editFirstName.trim()
+      .split(/([- ])/)
+      .map((part) => {
+        if (part === "-" || part === " ") return part
+        if (part.length === 0) return ""
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+      })
+      .join("")
+
+    const formattedLastName = editLastName.trim().toUpperCase()
+
+    if (!formattedFirstName || !formattedLastName) {
+      setErrorMsg("Le prénom et le nom sont requis.")
+      return
+    }
+
+    if (!editEmail.trim()) {
+      setErrorMsg("L'email est requis.")
+      return
+    }
+
+    if (!editCatId) {
+      setErrorMsg("Veuillez sélectionner une équipe. Ce champ est obligatoire.")
+      return
+    }
+
+    const fullName = `${formattedFirstName} ${formattedLastName}`
+
+    // Check capacity limit client-side if category changed
+    if (editCatId !== editingPlayer.teamCategoryId) {
+      const cat = categories.find((c) => c.id === editCatId)
+      if (cat && cat.playersCount >= cat.maxPlayers) {
+        setErrorMsg(`L'équipe "${cat.name}" a déjà atteint sa limite d'effectif (${cat.maxPlayers} max).`)
+        return
+      }
+    }
+
+    // Check if the jersey number is already taken in this team by someone else
+    const numberTaken = initialPlayers.some(
+      (p) => p.id !== editingPlayer.id && p.teamCategoryId === editCatId && p.number === Number(editNum)
+    )
+    if (numberTaken) {
+      setErrorMsg("Ce numéro est déjà choisi par un autre joueur de cette équipe.")
+      return
+    }
+
+    startTransition(async () => {
+      const res = await updatePlayerAction({
+        id: editingPlayer.id,
+        name: fullName,
+        number: Number(editNum),
+        position: editPos,
+        age: Number(editAge),
+        height: editHeight,
+        weight: editWeight,
+        foot: editFoot,
+        teamCategoryId: editCatId,
+        email: editEmail.trim(),
+        password: editPassword
+      })
+
+      if (res.success) {
+        setSuccessMsg(`Joueur ${fullName} modifié avec succès !`)
+        setIsEditModalOpen(false)
+        router.refresh()
+        setTimeout(() => setSuccessMsg(""), 5000)
+      } else {
+        setErrorMsg(res.error || "Une erreur est survenue.")
+        setTimeout(() => setErrorMsg(""), 5000)
+      }
+    })
+  }
+
+  const handleToggleBlock = (id: string, name: string, isBlocked?: boolean) => {
+    const actionWord = isBlocked ? "débloquer" : "bloquer"
+    if (!confirm(`Voulez-vous vraiment ${actionWord} le joueur ${name} ?`)) {
+      return
+    }
+
+    startTransition(async () => {
+      const res = await toggleBlockPlayer(id)
+      if (res.success) {
+        setSuccessMsg(`Statut du joueur ${name} modifié.`)
+        router.refresh()
+        setTimeout(() => setSuccessMsg(""), 5000)
+      } else {
+        setErrorMsg(res.error || "Impossible de modifier le statut.")
+        setTimeout(() => setErrorMsg(""), 5000)
+      }
+    })
+  }
 
   const handleAddPlayer = (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,6 +237,16 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
 
     if (!formattedFirstName || !formattedLastName) {
       setErrorMsg("Le prénom et le nom sont requis.")
+      return
+    }
+
+    if (!newEmail.trim()) {
+      setErrorMsg("L'email est requis.")
+      return
+    }
+
+    if (!newPassword.trim()) {
+      setErrorMsg("Le mot de passe est requis.")
       return
     }
 
@@ -132,13 +284,17 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
         height: newHeight,
         weight: newWeight,
         foot: newFoot,
-        teamCategoryId: selectedCatId
+        teamCategoryId: selectedCatId,
+        email: newEmail.trim(),
+        password: newPassword
       })
 
       if (res.success) {
         setSuccessMsg(`Joueur ${fullName} ajouté avec succès !`)
         setNewFirstName("")
         setNewLastName("")
+        setNewEmail("")
+        setNewPassword("")
         setNewWeight("75kg")
         setNewNum((prev) => prev + 1)
         setSelectedCatId("")
@@ -285,19 +441,12 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
               {filteredPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="relative rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between h-52 overflow-hidden group dark:border-zinc-800 dark:bg-zinc-900"
+                  className={`relative rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between h-auto space-y-4 group dark:border-zinc-800 dark:bg-zinc-900 ${
+                    player.isBlocked ? "opacity-75 bg-zinc-50/50 dark:bg-zinc-950/20" : ""
+                  }`}
                 >
                   {/* Background design glow */}
                   <div className="absolute top-0 right-0 h-16 w-16 bg-emerald-500/5 rounded-bl-full group-hover:scale-150 transition-all duration-300" />
-                  
-                  {/* Delete button */}
-                  <button
-                    onClick={() => handleDelete(player.id, player.name)}
-                    className="absolute top-4 right-4 text-zinc-300 hover:text-red-500 hover:scale-110 transition-all cursor-pointer font-black text-sm z-20"
-                    title="Supprimer le joueur"
-                  >
-                    ✕
-                  </button>
 
                   {(() => {
                     const isActiveInjured = player.isInjured && (
@@ -350,6 +499,11 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                                   Sans équipe
                                 </span>
                               )}
+                              {player.isBlocked && (
+                                <span className="inline-flex rounded-md bg-amber-50 px-2 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-amber-700 border border-amber-250 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900 animate-pulse">
+                                  Bloqué
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -380,6 +534,32 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                     <span>Vitesse Max: <strong className="text-emerald-600 dark:text-emerald-400">{player.gpsStats?.maxSpeed || "En attente"}</strong></span>
                     <span>Dist/Séance: <strong className="text-emerald-600 dark:text-emerald-400">{player.gpsStats?.distance || "En attente"}</strong></span>
                   </div>
+
+                  {/* Actions Row */}
+                  <div className="flex gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <button
+                      onClick={() => handleEditClick(player)}
+                      className="flex-1 py-2 px-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => handleToggleBlock(player.id, player.name, player.isBlocked)}
+                      className={`flex-1 py-2 px-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                        player.isBlocked
+                          ? "bg-amber-500 text-white hover:bg-amber-450"
+                          : "bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200"
+                      }`}
+                    >
+                      {player.isBlocked ? "Débloquer" : "Bloquer"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(player.id, player.name)}
+                      className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-650 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -398,6 +578,7 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                     <th className="py-3 px-4 text-center font-bold">VMA / VO2</th>
                     <th className="py-3 px-4 text-center">Sprint 10/30m</th>
                     <th className="py-3 px-4 text-center">Explo / Agil / Gras</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-150 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-350 font-semibold">
@@ -405,7 +586,12 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                     const idx = player.latestIndex
                     const tst = player.latestTest
                     return (
-                      <tr key={player.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-850/20">
+                      <tr
+                        key={player.id}
+                        className={`hover:bg-zinc-50/50 dark:hover:bg-zinc-850/20 ${
+                          player.isBlocked ? "opacity-75 bg-zinc-50/30 dark:bg-zinc-950/10" : ""
+                        }`}
+                      >
                         {/* Name and jersey number */}
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
@@ -428,10 +614,12 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                               </text>
                             </svg>
                             <div>
-                              <p className="font-bold text-zinc-900 dark:text-white truncate max-w-[120px]">
+                              <p className="font-bold text-zinc-900 dark:text-white truncate max-w-[120px]" title={player.name}>
                                 {player.name}
                               </p>
-                              <p className="text-[8px] text-zinc-400 font-medium">{player.position}</p>
+                              <p className="text-[8px] text-zinc-450 dark:text-zinc-400 font-medium">
+                                {player.position} {player.isBlocked ? "| 🔒 Bloqué" : ""}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -537,6 +725,34 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                             <span className="text-zinc-400 font-bold">N/A</span>
                           )}
                         </td>
+
+                        {/* Actions Cell */}
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <div className="flex gap-1.5 justify-end">
+                            <button
+                              onClick={() => handleEditClick(player)}
+                              className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                            >
+                              Modifier
+                            </button>
+                            <button
+                              onClick={() => handleToggleBlock(player.id, player.name, player.isBlocked)}
+                              className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                player.isBlocked
+                                  ? "bg-amber-500 text-white hover:bg-amber-450"
+                                  : "bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200"
+                              }`}
+                            >
+                              {player.isBlocked ? "Débloquer" : "Bloquer"}
+                            </button>
+                            <button
+                              onClick={() => handleDelete(player.id, player.name)}
+                              className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     )
                   })}
@@ -590,6 +806,31 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                     placeholder="Ex: Alexandre"
                     value={newFirstName}
                     onChange={(e) => setNewFirstName(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Ex: joueur@evo-sports.com"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Mot de passe</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: MotDePasse123"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
                   />
                 </div>
@@ -706,6 +947,191 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                 className="w-full rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed text-white font-black uppercase text-xs tracking-wider py-3 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer flex items-center justify-center"
               >
                 {isPending ? "Ajout..." : "Ajouter Joueur ➕"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Dialog for Editing a Player */}
+      {isEditModalOpen && editingPlayer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-2xl border border-zinc-200/50 bg-white p-6 shadow-2xl dark:border-zinc-850 dark:bg-zinc-900 space-y-6 animate-in zoom-in-95 duration-200">
+            {/* Close button */}
+            <button
+              onClick={() => {
+                setIsEditModalOpen(false)
+                setEditingPlayer(null)
+              }}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-650 dark:hover:text-white cursor-pointer font-black text-sm"
+              title="Fermer"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-sm font-black uppercase tracking-wider text-zinc-850 dark:text-white pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              Modifier le Joueur : {editingPlayer.name}
+            </h3>
+
+            {errorMsg && (
+              <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-3 text-xs font-bold text-red-650 text-center animate-pulse">
+                {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleEditPlayer} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Nom</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: LACAZETTE"
+                    value={editLastName}
+                    onChange={(e) => setEditLastName(e.target.value.toUpperCase())}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold uppercase"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Prénom</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Alexandre"
+                    value={editFirstName}
+                    onChange={(e) => setEditFirstName(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Ex: joueur@evo-sports.com"
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Mot de passe</label>
+                  <input
+                    type="text"
+                    placeholder="Laisser vide pour ne pas changer"
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Âge</label>
+                  <input
+                    type="number"
+                    required
+                    value={editAge}
+                    onChange={(e) => setEditAge(Number(e.target.value))}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-2 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Taille</label>
+                  <input
+                    type="text"
+                    required
+                    value={editHeight}
+                    onChange={(e) => setEditHeight(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-2 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Poids</label>
+                  <input
+                    type="text"
+                    required
+                    value={editWeight}
+                    onChange={(e) => setEditWeight(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-2 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Poste (Position)</label>
+                  <select
+                    value={editPos}
+                    onChange={(e) => setEditPos(e.target.value as any)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-1.5 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 font-bold"
+                  >
+                    <option value="Gardien">Gardien</option>
+                    <option value="Défenseur">Défenseur</option>
+                    <option value="Milieu">Milieu</option>
+                    <option value="Attaquant">Attaquant</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">N° Maillot</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="99"
+                    value={editNum}
+                    onChange={(e) => setEditNum(Number(e.target.value))}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-2 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Pied</label>
+                  <select
+                    value={editFoot}
+                    onChange={(e) => setEditFoot(e.target.value as any)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-1 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 font-bold"
+                  >
+                    <option value="Droitier">Droitier</option>
+                    <option value="Gaucher">Gaucher</option>
+                    <option value="Ambidextre">Ambi.</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Équipe / Catégorie</label>
+                <select
+                  value={editCatId}
+                  required
+                  onChange={(e) => {
+                    setEditCatId(e.target.value)
+                    setErrorMsg("")
+                  }}
+                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                >
+                  <option value="">Sélectionner une équipe</option>
+                  {categories.map((cat) => {
+                    const isSameCat = cat.id === editingPlayer.teamCategoryId
+                    const isCatFull = cat.playersCount >= cat.maxPlayers
+                    return (
+                      <option key={cat.id} value={cat.id} disabled={!isSameCat && isCatFull}>
+                        {cat.name} ({cat.playersCount}/{cat.maxPlayers} joueurs){(!isSameCat && isCatFull) ? " - [PLEIN]" : ""}
+                      </option>
+                    )
+                  })}
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isPending}
+                className="w-full rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed text-white font-black uppercase text-xs tracking-wider py-3 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer flex items-center justify-center"
+              >
+                {isPending ? "Modification..." : "Modifier Joueur 💾"}
               </button>
             </form>
           </div>

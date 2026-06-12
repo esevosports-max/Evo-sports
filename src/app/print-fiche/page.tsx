@@ -123,6 +123,7 @@ export default async function PrintFichePage() {
     try {
       dbCategories = await db.teamCategory.findMany({
         where: { clubId },
+        include: { staffMembers: { include: { user: true } } },
         orderBy: { createdAt: "asc" }
       })
     } catch (e) {
@@ -132,12 +133,31 @@ export default async function PrintFichePage() {
     dbCategories = []
   }
 
-  const categories = dbCategories.map(cat => ({
-    name: cat.name,
-    coach: cat.coach,
-    league: cat.league,
-    maxPlayers: cat.maxPlayers !== undefined ? cat.maxPlayers : (cat.playersCount || 0)
-  }))
+  const categories = dbCategories.map(cat => {
+    const coaches = cat.staffMembers
+      ? cat.staffMembers.filter((sm: any) => {
+          const roleName = sm.user?.role?.name || ""
+          const title = sm.title || ""
+          return (
+            roleName.startsWith("ENTRAINEUR") ||
+            title.toLowerCase().includes("entraineur") ||
+            title.toLowerCase().includes("entraîneur") ||
+            title.toLowerCase().includes("coach")
+          )
+        })
+      : []
+
+    const assignedCoach = coaches.length > 0
+      ? coaches.map((sm: any) => sm.user?.name).filter(Boolean).join(", ")
+      : (cat.coach || "Non attribué")
+
+    return {
+      name: cat.name,
+      coach: assignedCoach,
+      league: cat.league,
+      maxPlayers: cat.maxPlayers !== undefined ? cat.maxPlayers : (cat.playersCount || 0)
+    }
+  })
 
   // Fetch Staff roles
   const roleMap: Record<string, string> = {
@@ -203,7 +223,7 @@ export default async function PrintFichePage() {
           count: data.count,
           names: data.names
         }))
-        .filter(g => g.count > 0 || ["Président", "Directeur Sportif", "Entraîneur Principal", "Entraîneur Adjoint", "Médecin du Club"].includes(g.roleName))
+        .filter(g => g.count > 0)
 
       totalStaffCount = staffRoles.reduce((sum, item) => sum + item.count, 0)
     } catch (e) {

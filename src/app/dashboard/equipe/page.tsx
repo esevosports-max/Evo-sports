@@ -135,11 +135,13 @@ export default async function EquipePage() {
         const categoryIds = staff?.categories.map(c => c.id) || []
         dbCategories = await db.teamCategory.findMany({
           where: { id: { in: categoryIds } },
+          include: { staffMembers: { include: { user: true } } },
           orderBy: { createdAt: "asc" }
         })
       } else {
         dbCategories = await db.teamCategory.findMany({
           where: { clubId },
+          include: { staffMembers: { include: { user: true } } },
           orderBy: { createdAt: "asc" }
         })
       }
@@ -151,17 +153,36 @@ export default async function EquipePage() {
     dbCategories = []
   }
 
-  let categories = dbCategories.map(cat => ({
-    id: cat.id,
-    name: cat.name,
-    coach: cat.coach,
-    league: cat.league,
-    maxPlayers: cat.maxPlayers !== undefined ? cat.maxPlayers : (cat.playersCount || 0),
-    color: cat.name.includes("Séniors A") ? "border-emerald-500 bg-emerald-50/10" :
-           cat.name.includes("Séniors B") ? "border-teal-500 bg-teal-50/10" :
-           cat.name.includes("U19") ? "border-blue-500 bg-blue-5/10" :
-           "border-purple-500 bg-purple-5/10"
-  }))
+  let categories = dbCategories.map(cat => {
+    const coaches = cat.staffMembers
+      ? cat.staffMembers.filter((sm: any) => {
+          const roleName = sm.user?.role?.name || ""
+          const title = sm.title || ""
+          return (
+            roleName.startsWith("ENTRAINEUR") ||
+            title.toLowerCase().includes("entraineur") ||
+            title.toLowerCase().includes("entraîneur") ||
+            title.toLowerCase().includes("coach")
+          )
+        })
+      : []
+
+    const assignedCoach = coaches.length > 0
+      ? coaches.map((sm: any) => sm.user?.name).filter(Boolean).join(", ")
+      : (cat.coach || "Non attribué")
+
+    return {
+      id: cat.id,
+      name: cat.name,
+      coach: assignedCoach,
+      league: cat.league,
+      maxPlayers: cat.maxPlayers !== undefined ? cat.maxPlayers : (cat.playersCount || 0),
+      color: cat.name.includes("Séniors A") ? "border-emerald-500 bg-emerald-50/10" :
+             cat.name.includes("Séniors B") ? "border-teal-500 bg-teal-50/10" :
+             cat.name.includes("U19") ? "border-blue-500 bg-blue-5/10" :
+             "border-purple-500 bg-purple-5/10"
+    }
+  })
 
   // 2. Fetch Staff roles and counts dynamically
   const roleMap: Record<string, string> = {
@@ -231,7 +252,7 @@ export default async function EquipePage() {
           count: data.count,
           names: data.names
         }))
-        .filter(g => g.count > 0 || ["Président", "Directeur Sportif", "Entraîneur Principal", "Entraîneur Adjoint", "Médecin du Club"].includes(g.roleName))
+        .filter(g => g.count > 0)
 
       totalStaffCount = staffRoles.reduce((sum, item) => sum + item.count, 0)
     } catch (e) {

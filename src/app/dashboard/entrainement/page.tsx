@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
+import { getClubIdForUser } from "../planning/actions"
 import EntrainementClient from "@/components/EntrainementClient"
 
 export const dynamic = "force-dynamic"
@@ -27,11 +28,54 @@ export default async function EntrainementPage() {
     }
   }
 
+  // Fetch real training events and category rosters
+  let initialTrainings: any[] = []
+  let clubRosters: Record<string, any[]> = {}
+  try {
+    const clubId = await getClubIdForUser(session.user.id, roleName)
+    if (clubId) {
+      initialTrainings = await db.calendarEvent.findMany({
+        where: {
+          clubId,
+          type: "TRAINING"
+        },
+        orderBy: [
+          { date: "asc" },
+          { time: "asc" }
+        ]
+      })
+
+      // Fetch all team categories and their players
+      const categories = await db.teamCategory.findMany({
+        where: { clubId },
+        include: {
+          players: {
+            include: {
+              user: true
+            }
+          }
+        }
+      })
+
+      for (const cat of categories) {
+        clubRosters[cat.name] = cat.players.map(p => ({
+          id: p.id,
+          name: p.user.name || "Joueur sans nom",
+          position: p.position || "Attaquant"
+        }))
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching training details:", error)
+  }
+
   return (
     <EntrainementClient
       roleName={roleName}
       userName={userName}
       coachCategories={coachCategories}
+      initialTrainings={JSON.parse(JSON.stringify(initialTrainings))}
+      clubRosters={clubRosters}
     />
   )
 }

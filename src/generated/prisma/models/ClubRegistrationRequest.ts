@@ -564,10 +564,6 @@ export type ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClubRegistrationRequestUpdateToOneWithWhereWithoutUserInput, Prisma.ClubRegistrationRequestUpdateWithoutUserInput>, Prisma.ClubRegistrationRequestUncheckedUpdateWithoutUserInput>
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type ClubRegistrationRequestCreateWithoutUserInput = {
   id?: string
   clubName: string
