@@ -49,7 +49,7 @@ export default function DynamicNavbar({
     <div className="sticky top-0 z-50 w-full transition-all duration-500 ease-out py-3">
       {isScrolled ? (
         /* State B: Dynamic Island capsule (midnight blue transparent, rounded) */
-        <div className="mx-auto max-w-[380px] rounded-full bg-[#0B1528]/65 px-4 py-2 text-white shadow-xl backdrop-blur-lg border border-white/10 scale-95 transition-all duration-500 ease-out flex items-center justify-between">
+        <div className="mx-auto max-w-[380px] rounded-full bg-[#0B1528]/45 px-4 py-2 text-white shadow-xl backdrop-blur-lg border border-white/10 scale-95 transition-all duration-500 ease-out flex items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center group py-0.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -138,7 +138,7 @@ export default function DynamicNavbar({
         </div>
       ) : (
         /* State A: Floating Rounded Midnight Blue Transparent Banner */
-        <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl rounded-2xl bg-[#0B1528]/65 border border-white/10 text-white backdrop-blur-lg px-8 py-3.5 transition-all duration-500 ease-out flex items-center justify-between shadow-2xl">
+        <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl rounded-2xl bg-[#0B1528]/45 border border-white/10 text-white backdrop-blur-lg px-8 py-3.5 transition-all duration-500 ease-out flex items-center justify-between shadow-2xl">
           {/* Logo & Language Selector */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center group">
