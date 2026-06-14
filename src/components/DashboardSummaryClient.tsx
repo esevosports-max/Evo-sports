@@ -35,6 +35,32 @@ export default function DashboardSummaryClient({
   const [activeTab, setActiveTab] = useState<"sport" | "medical" | "club">("sport")
   const { t, language } = useLanguage()
 
+  const getPlanGlowStyles = (planName: string) => {
+    switch (planName) {
+      case "Elite":
+        return {
+          glowClass: "animate-card-glow-elite",
+          bgClass: "bg-amber-500/5 border-amber-500/30"
+        }
+      case "Professionnel":
+        return {
+          glowClass: "animate-card-glow-professionnel",
+          bgClass: "bg-cyan-500/5 border-cyan-500/30"
+        }
+      case "1 Équipe":
+        return {
+          glowClass: "animate-card-glow-1equipe",
+          bgClass: "bg-purple-500/5 border-purple-500/30"
+        }
+      case "Club":
+      default:
+        return {
+          glowClass: "animate-card-glow-club",
+          bgClass: "bg-emerald-500/5 border-emerald-500/30"
+        }
+    }
+  }
+
   const m = metrics || {
     teamsCount: 0,
     playersCount: 0,
@@ -77,6 +103,8 @@ export default function DashboardSummaryClient({
 
   const currentTab = tabsData[activeTab]
 
+  const glowStyles = subscription ? getPlanGlowStyles(subscription.plan) : { glowClass: "", bgClass: "" }
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
@@ -93,7 +121,7 @@ export default function DashboardSummaryClient({
           </div>
 
           {subscription && (
-            <div className="inline-flex items-center gap-2.5 bg-zinc-50 border border-zinc-200/60 px-3.5 py-2 rounded-2xl dark:bg-zinc-800/10 dark:border-zinc-800 shadow-sm self-start">
+            <div className={`inline-flex items-center gap-2.5 px-3.5 py-2 rounded-2xl shadow-sm self-start ${glowStyles.bgClass} ${glowStyles.glowClass}`}>
               <span className="text-sm">💳</span>
               <div className="text-left leading-none">
                 <div className="flex items-center gap-1.5">
