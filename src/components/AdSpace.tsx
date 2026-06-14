@@ -41,7 +41,7 @@ export default function AdSpace({ announcements = [] }: AdSpaceProps) {
 
   return (
     <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl px-4 py-1 mt-1">
-      <div className="relative overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-zinc-950 px-6 py-3.5 md:py-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="relative overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-[#0B1528]/45 backdrop-blur-lg px-6 py-3.5 md:py-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Background Slideshow Slider */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           {announcements.map((slide, index) => {
@@ -50,7 +50,7 @@ export default function AdSpace({ announcements = [] }: AdSpaceProps) {
               <div
                 key={slide.id || index}
                 className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                  isActive ? "opacity-100" : "opacity-0"
+                  isActive ? "opacity-50" : "opacity-0"
                 }`}
               >
                 {slide.mediaType === "video" ? (
@@ -74,7 +74,7 @@ export default function AdSpace({ announcements = [] }: AdSpaceProps) {
             )
           })}
           {/* Dark Glassy Overlay to guarantee high text contrast and legibility */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/85 backdrop-blur-[2px] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/35 to-black/55 backdrop-blur-[2px] z-10" />
         </div>
 
         {/* Dynamic Animated Content Wrapper */}
