@@ -49,7 +49,7 @@ export default function DynamicNavbar({
     <div className="sticky top-0 z-50 w-full transition-all duration-500 ease-out py-3">
       {isScrolled ? (
         /* State B: Dynamic Island capsule (midnight blue transparent, rounded) */
-        <div className="mx-auto max-w-[380px] rounded-full bg-[#0B1528]/85 px-4 py-2 text-white shadow-xl backdrop-blur-lg border border-white/10 scale-95 transition-all duration-500 ease-out flex items-center justify-between">
+        <div className="mx-auto max-w-[380px] rounded-full bg-[#0B1528]/65 px-4 py-2 text-white shadow-xl backdrop-blur-lg border border-white/10 scale-95 transition-all duration-500 ease-out flex items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center group py-0.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -60,7 +60,7 @@ export default function DynamicNavbar({
               />
             </Link>
           </div>
-
+ 
           <div className="flex items-center gap-2">
             {/* Language Selector Dropdown */}
             <div className="relative">
@@ -74,7 +74,7 @@ export default function DynamicNavbar({
                 </svg>
               </button>
               {langMenuOpen && (
-                <div className="absolute right-0 mt-2 w-32 rounded-xl bg-[#0B1528]/95 border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-xl">
+                <div className="absolute right-0 mt-2 w-32 rounded-xl bg-[#0B1528]/85 border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-xl">
                   <button 
                     onClick={() => { setLanguage('FR'); setLangMenuOpen(false); }}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${language === 'FR' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
@@ -138,7 +138,7 @@ export default function DynamicNavbar({
         </div>
       ) : (
         /* State A: Floating Rounded Midnight Blue Transparent Banner */
-        <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl rounded-2xl bg-[#0B1528]/85 border border-white/10 text-white backdrop-blur-lg px-8 py-3.5 transition-all duration-500 ease-out flex items-center justify-between shadow-2xl">
+        <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl rounded-2xl bg-[#0B1528]/65 border border-white/10 text-white backdrop-blur-lg px-8 py-3.5 transition-all duration-500 ease-out flex items-center justify-between shadow-2xl">
           {/* Logo & Language Selector */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center group">
@@ -149,7 +149,7 @@ export default function DynamicNavbar({
                 className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]" 
               />
             </Link>
-
+ 
             {/* Language Selector Dropdown */}
             <div className="relative">
               <button 
@@ -165,7 +165,7 @@ export default function DynamicNavbar({
                 </svg>
               </button>
               {langMenuOpen && (
-                <div className="absolute left-0 mt-2 w-32 rounded-xl bg-[#0B1528]/95 border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-xl">
+                <div className="absolute left-0 mt-2 w-32 rounded-xl bg-[#0B1528]/85 border border-white/10 shadow-2xl p-1.5 z-50 backdrop-blur-xl">
                   <button 
                     onClick={() => { setLanguage('FR'); setLangMenuOpen(false); }}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all ${language === 'FR' ? 'bg-emerald-500/10 text-emerald-400' : 'text-white/80 hover:bg-white/10 hover:text-white'}`}
