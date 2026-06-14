@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { createQuestionnaire, submitDailyWellness, applyQuestionnaireIndices } from "@/app/dashboard/quotidienne/actions"
+import { createQuestionnaire, submitDailyWellness, applyQuestionnaireIndices, deleteQuestionnaire, saveQuestionnaireTemplate } from "@/app/dashboard/quotidienne/actions"
 
 interface PlayerResponse {
   id: string
@@ -13,6 +13,7 @@ interface PlayerResponse {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Record<string, any> | null
   createdAt: string
 }
 
@@ -26,6 +27,7 @@ interface Questionnaire {
   expiresAt: string
   active: boolean
   isApplied: boolean
+  questions?: any[] | null
   responses: PlayerResponse[]
 }
 
@@ -50,6 +52,7 @@ interface QuotidienneClientProps {
     scheduledFor: string
     expiresAt: string
     active: boolean
+    questions?: any[] | null
   } | null
   hasResponded: boolean
   draftResponse: {
@@ -58,9 +61,11 @@ interface QuotidienneClientProps {
     stress: number
     soreness: number
     heartRate: number
+    answers?: Record<string, any> | null
   } | null
   currentPlayerId: string | null
   currentPlayerName: string
+  clubTemplate: any[] | null
 }
 
 export default function QuotidienneClient({
@@ -72,7 +77,8 @@ export default function QuotidienneClient({
   hasResponded,
   draftResponse,
   currentPlayerId,
-  currentPlayerName
+  currentPlayerName,
+  clubTemplate
 }: QuotidienneClientProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -92,6 +98,38 @@ export default function QuotidienneClient({
   const [stressScore, setStressScore] = useState<number>(4)
   const [sorenessScore, setSorenessScore] = useState<number>(4)
   const [heartRateInput, setHeartRateInput] = useState<string>("")
+
+  // --- Dynamic Player Answers ---
+  const [dynamicAnswers, setDynamicAnswers] = useState<Record<string, any>>({})
+
+  // Initialize dynamic answers when questionnaire changes
+  useEffect(() => {
+    if (!isStaff && activeQuestionnaire && activeQuestionnaire.questions) {
+      const initialAnswers: Record<string, any> = {}
+      activeQuestionnaire.questions.forEach((q: any) => {
+        if (q.type === "SCALE" || q.type === "SCALE_10") {
+          initialAnswers[q.key] = q.type === "SCALE_10" ? 5 : 4
+        } else if (q.type === "NUMBER") {
+          initialAnswers[q.key] = ""
+        }
+      })
+      setDynamicAnswers(initialAnswers)
+    }
+  }, [activeQuestionnaire, isStaff])
+
+  // --- Staff Template Management States ---
+  const [templateQuestions, setTemplateQuestions] = useState<any[]>(() => {
+    return clubTemplate || [
+      { id: "sleep", text: "Qualité du sommeil (cette nuit)", type: "SCALE", key: "sleepQuality", active: true },
+      { id: "fatigue", text: "Niveau de Fatigue Générale", type: "SCALE", key: "fatigue", active: true },
+      { id: "stress", text: "Niveau de Stress / Anxiété", type: "SCALE", key: "stress", active: true },
+      { id: "soreness", text: "Douleurs Musculaires / Courbatures", type: "SCALE", key: "soreness", active: true },
+      { id: "heartRate", text: "Fréquence cardiaque au repos", type: "NUMBER", key: "heartRate", active: true }
+    ]
+  })
+
+  const [newQuestionText, setNewQuestionText] = useState("")
+  const [newQuestionType, setNewQuestionType] = useState<"SCALE" | "SCALE_10" | "NUMBER">("SCALE")
 
   // Countdown timer for active questionnaire
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0)
@@ -189,26 +227,56 @@ export default function QuotidienneClient({
     setErrorMsg("")
     setSuccessMsg("")
 
-    if (!heartRateInput) {
-      setErrorMsg("Veuillez saisir votre fréquence cardiaque après l'arrêt du chrono.")
-      return
-    }
+    let finalAnswers: Record<string, any> = {}
 
-    const bpm = parseInt(heartRateInput)
-    if (isNaN(bpm) || bpm < 30 || bpm > 220) {
-      setErrorMsg("Veuillez entrer une fréquence cardiaque cohérente (30 - 220 BPM).")
-      return
-    }
-
-    startTransition(async () => {
-      const res = await submitDailyWellness(activeQuestionnaire.id, {
+    if (activeQuestionnaire.questions) {
+      // Dynamic questions validation
+      for (const q of activeQuestionnaire.questions) {
+        const val = dynamicAnswers[q.key]
+        if (q.type === "NUMBER") {
+          const numVal = parseInt(val)
+          if (isNaN(numVal)) {
+            setErrorMsg(`Veuillez répondre à la question : ${q.text}`)
+            return
+          }
+          if (q.key === "heartRate" && (numVal < 30 || numVal > 220)) {
+            setErrorMsg("Veuillez entrer une fréquence cardiaque cohérente (30 - 220 BPM).")
+            return
+          }
+          finalAnswers[q.key] = numVal
+        } else {
+          // SCALE or SCALE_10 type
+          const maxVal = q.type === "SCALE_10" ? 10 : 7
+          const scaleVal = parseInt(val)
+          if (isNaN(scaleVal) || scaleVal < 1 || scaleVal > maxVal) {
+            setErrorMsg(`Veuillez répondre à la question : ${q.text}`)
+            return
+          }
+          finalAnswers[q.key] = scaleVal
+        }
+      }
+    } else {
+      // Fallback/Legacy validation
+      if (!heartRateInput) {
+        setErrorMsg("Veuillez saisir votre fréquence cardiaque après l'arrêt du chrono.")
+        return
+      }
+      const bpm = parseInt(heartRateInput)
+      if (isNaN(bpm) || bpm < 30 || bpm > 220) {
+        setErrorMsg("Veuillez entrer une fréquence cardiaque cohérente (30 - 220 BPM).")
+        return
+      }
+      finalAnswers = {
         sleepQuality: sleepScore,
         fatigue: fatigueScore,
         stress: stressScore,
         soreness: sorenessScore,
         heartRate: bpm
-      })
+      }
+    }
 
+    startTransition(async () => {
+      const res = await submitDailyWellness(activeQuestionnaire.id, finalAnswers)
       if (res.success) {
         setSuccessMsg("Fiche clinique soumise avec succès !")
         router.refresh()
@@ -233,6 +301,67 @@ export default function QuotidienneClient({
     })
   }
 
+  const handleDeleteQuestionnaire = async (questionnaireId: string, isScheduled: boolean) => {
+    if (!confirm(isScheduled ? "Voulez-vous vraiment annuler ce questionnaire planifié ?" : "Voulez-vous vraiment supprimer ce questionnaire ? Les indices correspondants des joueurs seront également supprimés.")) {
+      return
+    }
+    setErrorMsg("")
+    setSuccessMsg("")
+
+    startTransition(async () => {
+      const res = await deleteQuestionnaire(questionnaireId)
+      if (res.success) {
+        setSuccessMsg(isScheduled ? "Questionnaire planifié annulé avec succès !" : "Questionnaire supprimé avec succès !")
+        router.refresh()
+      } else {
+        setErrorMsg(res.error || "Erreur lors de la suppression du questionnaire")
+      }
+    })
+  }
+
+  const handleUpdateQuestionText = (id: string, newText: string) => {
+    setTemplateQuestions(prev => prev.map(q => q.id === id ? { ...q, text: newText } : q))
+  }
+
+  const handleToggleQuestionActive = (id: string) => {
+    setTemplateQuestions(prev => prev.map(q => q.id === id ? { ...q, active: !q.active } : q))
+  }
+
+  const handleDeleteQuestionFromTemplate = (id: string) => {
+    setTemplateQuestions(prev => prev.filter(q => q.id !== id))
+  }
+
+  const handleAddQuestionToTemplate = () => {
+    if (!newQuestionText.trim()) return
+    const newId = `custom_${Date.now()}`
+    const newKey = `custom_${Date.now()}`
+    setTemplateQuestions(prev => [
+      ...prev,
+      {
+        id: newId,
+        text: newQuestionText.trim(),
+        type: newQuestionType,
+        key: newKey,
+        active: true
+      }
+    ])
+    setNewQuestionText("")
+  }
+
+  const handleSaveTemplate = async () => {
+    setErrorMsg("")
+    setSuccessMsg("")
+    startTransition(async () => {
+      const res = await saveQuestionnaireTemplate(templateQuestions)
+      if (res.success) {
+        setSuccessMsg("Configuration du questionnaire enregistrée avec succès !")
+        router.refresh()
+      } else {
+        setErrorMsg(res.error || "Erreur de sauvegarde")
+      }
+    })
+  }
+
   // Export responses to Excel (French formatting with semicolons)
   const handleExportCSV = (q: Questionnaire) => {
     // Determine targeted players
@@ -240,29 +369,37 @@ export default function QuotidienneClient({
       ? players.filter((p) => p.teamCategoryId === q.teamCategoryId)
       : players
 
-    const headers = [
-      "Joueur",
-      "Equipe",
-      "Statut Réponse",
-      "Sommeil (1-7)",
-      "Fatigue (1-7)",
-      "Stress (1-7)",
-      "Courbatures (1-7)",
-      "Rythme Cardiaque (BPM)"
-    ]
+    const headers = ["Joueur", "Equipe", "Statut Réponse"]
+    if (q.questions) {
+      q.questions.forEach((quest) => {
+        headers.push(`${quest.text} (${quest.type})`)
+      })
+    } else {
+      headers.push("Sommeil (1-7)", "Fatigue (1-7)", "Stress (1-7)", "Courbatures (1-7)", "Rythme Cardiaque (BPM)")
+    }
 
     const rows = targetedPlayers.map((p) => {
       const r = q.responses.find((resp) => resp.playerId === p.id)
-      return [
-        p.name,
-        p.teamCategoryName,
-        r ? "Répondu" : "N/A",
-        r ? r.sleepQuality.toString() : "N/A",
-        r ? r.fatigue.toString() : "N/A",
-        r ? r.stress.toString() : "N/A",
-        r ? r.soreness.toString() : "N/A",
-        r ? r.heartRate.toString() : "N/A"
-      ]
+      const row = [p.name, p.teamCategoryName, r ? "Répondu" : "N/A"]
+      if (q.questions) {
+        q.questions.forEach((quest) => {
+          if (r) {
+            const val = r.answers ? r.answers[quest.key] : (r as any)[quest.key]
+            row.push(val !== undefined && val !== null ? val.toString() : "N/A")
+          } else {
+            row.push("N/A")
+          }
+        })
+      } else {
+        row.push(
+          r ? r.sleepQuality.toString() : "N/A",
+          r ? r.fatigue.toString() : "N/A",
+          r ? r.stress.toString() : "N/A",
+          r ? r.soreness.toString() : "N/A",
+          r ? r.heartRate.toString() : "N/A"
+        )
+      }
+      return row
     })
 
     // Semicolon separator for default compatibility with Excel French edition
@@ -332,6 +469,33 @@ export default function QuotidienneClient({
     return Math.round(((posSleep + posFatigue + posStress + posSoreness) / 28) * 100)
   }
 
+  const getDynamicReadinessScore = (questions: any[] | null | undefined, answersObj: Record<string, any> | null | undefined) => {
+    if (!questions || questions.length === 0) return 100
+    const scaleQuestions = questions.filter(q => q.type === "SCALE" || q.type === "SCALE_10")
+    if (scaleQuestions.length === 0) return 100
+    let sum = 0
+    let count = 0
+    let maxPossiblePoints = 0
+    scaleQuestions.forEach(q => {
+      const val = answersObj ? answersObj[q.key] : undefined
+      if (val !== undefined && val !== null) {
+        const numVal = Number(val)
+        if (!isNaN(numVal)) {
+          if (q.type === "SCALE_10") {
+            sum += (11 - numVal)
+            maxPossiblePoints += 10
+          } else {
+            sum += (8 - numVal)
+            maxPossiblePoints += 7
+          }
+          count++
+        }
+      }
+    })
+    if (count === 0 || maxPossiblePoints === 0) return 100
+    return Math.round((sum / maxPossiblePoints) * 100)
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Messages */}
@@ -350,72 +514,204 @@ export default function QuotidienneClient({
         /* ==================== STAFF DASHBOARD ==================== */
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           
-          {/* Plan daily questionnaire (Right Panel - Col 1) */}
-          <div className="xl:col-span-1 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 h-fit space-y-6">
-            <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
-              <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-2">
-                <span>📢</span> Planifier Fiche Quotidienne
-              </h2>
-              <p className="text-[10px] text-zinc-400 mt-1">
-                Lancer un nouveau questionnaire à remplir immédiatement avec une limite de temps.
-              </p>
-            </div>
-
-            <form onSubmit={handleCreateQuestionnaire} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase">Équipe cible :</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
-                >
-                  <option value="Tous">Tout le club</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase">Limite de temps :</label>
-                <select
-                  value={timeLimit}
-                  onChange={(e) => setTimeLimit(Number(e.target.value))}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
-                >
-                  <option value={5}>5 minutes</option>
-                  <option value={10}>10 minutes</option>
-                  <option value={15}>15 minutes</option>
-                  <option value={20}>20 minutes</option>
-                  <option value={30}>30 minutes</option>
-                  <option value={45}>45 minutes</option>
-                  <option value={60}>1 heure</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-zinc-500 uppercase">Programmer l&apos;envoi (optionnel) :</label>
-                <input
-                  type="datetime-local"
-                  value={scheduledDateInput}
-                  onChange={(e) => setScheduledDateInput(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
-                />
-                <p className="text-[8px] text-zinc-400">
-                  Laissez vide pour envoyer immédiatement.
+          {/* Plan & Config daily questionnaire (Right Panel - Col 1) */}
+          <div className="xl:col-span-1 space-y-6 h-fit">
+            
+            {/* Configuration card */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+              <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
+                <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-2">
+                  <span>⚙️</span> Configuration du questionnaire
+                </h2>
+                <p className="text-[10px] text-zinc-400 mt-1">
+                  Modifiez le texte des questions, activez/désactivez ou ajoutez/supprimez des questions du test.
                 </p>
               </div>
 
+              {/* Questions List */}
+              <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                {templateQuestions.map((q) => (
+                  <div key={q.id} className="p-3 rounded-xl border border-zinc-100 dark:border-zinc-850 bg-zinc-50/30 dark:bg-zinc-950/20 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${
+                        q.type === "SCALE" ? "bg-emerald-500/10 text-emerald-500" :
+                        q.type === "SCALE_10" ? "bg-teal-500/10 text-teal-500" :
+                        "bg-purple-500/10 text-purple-500"
+                      }`}>
+                        {q.type === "SCALE" ? "Échelle 1-7" : q.type === "SCALE_10" ? "Échelle 1-10" : "Nombre"}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        {/* Toggle active status */}
+                        <label className="flex items-center gap-1 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={q.active}
+                            onChange={() => handleToggleQuestionActive(q.id)}
+                            className="rounded border-zinc-300 text-emerald-500 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                          />
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase">Actif</span>
+                        </label>
+
+                        {/* Delete button */}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteQuestionFromTemplate(q.id)}
+                          className="text-red-500 hover:text-red-600 text-[9px] font-bold uppercase transition-all cursor-pointer"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={q.text}
+                      onChange={(e) => handleUpdateQuestionText(q.id, e.target.value)}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                      placeholder="Texte de la question"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Add New Question Section */}
+              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
+                <p className="text-[10px] font-black text-zinc-500 uppercase">➕ Ajouter une question :</p>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={newQuestionText}
+                    onChange={(e) => setNewQuestionText(e.target.value)}
+                    placeholder="ex: Niveau d'énergie"
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                  />
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewQuestionType("SCALE")}
+                      className={`py-1.5 rounded-lg font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer text-center border ${
+                        newQuestionType === "SCALE"
+                          ? "bg-emerald-500 text-white border-emerald-500"
+                          : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500"
+                      }`}
+                    >
+                      Échelle (1-7)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewQuestionType("SCALE_10")}
+                      className={`py-1.5 rounded-lg font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer text-center border ${
+                        newQuestionType === "SCALE_10"
+                          ? "bg-emerald-500 text-white border-emerald-500"
+                          : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500"
+                      }`}
+                    >
+                      Échelle (1-10)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewQuestionType("NUMBER")}
+                      className={`py-1.5 rounded-lg font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer text-center border ${
+                        newQuestionType === "NUMBER"
+                          ? "bg-emerald-500 text-white border-emerald-500"
+                          : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500"
+                      }`}
+                    >
+                      Nombre
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddQuestionToTemplate}
+                    disabled={!newQuestionText.trim()}
+                    className="w-full py-2 rounded-xl bg-zinc-100 hover:bg-zinc-250 dark:bg-zinc-800 dark:hover:bg-zinc-750 border border-zinc-200 dark:border-zinc-700 text-zinc-850 dark:text-zinc-205 font-black text-[9px] uppercase tracking-wider transition-all disabled:opacity-40 cursor-pointer"
+                  >
+                    Ajouter au questionnaire
+                  </button>
+                </div>
+              </div>
+
+              {/* Save template */}
               <button
-                type="submit"
+                type="button"
+                onClick={handleSaveTemplate}
                 disabled={isPending}
-                className="w-full rounded-xl bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-emerald-600 dark:text-emerald-400 border border-zinc-300 dark:border-zinc-700 font-black uppercase text-[10px] tracking-wider py-3 shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer text-center"
+                className="w-full rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase text-[10px] tracking-wider py-3 shadow-md shadow-emerald-500/10 transition-all active:scale-95 disabled:opacity-50 cursor-pointer text-center"
               >
-                {isPending ? "Création..." : scheduledDateInput ? "Planifier le questionnaire" : "Lancer le questionnaire"}
+                {isPending ? "Enregistrement..." : "Enregistrer les questions 💾"}
               </button>
-            </form>
+            </div>
+
+            {/* Plan daily questionnaire card */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-6">
+              <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
+                <h2 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-2">
+                  <span>📢</span> Planifier Fiche Quotidienne
+                </h2>
+                <p className="text-[10px] text-zinc-400 mt-1">
+                  Lancer un nouveau questionnaire à remplir immédiatement avec une limite de temps.
+                </p>
+              </div>
+
+              <form onSubmit={handleCreateQuestionnaire} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase">Équipe cible :</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                  >
+                    <option value="Tous">Tout le club</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase">Limite de temps :</label>
+                  <select
+                    value={timeLimit}
+                    onChange={(e) => setTimeLimit(Number(e.target.value))}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                  >
+                    <option value={5}>5 minutes</option>
+                    <option value={10}>10 minutes</option>
+                    <option value={15}>15 minutes</option>
+                    <option value={20}>20 minutes</option>
+                    <option value={30}>30 minutes</option>
+                    <option value={45}>45 minutes</option>
+                    <option value={60}>1 heure</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-zinc-500 uppercase">Programmer l&apos;envoi (optionnel) :</label>
+                  <input
+                    type="datetime-local"
+                    value={scheduledDateInput}
+                    onChange={(e) => setScheduledDateInput(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                  />
+                  <p className="text-[8px] text-zinc-400">
+                    Laissez vide pour envoyer immédiatement.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full rounded-xl bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-emerald-600 dark:text-emerald-400 border border-zinc-300 dark:border-zinc-700 font-black uppercase text-[10px] tracking-wider py-3 shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer text-center"
+                >
+                  {isPending ? "Création..." : scheduledDateInput ? "Planifier le questionnaire" : "Lancer le questionnaire"}
+                </button>
+              </form>
+            </div>
           </div>
 
           {/* List and results of questionnaires (Left Panel - Col 2) */}
@@ -539,6 +835,26 @@ export default function QuotidienneClient({
                             >
                               {q.isApplied ? "Indices Appliqués" : "Mettre à jour les indices"}
                             </button>
+
+                            {isScheduled && (
+                              <button
+                                onClick={() => handleDeleteQuestionnaire(q.id, true)}
+                                disabled={isPending}
+                                className="rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-black text-[10px] uppercase tracking-wider px-3.5 py-2 transition-all cursor-pointer dark:bg-red-950/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-900/50"
+                              >
+                                Annuler le questionnaire
+                              </button>
+                            )}
+
+                            {isCurrentExpired && (
+                              <button
+                                onClick={() => handleDeleteQuestionnaire(q.id, false)}
+                                disabled={isPending}
+                                className="rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-black text-[10px] uppercase tracking-wider px-3.5 py-2 transition-all cursor-pointer dark:bg-red-950/20 dark:hover:bg-red-900/30 dark:text-red-400 dark:border-red-900/50"
+                              >
+                                Supprimer le questionnaire
+                              </button>
+                            )}
                           </div>
 
                           {/* Responsive table */}
@@ -547,11 +863,17 @@ export default function QuotidienneClient({
                               <thead>
                                 <tr className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 text-[9px] font-black text-zinc-500 uppercase tracking-wider">
                                   <th className="py-2.5 px-3">Joueur</th>
-                                  <th className="py-2.5 px-3 text-center">Sommeil</th>
-                                  <th className="py-2.5 px-3 text-center">Fatigue</th>
-                                  <th className="py-2.5 px-3 text-center">Stress</th>
-                                  <th className="py-2.5 px-3 text-center">Courbatures</th>
-                                  <th className="py-2.5 px-3 text-center">Pouls (BPM)</th>
+                                  {q.questions ? q.questions.map((quest) => (
+                                    <th key={quest.id} className="py-2.5 px-3 text-center">{quest.text}</th>
+                                  )) : (
+                                    <>
+                                      <th className="py-2.5 px-3 text-center">Sommeil</th>
+                                      <th className="py-2.5 px-3 text-center">Fatigue</th>
+                                      <th className="py-2.5 px-3 text-center">Stress</th>
+                                      <th className="py-2.5 px-3 text-center">Courbatures</th>
+                                      <th className="py-2.5 px-3 text-center">Pouls (BPM)</th>
+                                    </>
+                                  )}
                                   <th className="py-2.5 px-3 text-center">Forme</th>
                                 </tr>
                               </thead>
@@ -564,53 +886,90 @@ export default function QuotidienneClient({
                                       <td className="py-2.5 px-3 font-bold text-zinc-900 dark:text-white">
                                         {p.name}
                                       </td>
-                                      <td className="py-2.5 px-3 text-center font-bold">
-                                        {r ? (
-                                          <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                                            r.sleepQuality <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.sleepQuality <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
-                                          }`}>
-                                            {r.sleepQuality}/7
-                                          </span>
-                                        ) : "N/A"}
-                                      </td>
-                                      <td className="py-2.5 px-3 text-center font-bold">
-                                        {r ? (
-                                          <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                                            r.fatigue <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.fatigue <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
-                                          }`}>
-                                            {r.fatigue}/7
-                                          </span>
-                                        ) : "N/A"}
-                                      </td>
-                                      <td className="py-2.5 px-3 text-center font-bold">
-                                        {r ? (
-                                          <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                                            r.stress <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.stress <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
-                                          }`}>
-                                            {r.stress}/7
-                                          </span>
-                                        ) : "N/A"}
-                                      </td>
-                                      <td className="py-2.5 px-3 text-center font-bold">
-                                        {r ? (
-                                          <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                                            r.soreness <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.soreness <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
-                                          }`}>
-                                            {r.soreness}/7
-                                          </span>
-                                        ) : "N/A"}
-                                      </td>
-                                      <td className="py-2.5 px-3 text-center font-bold">
-                                        {r ? (
-                                          <span className="text-zinc-900 dark:text-zinc-100 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded font-black text-[10px]">
-                                            ❤️ {r.heartRate}
-                                          </span>
-                                        ) : "N/A"}
-                                      </td>
+                                      
+                                      {q.questions ? q.questions.map((quest) => {
+                                        const val = r ? (r.answers ? r.answers[quest.key] : (r as any)[quest.key]) : null
+                                        return (
+                                          <td key={quest.id} className="py-2.5 px-3 text-center font-bold">
+                                            {val !== null && val !== undefined ? (
+                                              (quest.type === "SCALE" || quest.type === "SCALE_10") ? (
+                                                (() => {
+                                                  const maxVal = quest.type === "SCALE_10" ? 10 : 7
+                                                  const half = maxVal / 2
+                                                  let colorClass = "text-red-500 bg-red-500/10"
+                                                  if (val <= Math.floor(half - 0.5)) {
+                                                    colorClass = "text-emerald-500 bg-emerald-500/10"
+                                                  } else if (val <= Math.floor(half + 1.5)) {
+                                                    colorClass = "text-amber-500 bg-amber-500/10"
+                                                  }
+                                                  return (
+                                                    <span className={`px-1.5 py-0.5 rounded text-[10px] ${colorClass}`}>
+                                                      {val}/{maxVal}
+                                                    </span>
+                                                  )
+                                                })()
+                                              ) : (
+                                                <span className="text-zinc-900 dark:text-zinc-100 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded font-black text-[10px]">
+                                                  {quest.key === "heartRate" ? `❤️ ${val}` : val}
+                                                </span>
+                                              )
+                                            ) : "N/A"}
+                                          </td>
+                                        )
+                                      }) : (
+                                        <>
+                                          <td className="py-2.5 px-3 text-center font-bold">
+                                            {r ? (
+                                              <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                                                r.sleepQuality <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.sleepQuality <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
+                                              }`}>
+                                                {r.sleepQuality}/7
+                                              </span>
+                                            ) : "N/A"}
+                                          </td>
+                                          <td className="py-2.5 px-3 text-center font-bold">
+                                            {r ? (
+                                              <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                                                r.fatigue <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.fatigue <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
+                                              }`}>
+                                                {r.fatigue}/7
+                                              </span>
+                                            ) : "N/A"}
+                                          </td>
+                                          <td className="py-2.5 px-3 text-center font-bold">
+                                            {r ? (
+                                              <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                                                r.stress <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.stress <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
+                                              }`}>
+                                                {r.stress}/7
+                                              </span>
+                                            ) : "N/A"}
+                                          </td>
+                                          <td className="py-2.5 px-3 text-center font-bold">
+                                            {r ? (
+                                              <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                                                r.soreness <= 2 ? "text-emerald-500 bg-emerald-500/10" : r.soreness <= 5 ? "text-amber-500 bg-amber-500/10" : "text-red-500 bg-red-500/10"
+                                              }`}>
+                                                {r.soreness}/7
+                                              </span>
+                                            ) : "N/A"}
+                                          </td>
+                                          <td className="py-2.5 px-3 text-center font-bold">
+                                            {r ? (
+                                              <span className="text-zinc-900 dark:text-zinc-100 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded font-black text-[10px]">
+                                                ❤️ {r.heartRate}
+                                              </span>
+                                            ) : "N/A"}
+                                          </td>
+                                        </>
+                                      )}
+
                                       <td className="py-2.5 px-3 text-center">
                                         {r ? (
                                           (() => {
-                                            const score = getReadinessScore(r.sleepQuality, r.fatigue, r.stress, r.soreness)
+                                            const score = q.questions
+                                              ? getDynamicReadinessScore(q.questions, r.answers)
+                                              : getReadinessScore(r.sleepQuality, r.fatigue, r.stress, r.soreness)
                                             return (
                                               <span className={`text-[10px] font-black uppercase ${
                                                 score >= 70 ? "text-emerald-500" : score >= 50 ? "text-amber-500" : "text-red-500"
@@ -670,16 +1029,51 @@ export default function QuotidienneClient({
                   Indice de Readiness Estimé
                 </p>
                 <p className="text-3xl font-black text-emerald-500 mt-2">
-                  {getReadinessScore(
-                    draftResponse.sleepQuality,
-                    draftResponse.fatigue,
-                    draftResponse.stress,
-                    draftResponse.soreness
-                  )}%
+                  {activeQuestionnaire.questions
+                    ? getDynamicReadinessScore(activeQuestionnaire.questions, draftResponse.answers)
+                    : getReadinessScore(
+                        draftResponse.sleepQuality,
+                        draftResponse.fatigue,
+                        draftResponse.stress,
+                        draftResponse.soreness
+                      )}%
                 </p>
-                <p className="text-[10px] text-zinc-500 mt-2 font-bold max-w-sm">
-                  ❤️ Pulsations de repos : {draftResponse.heartRate} BPM
-                </p>
+                <div className="text-[10px] text-zinc-500 mt-3 font-semibold space-y-1.5 text-left border-t border-zinc-100 dark:border-zinc-800 pt-3">
+                  {activeQuestionnaire.questions ? activeQuestionnaire.questions.map((quest) => {
+                    const val = draftResponse.answers ? draftResponse.answers[quest.key] : (draftResponse as any)[quest.key]
+                    return (
+                      <div key={quest.id} className="flex justify-between gap-6">
+                        <span className="text-zinc-400 font-bold">{quest.text} :</span>
+                        <span className="font-bold text-zinc-850 dark:text-zinc-200">
+                          {quest.type === "SCALE" ? `${val}/7` : quest.key === "heartRate" ? `❤️ ${val} BPM` : val}
+                        </span>
+                      </div>
+                    )
+                  }) : (
+                    <>
+                      <div className="flex justify-between gap-6">
+                        <span className="text-zinc-400 font-bold">Qualité du sommeil :</span>
+                        <span className="font-bold text-zinc-850 dark:text-zinc-200">{draftResponse.sleepQuality}/7</span>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <span className="text-zinc-400 font-bold">Niveau de Fatigue :</span>
+                        <span className="font-bold text-zinc-850 dark:text-zinc-200">{draftResponse.fatigue}/7</span>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <span className="text-zinc-400 font-bold">Niveau de Stress :</span>
+                        <span className="font-bold text-zinc-850 dark:text-zinc-200">{draftResponse.stress}/7</span>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <span className="text-zinc-400 font-bold">Douleurs Musculaires :</span>
+                        <span className="font-bold text-zinc-850 dark:text-zinc-200">{draftResponse.soreness}/7</span>
+                      </div>
+                      <div className="flex justify-between gap-6">
+                        <span className="text-zinc-400 font-bold">Pulsations :</span>
+                        <span className="font-bold text-zinc-850 dark:text-zinc-200">❤️ {draftResponse.heartRate} BPM</span>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           ) : isTimeExpired ? (
@@ -714,173 +1108,299 @@ export default function QuotidienneClient({
                 </div>
               </div>
 
-              {/* Part 1: Wellness Scales (1-7) */}
+              {/* Part 1: Wellness Scales & Questions */}
               <div className="space-y-6">
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">
-                  Partie 1 : Indicateurs de Wellness (Échelle 1 à 7)
-                </h4>
-
-                {/* Sleep Scale */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    <span>1. Qualité du sommeil (cette nuit)</span>
-                    <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{sleepScore}</strong></span>
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setSleepScore(num)}
-                        className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, sleepScore)}`}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
-                    <span>1 - Excellent / Réparateur</span>
-                    <span>7 - Très mauvais / Insomnie</span>
-                  </div>
-                </div>
-
-                {/* Fatigue Scale */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    <span>2. Niveau de Fatigue Générale</span>
-                    <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{fatigueScore}</strong></span>
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setFatigueScore(num)}
-                        className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, fatigueScore)}`}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
-                    <span>1 - Très en forme / Frais</span>
-                    <span>7 - Épuisé / Fatigué</span>
-                  </div>
-                </div>
-
-                {/* Stress Scale */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    <span>3. Niveau de Stress / Anxiété</span>
-                    <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{stressScore}</strong></span>
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setStressScore(num)}
-                        className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, stressScore)}`}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
-                    <span>1 - Relaxé / Aucun stress</span>
-                    <span>7 - Très anxieux / Tendu</span>
-                  </div>
-                </div>
-
-                {/* Soreness Scale */}
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    <span>4. Douleurs Musculaires / Courbatures</span>
-                    <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{sorenessScore}</strong></span>
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => setSorenessScore(num)}
-                        className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, sorenessScore)}`}
-                      >
-                        {num}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
-                    <span>1 - Muscles très frais</span>
-                    <span>7 - Courbatures intenses</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Part 2: Heart Rate & Rest Stopwatch */}
-              <div className="space-y-4 pt-6 border-t border-zinc-150 dark:border-zinc-850">
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">
-                  Partie 2 : Pouls après le réveil (Repos)
-                </h4>
-
-                <div className="rounded-2xl border border-zinc-150 dark:border-zinc-800 p-5 bg-zinc-50/50 dark:bg-zinc-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  {/* Stopwatch displays */}
-                  <div className="space-y-2">
-                    <p className="text-[10px] text-zinc-400 font-black uppercase">Mesure cardiaque (Chrono 1 minute) :</p>
-                    <div className="flex items-center gap-4">
-                      <span className="text-3xl font-black font-mono text-zinc-800 dark:text-white tracking-widest">
-                        {formatTime(stopwatchSeconds)}
-                      </span>
+                {activeQuestionnaire.questions ? (
+                  activeQuestionnaire.questions.filter((q: any) => q.active).map((q: any, idx: number) => {
+                    if (q.type === "SCALE" || q.type === "SCALE_10") {
+                      const maxVal = q.type === "SCALE_10" ? 10 : 7
+                      const score = dynamicAnswers[q.key] !== undefined ? dynamicAnswers[q.key] : (q.type === "SCALE_10" ? 5 : 4)
+                      const nums = Array.from({ length: maxVal }, (_, i) => i + 1)
                       
-                      <div className="flex items-center gap-1.5">
-                        {!stopwatchRunning ? (
+                      const getScaleButtonBg = (value: number, selected: number, max: number) => {
+                        if (value !== selected) {
+                          return "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-750 font-bold"
+                        }
+                        const half = max / 2
+                        if (value <= Math.floor(half - 0.5)) {
+                          return "bg-emerald-500 text-white shadow-emerald-500/20 shadow-md font-black scale-105"
+                        }
+                        if (value <= Math.floor(half + 1.5)) {
+                          return "bg-amber-500 text-white shadow-amber-500/20 shadow-md font-black scale-105"
+                        }
+                        return "bg-red-500 text-white shadow-red-500/20 shadow-md font-black scale-105"
+                      }
+
+                      return (
+                        <div key={q.id} className="space-y-2">
+                          <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                            <span>{idx + 1}. {q.text}</span>
+                            <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{score}</strong></span>
+                          </div>
+                          <div className={`grid ${maxVal === 10 ? 'grid-cols-10' : 'grid-cols-7'} gap-1`}>
+                            {nums.map((num) => (
+                              <button
+                                key={num}
+                                type="button"
+                                onClick={() => setDynamicAnswers(prev => ({ ...prev, [q.key]: num }))}
+                                className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getScaleButtonBg(num, score, maxVal)}`}
+                              >
+                                {num}
+                              </button>
+                            ))}
+                          </div>
+                          <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
+                            <span>1 - Excellent / Optimal</span>
+                            <span>{maxVal} - Très mauvais / Difficile</span>
+                          </div>
+                        </div>
+                      )
+                    } else {
+                      // NUMBER type
+                      const val = dynamicAnswers[q.key] !== undefined ? dynamicAnswers[q.key] : ""
+                      const isHeartRate = q.key === "heartRate"
+                      return (
+                        <div key={q.id} className="space-y-4 pt-4 border-t border-zinc-150 dark:border-zinc-850">
+                          <h5 className="text-[10px] font-black uppercase tracking-wider text-zinc-450">
+                            {idx + 1}. {q.text}
+                          </h5>
+
+                          <div className="rounded-2xl border border-zinc-150 dark:border-zinc-800 p-5 bg-zinc-50/50 dark:bg-zinc-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            {/* If heartRate, show stopwatch */}
+                            {isHeartRate && (
+                              <div className="space-y-2">
+                                <p className="text-[10px] text-zinc-400 font-black uppercase">Mesure cardiaque (Chrono 1 minute) :</p>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-3xl font-black font-mono text-zinc-800 dark:text-white tracking-widest">
+                                    {formatTime(stopwatchSeconds)}
+                                  </span>
+                                  
+                                  <div className="flex items-center gap-1.5">
+                                    {!stopwatchRunning ? (
+                                      <button
+                                        type="button"
+                                        onClick={startStopwatch}
+                                        className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
+                                      >
+                                        Démarrer ▶️
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={pauseStopwatch}
+                                        className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
+                                      >
+                                        Pause ⏸️
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={resetStopwatch}
+                                      className="px-3 py-1.5 rounded-lg bg-zinc-200 hover:bg-zinc-300 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-750 font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
+                                    >
+                                      Reset 🔄
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Input box */}
+                            <div className="space-y-2 w-full md:w-fit min-w-[200px]">
+                              <label className="text-[10px] font-black text-zinc-500 uppercase block">
+                                Valeur numérique :
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  pattern="[0-9]*"
+                                  maxLength={5}
+                                  value={val}
+                                  onChange={(e) => {
+                                    const cleanVal = e.target.value.replace(/[^0-9]/g, "")
+                                    setDynamicAnswers(prev => ({ ...prev, [q.key]: cleanVal }))
+                                  }}
+                                  placeholder={isHeartRate ? "ex: 65" : "ex: 10"}
+                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-black pl-8"
+                                />
+                                <span className="absolute left-3 top-3 text-red-500 font-bold text-xs">{isHeartRate ? "❤️" : "🔢"}</span>
+                                {isHeartRate && <span className="absolute right-3 top-3 text-[10px] text-zinc-400 font-bold">BPM</span>}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }
+                  })
+                ) : (
+                  <>
+                    <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">
+                      Partie 1 : Indicateurs de Wellness (Échelle 1 à 7)
+                    </h4>
+
+                    {/* Sleep Scale */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                        <span>1. Qualité du sommeil (cette nuit)</span>
+                        <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{sleepScore}</strong></span>
+                      </div>
+                      <div className="grid grid-cols-7 gap-1">
+                        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                           <button
+                            key={num}
                             type="button"
-                            onClick={startStopwatch}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
+                            onClick={() => setSleepScore(num)}
+                            className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, sleepScore)}`}
                           >
-                            Démarrer ▶️
+                            {num}
                           </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={pauseStopwatch}
-                            className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
-                          >
-                            Pause ⏸️
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={resetStopwatch}
-                          className="px-3 py-1.5 rounded-lg bg-zinc-200 hover:bg-zinc-300 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-750 font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
-                        >
-                          Reset 🔄
-                        </button>
+                        ))}
+                      </div>
+                      <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
+                        <span>1 - Excellent / Réparateur</span>
+                        <span>7 - Très mauvais / Insomnie</span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* BPM input box */}
-                  <div className="space-y-2 w-full md:w-fit min-w-[200px]">
-                    <label className="text-[10px] font-black text-zinc-500 uppercase block">
-                      Battements de coeur (3 chiffres max) :
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        pattern="[0-9]*"
-                        maxLength={3}
-                        value={heartRateInput}
-                        onChange={(e) => handleHeartRateChange(e.target.value)}
-                        placeholder="ex: 65"
-                        className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-black pl-8"
-                      />
-                      <span className="absolute left-3 top-3 text-red-500 font-bold text-xs">❤️</span>
-                      <span className="absolute right-3 top-3 text-[10px] text-zinc-400 font-bold">BPM</span>
+                    {/* Fatigue Scale */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                        <span>2. Niveau de Fatigue Générale</span>
+                        <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{fatigueScore}</strong></span>
+                      </div>
+                      <div className="grid grid-cols-7 gap-1">
+                        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setFatigueScore(num)}
+                            className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, fatigueScore)}`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
+                        <span>1 - Très en forme / Frais</span>
+                        <span>7 - Épuisé / Fatigué</span>
+                      </div>
                     </div>
-                  </div>
-                </div>
+
+                    {/* Stress Scale */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                        <span>3. Niveau de Stress / Anxiété</span>
+                        <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{stressScore}</strong></span>
+                      </div>
+                      <div className="grid grid-cols-7 gap-1">
+                        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setStressScore(num)}
+                            className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, stressScore)}`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
+                        <span>1 - Relaxé / Aucun stress</span>
+                        <span>7 - Très anxieux / Tendu</span>
+                      </div>
+                    </div>
+
+                    {/* Soreness Scale */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                        <span>4. Douleurs Musculaires / Courbatures</span>
+                        <span className="text-zinc-500">Sélectionné : <strong className="text-emerald-500">{sorenessScore}</strong></span>
+                      </div>
+                      <div className="grid grid-cols-7 gap-1">
+                        {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => setSorenessScore(num)}
+                            className={`py-2 text-xs rounded-lg transition-all cursor-pointer ${getButtonBg(num, sorenessScore)}`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex justify-between text-[8px] text-zinc-400 font-black uppercase tracking-wider">
+                        <span>1 - Muscles très frais</span>
+                        <span>7 - Courbatures intenses</span>
+                      </div>
+                    </div>
+
+                    {/* Part 2: Heart Rate & Rest Stopwatch */}
+                    <div className="space-y-4 pt-6 border-t border-zinc-150 dark:border-zinc-850">
+                      <h4 className="text-[11px] font-black uppercase tracking-widest text-zinc-450">
+                        Partie 2 : Pouls après le réveil (Repos)
+                      </h4>
+
+                      <div className="rounded-2xl border border-zinc-150 dark:border-zinc-800 p-5 bg-zinc-50/50 dark:bg-zinc-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        {/* Stopwatch displays */}
+                        <div className="space-y-2">
+                          <p className="text-[10px] text-zinc-450 font-black uppercase">Mesure cardiaque (Chrono 1 minute) :</p>
+                          <div className="flex items-center gap-4">
+                            <span className="text-3xl font-black font-mono text-zinc-800 dark:text-white tracking-widest">
+                              {formatTime(stopwatchSeconds)}
+                            </span>
+                            
+                            <div className="flex items-center gap-1.5">
+                              {!stopwatchRunning ? (
+                                <button
+                                  type="button"
+                                  onClick={startStopwatch}
+                                  className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
+                                >
+                                  Démarrer ▶️
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={pauseStopwatch}
+                                  className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
+                                >
+                                  Pause ⏸️
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={resetStopwatch}
+                                className="px-3 py-1.5 rounded-lg bg-zinc-200 hover:bg-zinc-300 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-750 font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer"
+                              >
+                                Reset 🔄
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* BPM input box */}
+                        <div className="space-y-2 w-full md:w-fit min-w-[200px]">
+                          <label className="text-[10px] font-black text-zinc-500 uppercase block">
+                            Battements de coeur (3 chiffres max) :
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              pattern="[0-9]*"
+                              maxLength={3}
+                              value={heartRateInput}
+                              onChange={(e) => handleHeartRateChange(e.target.value)}
+                              placeholder="ex: 65"
+                              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 shadow-sm outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-black pl-8"
+                            />
+                            <span className="absolute left-3 top-3 text-red-500 font-bold text-xs">❤️</span>
+                            <span className="absolute right-3 top-3 text-[10px] text-zinc-400 font-bold">BPM</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Submit button */}

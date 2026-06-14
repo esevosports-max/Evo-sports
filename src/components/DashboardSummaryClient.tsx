@@ -158,8 +158,7 @@ export default function DashboardSummaryClient({
 
       {/* Grid of 4 Metric Summary Cards */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 pb-2">
-          <span className="text-xl">{currentTab.icon}</span>
+        <div className="flex items-center pb-2">
           <h3 className="text-xs font-black uppercase text-zinc-900 tracking-widest">
             {currentTab.title} — {t("db_summary_title")}
           </h3>

@@ -36,6 +36,7 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
         { href: "/dashboard/manager/demandes", label: t("db_reg_requests"), icon: "📥", description: t("desc_requests") },
         { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️", description: t("desc_clubs") },
         { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳", description: t("desc_payments") },
+        { href: "/dashboard/manager/annonces", label: t("db_announcements"), icon: "📢", description: t("desc_announcements") },
       ]
     : [
         { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠", description: t("desc_dashboard") },
@@ -84,7 +85,7 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
           label: t("feat_injuries_title"), 
           icon: "🩹", 
           description: t("desc_injuries"),
-          requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"] 
+          requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE"] 
         },
         { 
           href: "/dashboard/medical/dossier-medical", 
@@ -175,43 +176,38 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
         {/* Navigation Items (Scrollable) */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1 custom-scrollbar">
           <p className="text-[9px] font-black uppercase tracking-widest text-white/30 px-3 pb-2">{t("db_menu_principal")}</p>
-          {menuItems.map((item) => {
-            const authorized = isRoleAuthorized(item.requiredRoles)
-            const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
+          {menuItems
+            .filter((item) => isRoleAuthorized(item.requiredRoles))
+            .map((item) => {
+              const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
 
-            return (
-              <Link
-                key={item.href}
-                href={authorized ? item.href : "#"}
-                onClick={authorized ? handleLinkClick : (e) => e.preventDefault()}
-                className={`
-                  flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group
-                  ${active 
-                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm" 
-                    : "text-white/60 hover:text-white hover:bg-white/5 border border-transparent"
-                  }
-                  ${!authorized && "opacity-40 cursor-not-allowed select-none"}
-                `}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className={`text-base transition-transform duration-200 ${active ? "scale-110" : "group-hover:scale-110"}`}>
-                    {item.icon}
-                  </span>
-                  <div className="min-w-0">
-                    <p className={`text-xs font-black tracking-wide ${active ? "text-emerald-400" : "text-white/80 group-hover:text-white"}`}>
-                      {item.label}
-                    </p>
-                    <p className="text-[9px] text-white/40 truncate font-medium">{item.description}</p>
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={handleLinkClick}
+                  className={`
+                    flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group
+                    ${active 
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm" 
+                      : "text-white/60 hover:text-white hover:bg-white/5 border border-transparent"
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`text-base transition-transform duration-200 ${active ? "scale-110" : "group-hover:scale-110"}`}>
+                      {item.icon}
+                    </span>
+                    <div className="min-w-0">
+                      <p className={`text-xs font-black tracking-wide ${active ? "text-emerald-400" : "text-white/80 group-hover:text-white"}`}>
+                        {item.label}
+                      </p>
+                      <p className="text-[9px] text-white/40 truncate font-medium">{item.description}</p>
+                    </div>
                   </div>
-                </div>
-                {!authorized && (
-                  <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-md uppercase tracking-wider">
-                    🔒 {t("db_blocked")}
-                  </span>
-                )}
-              </Link>
-            )
-          })}
+                </Link>
+              )
+            })}
         </nav>
 
         {/* Footer - User Profile Info & Logout */}

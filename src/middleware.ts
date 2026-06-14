@@ -20,8 +20,18 @@ export default NextAuth(authConfig).auth((req) => {
     }
 
     // Guard Medical-only dashboards
-    if (pathname.startsWith("/dashboard/medical") && role !== "PRESIDENT" && role !== "MEDECIN" && role !== "DIRECTEUR_SPORTIF" && role !== "SECRETAIRE_GENERAL" && role !== "ENTRAINEUR_PRINCIPAL" && role !== "ENTRAINEUR_ADJOINT") {
-      return Response.redirect(new URL("/dashboard", req.nextUrl))
+    if (pathname.startsWith("/dashboard/medical")) {
+      const allowedRolesForMedical = ["PRESIDENT", "MEDECIN", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"]
+      
+      if (pathname.startsWith("/dashboard/medical/blessures")) {
+        if (!allowedRolesForMedical.includes(role || "") && role !== "PREPARATEUR_PHYSIQUE") {
+          return Response.redirect(new URL("/dashboard", req.nextUrl))
+        }
+      } else {
+        if (!allowedRolesForMedical.includes(role || "")) {
+          return Response.redirect(new URL("/dashboard", req.nextUrl))
+        }
+      }
     }
 
     // Guard Tactical & Training Staff space (President, Directeur, Head Coach, Assistants, GK Coach, Fitness Coach)

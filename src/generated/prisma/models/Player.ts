@@ -64,6 +64,10 @@ export type PlayerMinAggregateOutputType = {
   allergies: string | null
   lastCheckup: string | null
   clearance: string | null
+  nationality: string | null
+  birthDate: string | null
+  medicalTreatment: string | null
+  medication: string | null
 }
 
 export type PlayerMaxAggregateOutputType = {
@@ -92,6 +96,10 @@ export type PlayerMaxAggregateOutputType = {
   allergies: string | null
   lastCheckup: string | null
   clearance: string | null
+  nationality: string | null
+  birthDate: string | null
+  medicalTreatment: string | null
+  medication: string | null
 }
 
 export type PlayerCountAggregateOutputType = {
@@ -121,6 +129,10 @@ export type PlayerCountAggregateOutputType = {
   lastCheckup: number
   clearance: number
   medicalNotes: number
+  nationality: number
+  birthDate: number
+  medicalTreatment: number
+  medication: number
   _all: number
 }
 
@@ -163,6 +175,10 @@ export type PlayerMinAggregateInputType = {
   allergies?: true
   lastCheckup?: true
   clearance?: true
+  nationality?: true
+  birthDate?: true
+  medicalTreatment?: true
+  medication?: true
 }
 
 export type PlayerMaxAggregateInputType = {
@@ -191,6 +207,10 @@ export type PlayerMaxAggregateInputType = {
   allergies?: true
   lastCheckup?: true
   clearance?: true
+  nationality?: true
+  birthDate?: true
+  medicalTreatment?: true
+  medication?: true
 }
 
 export type PlayerCountAggregateInputType = {
@@ -220,6 +240,10 @@ export type PlayerCountAggregateInputType = {
   lastCheckup?: true
   clearance?: true
   medicalNotes?: true
+  nationality?: true
+  birthDate?: true
+  medicalTreatment?: true
+  medication?: true
   _all?: true
 }
 
@@ -336,6 +360,10 @@ export type PlayerGroupByOutputType = {
   lastCheckup: string | null
   clearance: string | null
   medicalNotes: string[]
+  nationality: string | null
+  birthDate: string | null
+  medicalTreatment: string | null
+  medication: string | null
   _count: PlayerCountAggregateOutputType | null
   _avg: PlayerAvgAggregateOutputType | null
   _sum: PlayerSumAggregateOutputType | null
@@ -388,6 +416,10 @@ export type PlayerWhereInput = {
   lastCheckup?: Prisma.StringNullableFilter<"Player"> | string | null
   clearance?: Prisma.StringNullableFilter<"Player"> | string | null
   medicalNotes?: Prisma.StringNullableListFilter<"Player">
+  nationality?: Prisma.StringNullableFilter<"Player"> | string | null
+  birthDate?: Prisma.StringNullableFilter<"Player"> | string | null
+  medicalTreatment?: Prisma.StringNullableFilter<"Player"> | string | null
+  medication?: Prisma.StringNullableFilter<"Player"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryNullableScalarRelationFilter, Prisma.TeamCategoryWhereInput> | null
@@ -423,6 +455,10 @@ export type PlayerOrderByWithRelationInput = {
   lastCheckup?: Prisma.SortOrderInput | Prisma.SortOrder
   clearance?: Prisma.SortOrderInput | Prisma.SortOrder
   medicalNotes?: Prisma.SortOrder
+  nationality?: Prisma.SortOrderInput | Prisma.SortOrder
+  birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrderInput | Prisma.SortOrder
+  medication?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   club?: Prisma.ClubOrderByWithRelationInput
   teamCategory?: Prisma.TeamCategoryOrderByWithRelationInput
@@ -461,6 +497,10 @@ export type PlayerWhereUniqueInput = Prisma.AtLeast<{
   lastCheckup?: Prisma.StringNullableFilter<"Player"> | string | null
   clearance?: Prisma.StringNullableFilter<"Player"> | string | null
   medicalNotes?: Prisma.StringNullableListFilter<"Player">
+  nationality?: Prisma.StringNullableFilter<"Player"> | string | null
+  birthDate?: Prisma.StringNullableFilter<"Player"> | string | null
+  medicalTreatment?: Prisma.StringNullableFilter<"Player"> | string | null
+  medication?: Prisma.StringNullableFilter<"Player"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryNullableScalarRelationFilter, Prisma.TeamCategoryWhereInput> | null
@@ -496,6 +536,10 @@ export type PlayerOrderByWithAggregationInput = {
   lastCheckup?: Prisma.SortOrderInput | Prisma.SortOrder
   clearance?: Prisma.SortOrderInput | Prisma.SortOrder
   medicalNotes?: Prisma.SortOrder
+  nationality?: Prisma.SortOrderInput | Prisma.SortOrder
+  birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrderInput | Prisma.SortOrder
+  medication?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PlayerCountOrderByAggregateInput
   _avg?: Prisma.PlayerAvgOrderByAggregateInput
   _max?: Prisma.PlayerMaxOrderByAggregateInput
@@ -533,6 +577,10 @@ export type PlayerScalarWhereWithAggregatesInput = {
   lastCheckup?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
   clearance?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
   medicalNotes?: Prisma.StringNullableListFilter<"Player">
+  nationality?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
+  birthDate?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
+  medicalTreatment?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
+  medication?: Prisma.StringNullableWithAggregatesFilter<"Player"> | string | null
 }
 
 export type PlayerCreateInput = {
@@ -559,6 +607,10 @@ export type PlayerCreateInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
@@ -594,6 +646,10 @@ export type PlayerUncheckedCreateInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
@@ -623,6 +679,10 @@ export type PlayerUpdateInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
@@ -658,6 +718,10 @@ export type PlayerUncheckedUpdateInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
@@ -690,6 +754,10 @@ export type PlayerCreateManyInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
 }
 
 export type PlayerUpdateManyMutationInput = {
@@ -716,6 +784,10 @@ export type PlayerUpdateManyMutationInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PlayerUncheckedUpdateManyInput = {
@@ -745,6 +817,10 @@ export type PlayerUncheckedUpdateManyInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PlayerNullableScalarRelationFilter = {
@@ -760,14 +836,6 @@ export type PlayerListRelationFilter = {
 
 export type PlayerOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type StringNullableListFilter<$PrismaModel = never> = {
-  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
-  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
-  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
-  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
-  isEmpty?: boolean
 }
 
 export type PlayerCountOrderByAggregateInput = {
@@ -797,6 +865,10 @@ export type PlayerCountOrderByAggregateInput = {
   lastCheckup?: Prisma.SortOrder
   clearance?: Prisma.SortOrder
   medicalNotes?: Prisma.SortOrder
+  nationality?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrder
+  medication?: Prisma.SortOrder
 }
 
 export type PlayerAvgOrderByAggregateInput = {
@@ -831,6 +903,10 @@ export type PlayerMaxOrderByAggregateInput = {
   allergies?: Prisma.SortOrder
   lastCheckup?: Prisma.SortOrder
   clearance?: Prisma.SortOrder
+  nationality?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrder
+  medication?: Prisma.SortOrder
 }
 
 export type PlayerMinOrderByAggregateInput = {
@@ -859,6 +935,10 @@ export type PlayerMinOrderByAggregateInput = {
   allergies?: Prisma.SortOrder
   lastCheckup?: Prisma.SortOrder
   clearance?: Prisma.SortOrder
+  nationality?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrder
+  medication?: Prisma.SortOrder
 }
 
 export type PlayerSumOrderByAggregateInput = {
@@ -992,14 +1072,6 @@ export type PlayerCreatemedicalNotesInput = {
   set: string[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type PlayerUpdatemedicalNotesInput = {
   set?: string[]
   push?: string | string[]
@@ -1071,6 +1143,10 @@ export type PlayerCreateWithoutUserInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
@@ -1104,6 +1180,10 @@ export type PlayerUncheckedCreateWithoutUserInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
@@ -1149,6 +1229,10 @@ export type PlayerUpdateWithoutUserInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
@@ -1182,6 +1266,10 @@ export type PlayerUncheckedUpdateWithoutUserInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
@@ -1211,6 +1299,10 @@ export type PlayerCreateWithoutClubInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
@@ -1244,6 +1336,10 @@ export type PlayerUncheckedCreateWithoutClubInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
@@ -1305,6 +1401,10 @@ export type PlayerScalarWhereInput = {
   lastCheckup?: Prisma.StringNullableFilter<"Player"> | string | null
   clearance?: Prisma.StringNullableFilter<"Player"> | string | null
   medicalNotes?: Prisma.StringNullableListFilter<"Player">
+  nationality?: Prisma.StringNullableFilter<"Player"> | string | null
+  birthDate?: Prisma.StringNullableFilter<"Player"> | string | null
+  medicalTreatment?: Prisma.StringNullableFilter<"Player"> | string | null
+  medication?: Prisma.StringNullableFilter<"Player"> | string | null
 }
 
 export type PlayerCreateWithoutTeamCategoryInput = {
@@ -1331,6 +1431,10 @@ export type PlayerCreateWithoutTeamCategoryInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
@@ -1364,6 +1468,10 @@ export type PlayerUncheckedCreateWithoutTeamCategoryInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
@@ -1419,6 +1527,10 @@ export type PlayerCreateWithoutPhysicalIndicesInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
@@ -1453,6 +1565,10 @@ export type PlayerUncheckedCreateWithoutPhysicalIndicesInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
 }
@@ -1497,6 +1613,10 @@ export type PlayerUpdateWithoutPhysicalIndicesInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
@@ -1531,6 +1651,10 @@ export type PlayerUncheckedUpdateWithoutPhysicalIndicesInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
 }
@@ -1559,6 +1683,10 @@ export type PlayerCreateWithoutDailyResponsesInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
@@ -1593,6 +1721,10 @@ export type PlayerUncheckedCreateWithoutDailyResponsesInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
 }
@@ -1637,6 +1769,10 @@ export type PlayerUpdateWithoutDailyResponsesInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
@@ -1671,6 +1807,10 @@ export type PlayerUncheckedUpdateWithoutDailyResponsesInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
 }
@@ -1699,6 +1839,10 @@ export type PlayerCreateWithoutPhysicalTestsInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
@@ -1733,6 +1877,10 @@ export type PlayerUncheckedCreateWithoutPhysicalTestsInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
 }
@@ -1777,6 +1925,10 @@ export type PlayerUpdateWithoutPhysicalTestsInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
@@ -1811,6 +1963,10 @@ export type PlayerUncheckedUpdateWithoutPhysicalTestsInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
 }
@@ -1841,6 +1997,10 @@ export type PlayerCreateManyClubInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
 }
 
 export type PlayerUpdateWithoutClubInput = {
@@ -1867,6 +2027,10 @@ export type PlayerUpdateWithoutClubInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
@@ -1900,6 +2064,10 @@ export type PlayerUncheckedUpdateWithoutClubInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
@@ -1931,6 +2099,10 @@ export type PlayerUncheckedUpdateManyWithoutClubInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PlayerCreateManyTeamCategoryInput = {
@@ -1959,6 +2131,10 @@ export type PlayerCreateManyTeamCategoryInput = {
   lastCheckup?: string | null
   clearance?: string | null
   medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
 }
 
 export type PlayerUpdateWithoutTeamCategoryInput = {
@@ -1985,6 +2161,10 @@ export type PlayerUpdateWithoutTeamCategoryInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
@@ -2018,6 +2198,10 @@ export type PlayerUncheckedUpdateWithoutTeamCategoryInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
@@ -2049,6 +2233,10 @@ export type PlayerUncheckedUpdateManyWithoutTeamCategoryInput = {
   lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -2127,6 +2315,10 @@ export type PlayerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   lastCheckup?: boolean
   clearance?: boolean
   medicalNotes?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.Player$teamCategoryArgs<ExtArgs>
@@ -2163,6 +2355,10 @@ export type PlayerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   lastCheckup?: boolean
   clearance?: boolean
   medicalNotes?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.Player$teamCategoryArgs<ExtArgs>
@@ -2195,6 +2391,10 @@ export type PlayerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   lastCheckup?: boolean
   clearance?: boolean
   medicalNotes?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.Player$teamCategoryArgs<ExtArgs>
@@ -2227,9 +2427,13 @@ export type PlayerSelectScalar = {
   lastCheckup?: boolean
   clearance?: boolean
   medicalNotes?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
 }
 
-export type PlayerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "clubId" | "position" | "number" | "teamCategoryId" | "age" | "height" | "weight" | "foot" | "createdAt" | "updatedAt" | "isInjured" | "injuryType" | "injurySeverity" | "injuryDuration" | "injuryDate" | "injuryReturn" | "injuryStatus" | "injuryProgress" | "injuryDeclaredBy" | "bloodGroup" | "allergies" | "lastCheckup" | "clearance" | "medicalNotes", ExtArgs["result"]["player"]>
+export type PlayerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "clubId" | "position" | "number" | "teamCategoryId" | "age" | "height" | "weight" | "foot" | "createdAt" | "updatedAt" | "isInjured" | "injuryType" | "injurySeverity" | "injuryDuration" | "injuryDate" | "injuryReturn" | "injuryStatus" | "injuryProgress" | "injuryDeclaredBy" | "bloodGroup" | "allergies" | "lastCheckup" | "clearance" | "medicalNotes" | "nationality" | "birthDate" | "medicalTreatment" | "medication", ExtArgs["result"]["player"]>
 export type PlayerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
@@ -2287,6 +2491,10 @@ export type $PlayerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     lastCheckup: string | null
     clearance: string | null
     medicalNotes: string[]
+    nationality: string | null
+    birthDate: string | null
+    medicalTreatment: string | null
+    medication: string | null
   }, ExtArgs["result"]["player"]>
   composites: {}
 }
@@ -2742,6 +2950,10 @@ export interface PlayerFieldRefs {
   readonly lastCheckup: Prisma.FieldRef<"Player", 'String'>
   readonly clearance: Prisma.FieldRef<"Player", 'String'>
   readonly medicalNotes: Prisma.FieldRef<"Player", 'String[]'>
+  readonly nationality: Prisma.FieldRef<"Player", 'String'>
+  readonly birthDate: Prisma.FieldRef<"Player", 'String'>
+  readonly medicalTreatment: Prisma.FieldRef<"Player", 'String'>
+  readonly medication: Prisma.FieldRef<"Player", 'String'>
 }
     
 

@@ -59,6 +59,23 @@ export async function createQuestionnaire(
       })
     }
 
+    // Fetch club's questionnaire template
+    const dbClub = await db.club.findUnique({
+      where: { id: clubId },
+      select: { questionnaireTemplate: true }
+    })
+
+    const defaultTemplate = [
+      { id: "sleep", text: "Qualité du sommeil (cette nuit)", type: "SCALE", key: "sleepQuality", active: true },
+      { id: "fatigue", text: "Niveau de Fatigue Générale", type: "SCALE", key: "fatigue", active: true },
+      { id: "stress", text: "Niveau de Stress / Anxiété", type: "SCALE", key: "stress", active: true },
+      { id: "soreness", text: "Douleurs Musculaires / Courbatures", type: "SCALE", key: "soreness", active: true },
+      { id: "heartRate", text: "Fréquence cardiaque au repos", type: "NUMBER", key: "heartRate", active: true }
+    ]
+
+    const templateQuestions = (dbClub?.questionnaireTemplate as any[]) || defaultTemplate
+    const activeQuestions = templateQuestions.filter(q => q.active)
+
     await db.dailyQuestionnaire.create({
       data: {
         clubId,
@@ -68,7 +85,8 @@ export async function createQuestionnaire(
         scheduledFor,
         expiresAt,
         active: true,
-        isApplied: false
+        isApplied: false,
+        questions: activeQuestions
       }
     })
 
@@ -82,7 +100,7 @@ export async function createQuestionnaire(
 
 export async function submitDailyWellness(
   questionnaireId: string,
-  data: { sleepQuality: number; fatigue: number; stress: number; soreness: number; heartRate: number }
+  answers: Record<string, any>
 ) {
   try {
     const session = await auth()
@@ -132,16 +150,24 @@ export async function submitDailyWellness(
       throw new Error("Vous avez déjà répondu à ce questionnaire")
     }
 
-    // Save draft response
+    // Backward compatibility for standard fields
+    const sleepQuality = typeof answers.sleepQuality === 'number' ? answers.sleepQuality : 4
+    const fatigue = typeof answers.fatigue === 'number' ? answers.fatigue : 4
+    const stress = typeof answers.stress === 'number' ? answers.stress : 4
+    const soreness = typeof answers.soreness === 'number' ? answers.soreness : 4
+    const heartRate = typeof answers.heartRate === 'number' ? answers.heartRate : 70
+
+    // Save response
     await db.dailyResponse.create({
       data: {
         questionnaireId,
         playerId: player.id,
-        sleepQuality: data.sleepQuality,
-        fatigue: data.fatigue,
-        stress: data.stress,
-        soreness: data.soreness,
-        heartRate: data.heartRate
+        sleepQuality,
+        fatigue,
+        stress,
+        soreness,
+        heartRate,
+        answers: answers
       }
     })
 
@@ -150,6 +176,53 @@ export async function submitDailyWellness(
   } catch (e: any) {
     console.error("Error submitting wellness:", e)
     return { success: false, error: e.message || "Erreur de soumission du test" }
+  }
+}
+
+export async function saveQuestionnaireTemplate(template: any[]) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const userRole = session.user.role?.name
+
+    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
+      throw new Error("Action réservée aux gestionnaires")
+    }
+
+    // Get the staff's clubId
+    const staff = await db.staff.findUnique({
+      where: { userId }
+    })
+    const club = await db.club.findFirst({
+      where: {
+        OR: [
+          { presidentId: userId },
+          { staff: { some: { userId } } }
+        ]
+      }
+    })
+
+    const clubId = club?.id || staff?.clubId
+    if (!clubId) {
+      throw new Error("Club introuvable")
+    }
+
+    await db.club.update({
+      where: { id: clubId },
+      data: {
+        questionnaireTemplate: template
+      }
+    })
+
+    revalidatePath("/dashboard/quotidienne")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error saving questionnaire template:", e)
+    return { success: false, error: e.message || "Erreur lors de la sauvegarde de la configuration" }
   }
 }
 
@@ -212,5 +285,37 @@ export async function applyQuestionnaireIndices(questionnaireId: string) {
   } catch (e: any) {
     console.error("Error applying indices:", e)
     return { success: false, error: e.message || "Erreur lors de la mise à jour des indices" }
+  }
+}
+
+export async function deleteQuestionnaire(questionnaireId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const userRole = session.user.role?.name
+
+    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
+      throw new Error("Action réservée aux gestionnaires")
+    }
+
+    // 1. Delete physical indices associated with this questionnaire
+    await db.physicalIndex.deleteMany({
+      where: { questionnaireId }
+    })
+
+    // 2. Delete the questionnaire itself (daily responses will cascade delete)
+    await db.dailyQuestionnaire.delete({
+      where: { id: questionnaireId }
+    })
+
+    revalidatePath("/dashboard/quotidienne")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error deleting questionnaire:", e)
+    return { success: false, error: e.message || "Erreur lors de la suppression du questionnaire" }
   }
 }

@@ -135,13 +135,19 @@ export default async function EquipePage() {
         const categoryIds = staff?.categories.map(c => c.id) || []
         dbCategories = await db.teamCategory.findMany({
           where: { id: { in: categoryIds } },
-          include: { staffMembers: { include: { user: true } } },
+          include: { 
+            staffMembers: { include: { user: true } },
+            _count: { select: { players: true } }
+          },
           orderBy: { createdAt: "asc" }
         })
       } else {
         dbCategories = await db.teamCategory.findMany({
           where: { clubId },
-          include: { staffMembers: { include: { user: true } } },
+          include: { 
+            staffMembers: { include: { user: true } },
+            _count: { select: { players: true } }
+          },
           orderBy: { createdAt: "asc" }
         })
       }
@@ -177,6 +183,7 @@ export default async function EquipePage() {
       coach: assignedCoach,
       league: cat.league,
       maxPlayers: cat.maxPlayers !== undefined ? cat.maxPlayers : (cat.playersCount || 0),
+      playerCount: cat._count?.players || 0,
       color: cat.name.includes("Séniors A") ? "border-emerald-500 bg-emerald-50/10" :
              cat.name.includes("Séniors B") ? "border-teal-500 bg-teal-50/10" :
              cat.name.includes("U19") ? "border-blue-500 bg-blue-5/10" :

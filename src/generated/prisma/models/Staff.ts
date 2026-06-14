@@ -20,8 +20,18 @@ export type StaffModel = runtime.Types.Result.DefaultSelection<Prisma.$StaffPayl
 
 export type AggregateStaff = {
   _count: StaffCountAggregateOutputType | null
+  _avg: StaffAvgAggregateOutputType | null
+  _sum: StaffSumAggregateOutputType | null
   _min: StaffMinAggregateOutputType | null
   _max: StaffMaxAggregateOutputType | null
+}
+
+export type StaffAvgAggregateOutputType = {
+  age: number | null
+}
+
+export type StaffSumAggregateOutputType = {
+  age: number | null
 }
 
 export type StaffMinAggregateOutputType = {
@@ -31,6 +41,15 @@ export type StaffMinAggregateOutputType = {
   title: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  bloodGroup: string | null
+  allergies: string | null
+  lastCheckup: string | null
+  clearance: string | null
+  age: number | null
+  nationality: string | null
+  birthDate: string | null
+  medicalTreatment: string | null
+  medication: string | null
 }
 
 export type StaffMaxAggregateOutputType = {
@@ -40,6 +59,15 @@ export type StaffMaxAggregateOutputType = {
   title: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  bloodGroup: string | null
+  allergies: string | null
+  lastCheckup: string | null
+  clearance: string | null
+  age: number | null
+  nationality: string | null
+  birthDate: string | null
+  medicalTreatment: string | null
+  medication: string | null
 }
 
 export type StaffCountAggregateOutputType = {
@@ -49,9 +77,27 @@ export type StaffCountAggregateOutputType = {
   title: number
   createdAt: number
   updatedAt: number
+  bloodGroup: number
+  allergies: number
+  lastCheckup: number
+  clearance: number
+  medicalNotes: number
+  age: number
+  nationality: number
+  birthDate: number
+  medicalTreatment: number
+  medication: number
   _all: number
 }
 
+
+export type StaffAvgAggregateInputType = {
+  age?: true
+}
+
+export type StaffSumAggregateInputType = {
+  age?: true
+}
 
 export type StaffMinAggregateInputType = {
   id?: true
@@ -60,6 +106,15 @@ export type StaffMinAggregateInputType = {
   title?: true
   createdAt?: true
   updatedAt?: true
+  bloodGroup?: true
+  allergies?: true
+  lastCheckup?: true
+  clearance?: true
+  age?: true
+  nationality?: true
+  birthDate?: true
+  medicalTreatment?: true
+  medication?: true
 }
 
 export type StaffMaxAggregateInputType = {
@@ -69,6 +124,15 @@ export type StaffMaxAggregateInputType = {
   title?: true
   createdAt?: true
   updatedAt?: true
+  bloodGroup?: true
+  allergies?: true
+  lastCheckup?: true
+  clearance?: true
+  age?: true
+  nationality?: true
+  birthDate?: true
+  medicalTreatment?: true
+  medication?: true
 }
 
 export type StaffCountAggregateInputType = {
@@ -78,6 +142,16 @@ export type StaffCountAggregateInputType = {
   title?: true
   createdAt?: true
   updatedAt?: true
+  bloodGroup?: true
+  allergies?: true
+  lastCheckup?: true
+  clearance?: true
+  medicalNotes?: true
+  age?: true
+  nationality?: true
+  birthDate?: true
+  medicalTreatment?: true
+  medication?: true
   _all?: true
 }
 
@@ -119,6 +193,18 @@ export type StaffAggregateArgs<ExtArgs extends runtime.Types.Extensions.Internal
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: StaffAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: StaffSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: StaffMinAggregateInputType
@@ -149,6 +235,8 @@ export type StaffGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   take?: number
   skip?: number
   _count?: StaffCountAggregateInputType | true
+  _avg?: StaffAvgAggregateInputType
+  _sum?: StaffSumAggregateInputType
   _min?: StaffMinAggregateInputType
   _max?: StaffMaxAggregateInputType
 }
@@ -160,7 +248,19 @@ export type StaffGroupByOutputType = {
   title: string | null
   createdAt: Date
   updatedAt: Date
+  bloodGroup: string | null
+  allergies: string | null
+  lastCheckup: string | null
+  clearance: string | null
+  medicalNotes: string[]
+  age: number | null
+  nationality: string | null
+  birthDate: string | null
+  medicalTreatment: string | null
+  medication: string | null
   _count: StaffCountAggregateOutputType | null
+  _avg: StaffAvgAggregateOutputType | null
+  _sum: StaffSumAggregateOutputType | null
   _min: StaffMinAggregateOutputType | null
   _max: StaffMaxAggregateOutputType | null
 }
@@ -190,6 +290,16 @@ export type StaffWhereInput = {
   title?: Prisma.StringNullableFilter<"Staff"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Staff"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Staff"> | Date | string
+  bloodGroup?: Prisma.StringNullableFilter<"Staff"> | string | null
+  allergies?: Prisma.StringNullableFilter<"Staff"> | string | null
+  lastCheckup?: Prisma.StringNullableFilter<"Staff"> | string | null
+  clearance?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medicalNotes?: Prisma.StringNullableListFilter<"Staff">
+  age?: Prisma.IntNullableFilter<"Staff"> | number | null
+  nationality?: Prisma.StringNullableFilter<"Staff"> | string | null
+  birthDate?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medicalTreatment?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medication?: Prisma.StringNullableFilter<"Staff"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   categories?: Prisma.TeamCategoryListRelationFilter
@@ -202,6 +312,16 @@ export type StaffOrderByWithRelationInput = {
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  bloodGroup?: Prisma.SortOrderInput | Prisma.SortOrder
+  allergies?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCheckup?: Prisma.SortOrderInput | Prisma.SortOrder
+  clearance?: Prisma.SortOrderInput | Prisma.SortOrder
+  medicalNotes?: Prisma.SortOrder
+  age?: Prisma.SortOrderInput | Prisma.SortOrder
+  nationality?: Prisma.SortOrderInput | Prisma.SortOrder
+  birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrderInput | Prisma.SortOrder
+  medication?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   club?: Prisma.ClubOrderByWithRelationInput
   categories?: Prisma.TeamCategoryOrderByRelationAggregateInput
@@ -217,6 +337,16 @@ export type StaffWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringNullableFilter<"Staff"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Staff"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Staff"> | Date | string
+  bloodGroup?: Prisma.StringNullableFilter<"Staff"> | string | null
+  allergies?: Prisma.StringNullableFilter<"Staff"> | string | null
+  lastCheckup?: Prisma.StringNullableFilter<"Staff"> | string | null
+  clearance?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medicalNotes?: Prisma.StringNullableListFilter<"Staff">
+  age?: Prisma.IntNullableFilter<"Staff"> | number | null
+  nationality?: Prisma.StringNullableFilter<"Staff"> | string | null
+  birthDate?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medicalTreatment?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medication?: Prisma.StringNullableFilter<"Staff"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   categories?: Prisma.TeamCategoryListRelationFilter
@@ -229,9 +359,21 @@ export type StaffOrderByWithAggregationInput = {
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  bloodGroup?: Prisma.SortOrderInput | Prisma.SortOrder
+  allergies?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastCheckup?: Prisma.SortOrderInput | Prisma.SortOrder
+  clearance?: Prisma.SortOrderInput | Prisma.SortOrder
+  medicalNotes?: Prisma.SortOrder
+  age?: Prisma.SortOrderInput | Prisma.SortOrder
+  nationality?: Prisma.SortOrderInput | Prisma.SortOrder
+  birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrderInput | Prisma.SortOrder
+  medication?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StaffCountOrderByAggregateInput
+  _avg?: Prisma.StaffAvgOrderByAggregateInput
   _max?: Prisma.StaffMaxOrderByAggregateInput
   _min?: Prisma.StaffMinOrderByAggregateInput
+  _sum?: Prisma.StaffSumOrderByAggregateInput
 }
 
 export type StaffScalarWhereWithAggregatesInput = {
@@ -244,6 +386,16 @@ export type StaffScalarWhereWithAggregatesInput = {
   title?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Staff"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Staff"> | Date | string
+  bloodGroup?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
+  allergies?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
+  lastCheckup?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
+  clearance?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
+  medicalNotes?: Prisma.StringNullableListFilter<"Staff">
+  age?: Prisma.IntNullableWithAggregatesFilter<"Staff"> | number | null
+  nationality?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
+  birthDate?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
+  medicalTreatment?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
+  medication?: Prisma.StringNullableWithAggregatesFilter<"Staff"> | string | null
 }
 
 export type StaffCreateInput = {
@@ -251,6 +403,16 @@ export type StaffCreateInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutStaffInput
   club: Prisma.ClubCreateNestedOneWithoutStaffInput
   categories?: Prisma.TeamCategoryCreateNestedManyWithoutStaffMembersInput
@@ -263,6 +425,16 @@ export type StaffUncheckedCreateInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   categories?: Prisma.TeamCategoryUncheckedCreateNestedManyWithoutStaffMembersInput
 }
 
@@ -271,6 +443,16 @@ export type StaffUpdateInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutStaffNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutStaffNestedInput
   categories?: Prisma.TeamCategoryUpdateManyWithoutStaffMembersNestedInput
@@ -283,6 +465,16 @@ export type StaffUncheckedUpdateInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categories?: Prisma.TeamCategoryUncheckedUpdateManyWithoutStaffMembersNestedInput
 }
 
@@ -293,6 +485,16 @@ export type StaffCreateManyInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
 }
 
 export type StaffUpdateManyMutationInput = {
@@ -300,6 +502,16 @@ export type StaffUpdateManyMutationInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffUncheckedUpdateManyInput = {
@@ -309,6 +521,16 @@ export type StaffUncheckedUpdateManyInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffNullableScalarRelationFilter = {
@@ -326,6 +548,14 @@ export type StaffOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
+}
+
 export type StaffCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -333,6 +563,20 @@ export type StaffCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  bloodGroup?: Prisma.SortOrder
+  allergies?: Prisma.SortOrder
+  lastCheckup?: Prisma.SortOrder
+  clearance?: Prisma.SortOrder
+  medicalNotes?: Prisma.SortOrder
+  age?: Prisma.SortOrder
+  nationality?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrder
+  medication?: Prisma.SortOrder
+}
+
+export type StaffAvgOrderByAggregateInput = {
+  age?: Prisma.SortOrder
 }
 
 export type StaffMaxOrderByAggregateInput = {
@@ -342,6 +586,15 @@ export type StaffMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  bloodGroup?: Prisma.SortOrder
+  allergies?: Prisma.SortOrder
+  lastCheckup?: Prisma.SortOrder
+  clearance?: Prisma.SortOrder
+  age?: Prisma.SortOrder
+  nationality?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrder
+  medication?: Prisma.SortOrder
 }
 
 export type StaffMinOrderByAggregateInput = {
@@ -351,6 +604,19 @@ export type StaffMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  bloodGroup?: Prisma.SortOrder
+  allergies?: Prisma.SortOrder
+  lastCheckup?: Prisma.SortOrder
+  clearance?: Prisma.SortOrder
+  age?: Prisma.SortOrder
+  nationality?: Prisma.SortOrder
+  birthDate?: Prisma.SortOrder
+  medicalTreatment?: Prisma.SortOrder
+  medication?: Prisma.SortOrder
+}
+
+export type StaffSumOrderByAggregateInput = {
+  age?: Prisma.SortOrder
 }
 
 export type StaffCreateNestedOneWithoutUserInput = {
@@ -465,11 +731,38 @@ export type StaffUncheckedUpdateManyWithoutCategoriesNestedInput = {
   deleteMany?: Prisma.StaffScalarWhereInput | Prisma.StaffScalarWhereInput[]
 }
 
+export type StaffCreatemedicalNotesInput = {
+  set: string[]
+}
+
+export type StaffUpdatemedicalNotesInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type StaffCreateWithoutUserInput = {
   id?: string
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   club: Prisma.ClubCreateNestedOneWithoutStaffInput
   categories?: Prisma.TeamCategoryCreateNestedManyWithoutStaffMembersInput
 }
@@ -480,6 +773,16 @@ export type StaffUncheckedCreateWithoutUserInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   categories?: Prisma.TeamCategoryUncheckedCreateNestedManyWithoutStaffMembersInput
 }
 
@@ -504,6 +807,16 @@ export type StaffUpdateWithoutUserInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   club?: Prisma.ClubUpdateOneRequiredWithoutStaffNestedInput
   categories?: Prisma.TeamCategoryUpdateManyWithoutStaffMembersNestedInput
 }
@@ -514,6 +827,16 @@ export type StaffUncheckedUpdateWithoutUserInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categories?: Prisma.TeamCategoryUncheckedUpdateManyWithoutStaffMembersNestedInput
 }
 
@@ -522,6 +845,16 @@ export type StaffCreateWithoutClubInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutStaffInput
   categories?: Prisma.TeamCategoryCreateNestedManyWithoutStaffMembersInput
 }
@@ -532,6 +865,16 @@ export type StaffUncheckedCreateWithoutClubInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   categories?: Prisma.TeamCategoryUncheckedCreateNestedManyWithoutStaffMembersInput
 }
 
@@ -571,6 +914,16 @@ export type StaffScalarWhereInput = {
   title?: Prisma.StringNullableFilter<"Staff"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Staff"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Staff"> | Date | string
+  bloodGroup?: Prisma.StringNullableFilter<"Staff"> | string | null
+  allergies?: Prisma.StringNullableFilter<"Staff"> | string | null
+  lastCheckup?: Prisma.StringNullableFilter<"Staff"> | string | null
+  clearance?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medicalNotes?: Prisma.StringNullableListFilter<"Staff">
+  age?: Prisma.IntNullableFilter<"Staff"> | number | null
+  nationality?: Prisma.StringNullableFilter<"Staff"> | string | null
+  birthDate?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medicalTreatment?: Prisma.StringNullableFilter<"Staff"> | string | null
+  medication?: Prisma.StringNullableFilter<"Staff"> | string | null
 }
 
 export type StaffCreateWithoutCategoriesInput = {
@@ -578,6 +931,16 @@ export type StaffCreateWithoutCategoriesInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
   user: Prisma.UserCreateNestedOneWithoutStaffInput
   club: Prisma.ClubCreateNestedOneWithoutStaffInput
 }
@@ -589,6 +952,16 @@ export type StaffUncheckedCreateWithoutCategoriesInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
 }
 
 export type StaffCreateOrConnectWithoutCategoriesInput = {
@@ -618,6 +991,16 @@ export type StaffCreateManyClubInput = {
   title?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.StaffCreatemedicalNotesInput | string[]
+  age?: number | null
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
 }
 
 export type StaffUpdateWithoutClubInput = {
@@ -625,6 +1008,16 @@ export type StaffUpdateWithoutClubInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutStaffNestedInput
   categories?: Prisma.TeamCategoryUpdateManyWithoutStaffMembersNestedInput
 }
@@ -635,6 +1028,16 @@ export type StaffUncheckedUpdateWithoutClubInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   categories?: Prisma.TeamCategoryUncheckedUpdateManyWithoutStaffMembersNestedInput
 }
 
@@ -644,6 +1047,16 @@ export type StaffUncheckedUpdateManyWithoutClubInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffUpdateWithoutCategoriesInput = {
@@ -651,6 +1064,16 @@ export type StaffUpdateWithoutCategoriesInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutStaffNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutStaffNestedInput
 }
@@ -662,6 +1085,16 @@ export type StaffUncheckedUpdateWithoutCategoriesInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StaffUncheckedUpdateManyWithoutCategoriesInput = {
@@ -671,6 +1104,16 @@ export type StaffUncheckedUpdateManyWithoutCategoriesInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.StaffUpdatemedicalNotesInput | string[]
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -711,6 +1154,16 @@ export type StaffSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   title?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  bloodGroup?: boolean
+  allergies?: boolean
+  lastCheckup?: boolean
+  clearance?: boolean
+  medicalNotes?: boolean
+  age?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   categories?: boolean | Prisma.Staff$categoriesArgs<ExtArgs>
@@ -724,6 +1177,16 @@ export type StaffSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   title?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  bloodGroup?: boolean
+  allergies?: boolean
+  lastCheckup?: boolean
+  clearance?: boolean
+  medicalNotes?: boolean
+  age?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staff"]>
@@ -735,6 +1198,16 @@ export type StaffSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   title?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  bloodGroup?: boolean
+  allergies?: boolean
+  lastCheckup?: boolean
+  clearance?: boolean
+  medicalNotes?: boolean
+  age?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staff"]>
@@ -746,9 +1219,19 @@ export type StaffSelectScalar = {
   title?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  bloodGroup?: boolean
+  allergies?: boolean
+  lastCheckup?: boolean
+  clearance?: boolean
+  medicalNotes?: boolean
+  age?: boolean
+  nationality?: boolean
+  birthDate?: boolean
+  medicalTreatment?: boolean
+  medication?: boolean
 }
 
-export type StaffOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "clubId" | "title" | "createdAt" | "updatedAt", ExtArgs["result"]["staff"]>
+export type StaffOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "clubId" | "title" | "createdAt" | "updatedAt" | "bloodGroup" | "allergies" | "lastCheckup" | "clearance" | "medicalNotes" | "age" | "nationality" | "birthDate" | "medicalTreatment" | "medication", ExtArgs["result"]["staff"]>
 export type StaffInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
@@ -778,6 +1261,16 @@ export type $StaffPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     title: string | null
     createdAt: Date
     updatedAt: Date
+    bloodGroup: string | null
+    allergies: string | null
+    lastCheckup: string | null
+    clearance: string | null
+    medicalNotes: string[]
+    age: number | null
+    nationality: string | null
+    birthDate: string | null
+    medicalTreatment: string | null
+    medication: string | null
   }, ExtArgs["result"]["staff"]>
   composites: {}
 }
@@ -1210,6 +1703,16 @@ export interface StaffFieldRefs {
   readonly title: Prisma.FieldRef<"Staff", 'String'>
   readonly createdAt: Prisma.FieldRef<"Staff", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Staff", 'DateTime'>
+  readonly bloodGroup: Prisma.FieldRef<"Staff", 'String'>
+  readonly allergies: Prisma.FieldRef<"Staff", 'String'>
+  readonly lastCheckup: Prisma.FieldRef<"Staff", 'String'>
+  readonly clearance: Prisma.FieldRef<"Staff", 'String'>
+  readonly medicalNotes: Prisma.FieldRef<"Staff", 'String[]'>
+  readonly age: Prisma.FieldRef<"Staff", 'Int'>
+  readonly nationality: Prisma.FieldRef<"Staff", 'String'>
+  readonly birthDate: Prisma.FieldRef<"Staff", 'String'>
+  readonly medicalTreatment: Prisma.FieldRef<"Staff", 'String'>
+  readonly medication: Prisma.FieldRef<"Staff", 'String'>
 }
     
 

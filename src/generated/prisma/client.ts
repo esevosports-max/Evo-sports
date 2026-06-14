@@ -151,3 +151,13 @@ export type ChatMessage = Prisma.ChatMessageModel
  * 
  */
 export type ChatMessageView = Prisma.ChatMessageViewModel
+/**
+ * Model Announcement
+ * 
+ */
+export type Announcement = Prisma.AnnouncementModel
+/**
+ * Model SystemSetting
+ * 
+ */
+export type SystemSetting = Prisma.SystemSettingModel

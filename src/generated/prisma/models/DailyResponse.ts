@@ -75,6 +75,7 @@ export type DailyResponseCountAggregateOutputType = {
   stress: number
   soreness: number
   heartRate: number
+  answers: number
   createdAt: number
   _all: number
 }
@@ -129,6 +130,7 @@ export type DailyResponseCountAggregateInputType = {
   stress?: true
   soreness?: true
   heartRate?: true
+  answers?: true
   createdAt?: true
   _all?: true
 }
@@ -228,6 +230,7 @@ export type DailyResponseGroupByOutputType = {
   stress: number
   soreness: number
   heartRate: number
+  answers: runtime.JsonValue | null
   createdAt: Date
   _count: DailyResponseCountAggregateOutputType | null
   _avg: DailyResponseAvgAggregateOutputType | null
@@ -263,6 +266,7 @@ export type DailyResponseWhereInput = {
   stress?: Prisma.IntFilter<"DailyResponse"> | number
   soreness?: Prisma.IntFilter<"DailyResponse"> | number
   heartRate?: Prisma.IntFilter<"DailyResponse"> | number
+  answers?: Prisma.JsonNullableFilter<"DailyResponse">
   createdAt?: Prisma.DateTimeFilter<"DailyResponse"> | Date | string
   questionnaire?: Prisma.XOR<Prisma.DailyQuestionnaireScalarRelationFilter, Prisma.DailyQuestionnaireWhereInput>
   player?: Prisma.XOR<Prisma.PlayerScalarRelationFilter, Prisma.PlayerWhereInput>
@@ -277,6 +281,7 @@ export type DailyResponseOrderByWithRelationInput = {
   stress?: Prisma.SortOrder
   soreness?: Prisma.SortOrder
   heartRate?: Prisma.SortOrder
+  answers?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   questionnaire?: Prisma.DailyQuestionnaireOrderByWithRelationInput
   player?: Prisma.PlayerOrderByWithRelationInput
@@ -295,6 +300,7 @@ export type DailyResponseWhereUniqueInput = Prisma.AtLeast<{
   stress?: Prisma.IntFilter<"DailyResponse"> | number
   soreness?: Prisma.IntFilter<"DailyResponse"> | number
   heartRate?: Prisma.IntFilter<"DailyResponse"> | number
+  answers?: Prisma.JsonNullableFilter<"DailyResponse">
   createdAt?: Prisma.DateTimeFilter<"DailyResponse"> | Date | string
   questionnaire?: Prisma.XOR<Prisma.DailyQuestionnaireScalarRelationFilter, Prisma.DailyQuestionnaireWhereInput>
   player?: Prisma.XOR<Prisma.PlayerScalarRelationFilter, Prisma.PlayerWhereInput>
@@ -309,6 +315,7 @@ export type DailyResponseOrderByWithAggregationInput = {
   stress?: Prisma.SortOrder
   soreness?: Prisma.SortOrder
   heartRate?: Prisma.SortOrder
+  answers?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.DailyResponseCountOrderByAggregateInput
   _avg?: Prisma.DailyResponseAvgOrderByAggregateInput
@@ -329,6 +336,7 @@ export type DailyResponseScalarWhereWithAggregatesInput = {
   stress?: Prisma.IntWithAggregatesFilter<"DailyResponse"> | number
   soreness?: Prisma.IntWithAggregatesFilter<"DailyResponse"> | number
   heartRate?: Prisma.IntWithAggregatesFilter<"DailyResponse"> | number
+  answers?: Prisma.JsonNullableWithAggregatesFilter<"DailyResponse">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DailyResponse"> | Date | string
 }
 
@@ -339,6 +347,7 @@ export type DailyResponseCreateInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   questionnaire: Prisma.DailyQuestionnaireCreateNestedOneWithoutResponsesInput
   player: Prisma.PlayerCreateNestedOneWithoutDailyResponsesInput
@@ -353,6 +362,7 @@ export type DailyResponseUncheckedCreateInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -363,6 +373,7 @@ export type DailyResponseUpdateInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questionnaire?: Prisma.DailyQuestionnaireUpdateOneRequiredWithoutResponsesNestedInput
   player?: Prisma.PlayerUpdateOneRequiredWithoutDailyResponsesNestedInput
@@ -377,6 +388,7 @@ export type DailyResponseUncheckedUpdateInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -389,6 +401,7 @@ export type DailyResponseCreateManyInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -399,6 +412,7 @@ export type DailyResponseUpdateManyMutationInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -411,6 +425,7 @@ export type DailyResponseUncheckedUpdateManyInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -438,6 +453,7 @@ export type DailyResponseCountOrderByAggregateInput = {
   stress?: Prisma.SortOrder
   soreness?: Prisma.SortOrder
   heartRate?: Prisma.SortOrder
+  answers?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -572,6 +588,7 @@ export type DailyResponseCreateWithoutPlayerInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   questionnaire: Prisma.DailyQuestionnaireCreateNestedOneWithoutResponsesInput
 }
@@ -584,6 +601,7 @@ export type DailyResponseUncheckedCreateWithoutPlayerInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -625,6 +643,7 @@ export type DailyResponseScalarWhereInput = {
   stress?: Prisma.IntFilter<"DailyResponse"> | number
   soreness?: Prisma.IntFilter<"DailyResponse"> | number
   heartRate?: Prisma.IntFilter<"DailyResponse"> | number
+  answers?: Prisma.JsonNullableFilter<"DailyResponse">
   createdAt?: Prisma.DateTimeFilter<"DailyResponse"> | Date | string
 }
 
@@ -635,6 +654,7 @@ export type DailyResponseCreateWithoutQuestionnaireInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   player: Prisma.PlayerCreateNestedOneWithoutDailyResponsesInput
 }
@@ -647,6 +667,7 @@ export type DailyResponseUncheckedCreateWithoutQuestionnaireInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -684,6 +705,7 @@ export type DailyResponseCreateManyPlayerInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -694,6 +716,7 @@ export type DailyResponseUpdateWithoutPlayerInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questionnaire?: Prisma.DailyQuestionnaireUpdateOneRequiredWithoutResponsesNestedInput
 }
@@ -706,6 +729,7 @@ export type DailyResponseUncheckedUpdateWithoutPlayerInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -717,6 +741,7 @@ export type DailyResponseUncheckedUpdateManyWithoutPlayerInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -728,6 +753,7 @@ export type DailyResponseCreateManyQuestionnaireInput = {
   stress: number
   soreness: number
   heartRate: number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -738,6 +764,7 @@ export type DailyResponseUpdateWithoutQuestionnaireInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   player?: Prisma.PlayerUpdateOneRequiredWithoutDailyResponsesNestedInput
 }
@@ -750,6 +777,7 @@ export type DailyResponseUncheckedUpdateWithoutQuestionnaireInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -761,6 +789,7 @@ export type DailyResponseUncheckedUpdateManyWithoutQuestionnaireInput = {
   stress?: Prisma.IntFieldUpdateOperationsInput | number
   soreness?: Prisma.IntFieldUpdateOperationsInput | number
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
+  answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -775,6 +804,7 @@ export type DailyResponseSelect<ExtArgs extends runtime.Types.Extensions.Interna
   stress?: boolean
   soreness?: boolean
   heartRate?: boolean
+  answers?: boolean
   createdAt?: boolean
   questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
@@ -789,6 +819,7 @@ export type DailyResponseSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   stress?: boolean
   soreness?: boolean
   heartRate?: boolean
+  answers?: boolean
   createdAt?: boolean
   questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
@@ -803,6 +834,7 @@ export type DailyResponseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   stress?: boolean
   soreness?: boolean
   heartRate?: boolean
+  answers?: boolean
   createdAt?: boolean
   questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
@@ -817,10 +849,11 @@ export type DailyResponseSelectScalar = {
   stress?: boolean
   soreness?: boolean
   heartRate?: boolean
+  answers?: boolean
   createdAt?: boolean
 }
 
-export type DailyResponseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "questionnaireId" | "playerId" | "sleepQuality" | "fatigue" | "stress" | "soreness" | "heartRate" | "createdAt", ExtArgs["result"]["dailyResponse"]>
+export type DailyResponseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "questionnaireId" | "playerId" | "sleepQuality" | "fatigue" | "stress" | "soreness" | "heartRate" | "answers" | "createdAt", ExtArgs["result"]["dailyResponse"]>
 export type DailyResponseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
@@ -849,6 +882,7 @@ export type $DailyResponsePayload<ExtArgs extends runtime.Types.Extensions.Inter
     stress: number
     soreness: number
     heartRate: number
+    answers: runtime.JsonValue | null
     createdAt: Date
   }, ExtArgs["result"]["dailyResponse"]>
   composites: {}
@@ -1283,6 +1317,7 @@ export interface DailyResponseFieldRefs {
   readonly stress: Prisma.FieldRef<"DailyResponse", 'Int'>
   readonly soreness: Prisma.FieldRef<"DailyResponse", 'Int'>
   readonly heartRate: Prisma.FieldRef<"DailyResponse", 'Int'>
+  readonly answers: Prisma.FieldRef<"DailyResponse", 'Json'>
   readonly createdAt: Prisma.FieldRef<"DailyResponse", 'DateTime'>
 }
     

@@ -72,7 +72,9 @@ export const ModelName = {
   PollVote: 'PollVote',
   ChatChannel: 'ChatChannel',
   ChatMessage: 'ChatMessage',
-  ChatMessageView: 'ChatMessageView'
+  ChatMessageView: 'ChatMessageView',
+  Announcement: 'Announcement',
+  SystemSetting: 'SystemSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -167,7 +169,8 @@ export const ClubScalarFieldEnum = {
   subscriptionStatus: 'subscriptionStatus',
   subscriptionExpires: 'subscriptionExpires',
   subscriptionPaid: 'subscriptionPaid',
-  subscriptionMethod: 'subscriptionMethod'
+  subscriptionMethod: 'subscriptionMethod',
+  questionnaireTemplate: 'questionnaireTemplate'
 } as const
 
 export type ClubScalarFieldEnum = (typeof ClubScalarFieldEnum)[keyof typeof ClubScalarFieldEnum]
@@ -214,7 +217,17 @@ export const StaffScalarFieldEnum = {
   clubId: 'clubId',
   title: 'title',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  bloodGroup: 'bloodGroup',
+  allergies: 'allergies',
+  lastCheckup: 'lastCheckup',
+  clearance: 'clearance',
+  medicalNotes: 'medicalNotes',
+  age: 'age',
+  nationality: 'nationality',
+  birthDate: 'birthDate',
+  medicalTreatment: 'medicalTreatment',
+  medication: 'medication'
 } as const
 
 export type StaffScalarFieldEnum = (typeof StaffScalarFieldEnum)[keyof typeof StaffScalarFieldEnum]
@@ -246,7 +259,11 @@ export const PlayerScalarFieldEnum = {
   allergies: 'allergies',
   lastCheckup: 'lastCheckup',
   clearance: 'clearance',
-  medicalNotes: 'medicalNotes'
+  medicalNotes: 'medicalNotes',
+  nationality: 'nationality',
+  birthDate: 'birthDate',
+  medicalTreatment: 'medicalTreatment',
+  medication: 'medication'
 } as const
 
 export type PlayerScalarFieldEnum = (typeof PlayerScalarFieldEnum)[keyof typeof PlayerScalarFieldEnum]
@@ -294,7 +311,8 @@ export const DailyQuestionnaireScalarFieldEnum = {
   scheduledFor: 'scheduledFor',
   expiresAt: 'expiresAt',
   active: 'active',
-  isApplied: 'isApplied'
+  isApplied: 'isApplied',
+  questions: 'questions'
 } as const
 
 export type DailyQuestionnaireScalarFieldEnum = (typeof DailyQuestionnaireScalarFieldEnum)[keyof typeof DailyQuestionnaireScalarFieldEnum]
@@ -309,6 +327,7 @@ export const DailyResponseScalarFieldEnum = {
   stress: 'stress',
   soreness: 'soreness',
   heartRate: 'heartRate',
+  answers: 'answers',
   createdAt: 'createdAt'
 } as const
 
@@ -460,6 +479,38 @@ export const ChatMessageViewScalarFieldEnum = {
 export type ChatMessageViewScalarFieldEnum = (typeof ChatMessageViewScalarFieldEnum)[keyof typeof ChatMessageViewScalarFieldEnum]
 
 
+export const AnnouncementScalarFieldEnum = {
+  id: 'id',
+  badgeText: 'badgeText',
+  badgeStyle: 'badgeStyle',
+  icon: 'icon',
+  title: 'title',
+  titleStyle: 'titleStyle',
+  description: 'description',
+  linkText: 'linkText',
+  linkUrl: 'linkUrl',
+  mediaType: 'mediaType',
+  mediaUrl: 'mediaUrl',
+  active: 'active',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AnnouncementScalarFieldEnum = (typeof AnnouncementScalarFieldEnum)[keyof typeof AnnouncementScalarFieldEnum]
+
+
+export const SystemSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -468,19 +519,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

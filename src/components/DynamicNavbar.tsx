@@ -317,36 +317,34 @@ export default function DynamicNavbar({
                             { href: "/dashboard/composition", label: t("feat_composition_title"), icon: "📋", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "JOUEUR", "MANAGER_EVO_SPORTS"] },
                             { href: "/dashboard/entrainement", label: t("feat_trainings_title"), icon: "🏃‍♂️", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
                             { href: "/dashboard/match", label: t("feat_matches_title"), icon: "📅", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "JOUEUR", "MANAGER_EVO_SPORTS"] },
-                            { href: "/dashboard/medical/blessures", label: t("feat_injuries_title"), icon: "🩹", requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"] },
+                            { href: "/dashboard/medical/blessures", label: t("feat_injuries_title"), icon: "🩹", requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE"] },
                             { href: "/dashboard/medical/dossier-medical", label: t("feat_medical_title"), icon: "📁", requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"] },
                             { href: "/dashboard/test", label: t("feat_tests_title"), icon: "🧪", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
                             { href: "/dashboard/quotidienne", label: t("feat_welfare_title"), icon: "📝", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR", "MANAGER_EVO_SPORTS"] },
                           ]
 
-                      return linksToRender.map((item) => {
-                        const isAuthorized = !item.requiredRoles || item.requiredRoles.includes(userRole)
-                        const active = pathname === item.href
+                      return linksToRender
+                        .filter((item) => !item.requiredRoles || item.requiredRoles.includes(userRole))
+                        .map((item) => {
+                          const active = pathname === item.href
 
-                        return (
-                          <Link
-                            key={item.href}
-                            href={isAuthorized ? item.href : "#"}
-                            onClick={isAuthorized ? () => setDrawerOpen(false) : (e) => e.preventDefault()}
-                            className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                              active
-                                ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/10"
-                                : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-                            } ${!isAuthorized ? "opacity-40 cursor-not-allowed select-none" : ""}`}
-                          >
-                            <span className="flex items-center gap-2">
-                              <span>{item.icon}</span> {item.label}
-                            </span>
-                            {!isAuthorized && (
-                              <span className="text-[8px] font-bold text-amber-500 uppercase">🔒</span>
-                            )}
-                          </Link>
-                        )
-                      })
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setDrawerOpen(false)}
+                              className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                                active
+                                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/10"
+                                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                              }`}
+                            >
+                              <span className="flex items-center gap-2">
+                                <span>{item.icon}</span> {item.label}
+                              </span>
+                            </Link>
+                          )
+                        })
                     })()}
                   </div>
                 </div>

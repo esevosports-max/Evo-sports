@@ -28,9 +28,11 @@ interface Player {
 interface BlessuresClientProps {
   initialPlayers: Player[]
   categories: Category[]
+  userRole?: string
 }
 
-export default function BlessuresClient({ initialPlayers, categories }: BlessuresClientProps) {
+export default function BlessuresClient({ initialPlayers, categories, userRole }: BlessuresClientProps) {
+  const isPlayer = userRole === "JOUEUR"
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   
@@ -192,47 +194,49 @@ export default function BlessuresClient({ initialPlayers, categories }: Blessure
         </div>
 
         {/* List Filters */}
-        <div className="flex flex-wrap items-center gap-3 bg-zinc-100 dark:bg-zinc-800 p-2 rounded-xl">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase pl-1">Équipe :</span>
-            <select
-              value={selectedCategoryFilter}
-              onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 shadow-sm outline-none transition-all dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
-            >
-              <option value="Tous">Toutes</option>
-              <option value="Sans équipe">Sans équipe</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {!isPlayer && (
+          <div className="flex flex-wrap items-center gap-3 bg-zinc-100 dark:bg-zinc-800 p-2 rounded-xl">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase pl-1">Équipe :</span>
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 shadow-sm outline-none transition-all dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+              >
+                <option value="Tous">Toutes</option>
+                <option value="Sans équipe">Sans équipe</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700 hidden sm:block" />
+            <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-700 hidden sm:block" />
 
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase pl-1">Statut :</span>
-            <select
-              value={selectedStatusFilter}
-              onChange={(e) => setSelectedStatusFilter(e.target.value)}
-              className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 shadow-sm outline-none transition-all dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
-            >
-              <option value="Tous">Tous les rapports</option>
-              <option value="Actif">Blessures Actives</option>
-              <option value="Expiré">Retours Dépassés</option>
-              <option value="Rétabli">Joueurs Rétablis</option>
-            </select>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase pl-1">Statut :</span>
+              <select
+                value={selectedStatusFilter}
+                onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 shadow-sm outline-none transition-all dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+              >
+                <option value="Tous">Tous les rapports</option>
+                <option value="Actif">Blessures Actives</option>
+                <option value="Expiré">Retours Dépassés</option>
+                <option value="Rétabli">Joueurs Rétablis</option>
+              </select>
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* Grid: Injury Log & Declare Injury Form */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Injury Logs (Left 2 cols) */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className={`${isPlayer ? "lg:col-span-3" : "lg:col-span-2"} space-y-4`}>
           <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
             <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-white">
               Rapports & Archives Médicales ({injuredPlayers.length})
@@ -366,13 +370,15 @@ export default function BlessuresClient({ initialPlayers, categories }: Blessure
                           >
                             Rapport 📄
                           </button>
-                          <button
-                            onClick={() => handleHeal(record.id, record.name)}
-                            disabled={isPending}
-                            className="flex-1 rounded-lg bg-zinc-150 hover:bg-emerald-50 hover:text-emerald-600 dark:bg-zinc-800 dark:hover:bg-emerald-950/30 text-zinc-650 dark:text-zinc-350 text-[10px] font-extrabold uppercase tracking-wider py-1.5 px-3 transition-all border border-zinc-200/60 dark:border-zinc-700/60 cursor-pointer text-center"
-                          >
-                            Rétabli ✔️
-                          </button>
+                          {!isPlayer && (
+                            <button
+                              onClick={() => handleHeal(record.id, record.name)}
+                              disabled={isPending}
+                              className="flex-1 rounded-lg bg-zinc-150 hover:bg-emerald-50 hover:text-emerald-600 dark:bg-zinc-800 dark:hover:bg-emerald-950/30 text-zinc-650 dark:text-zinc-350 text-[10px] font-extrabold uppercase tracking-wider py-1.5 px-3 transition-all border border-zinc-200/60 dark:border-zinc-700/60 cursor-pointer text-center"
+                            >
+                              Rétabli ✔️
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <button
@@ -391,7 +397,8 @@ export default function BlessuresClient({ initialPlayers, categories }: Blessure
         </div>
 
         {/* Declare Injury Form (Right 1 col) */}
-        <div className="lg:col-span-1 rounded-2xl border border-emerald-500/30 bg-emerald-50/25 dark:border-emerald-800/40 dark:bg-emerald-950/20 p-6 shadow-sm space-y-6 h-fit backdrop-blur-sm">
+        {!isPlayer && (
+          <div className="lg:col-span-1 rounded-2xl border border-emerald-500/30 bg-emerald-50/25 dark:border-emerald-800/40 dark:bg-emerald-950/20 p-6 shadow-sm space-y-6 h-fit backdrop-blur-sm">
           <div className="space-y-1 pb-3 border-b border-zinc-150 dark:border-zinc-850">
             <h3 className="text-sm font-black uppercase tracking-wider text-zinc-850 dark:text-white">
               Déclarer une Blessure
@@ -549,6 +556,7 @@ export default function BlessuresClient({ initialPlayers, categories }: Blessure
             </button>
           </form>
         </div>
+        )}
       </div>
 
       {selectedReportPlayer && (

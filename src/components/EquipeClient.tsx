@@ -22,6 +22,7 @@ interface Category {
   league: string
   maxPlayers: number
   color: string
+  playerCount?: number
 }
 
 interface StaffRoleGroup {
@@ -398,7 +399,7 @@ export default function EquipeClient({
     worksheet.getCell(`A${currentRow}`).value = "Équipe / Catégorie"
     worksheet.getCell(`B${currentRow}`).value = "Championnat / Division"
     worksheet.getCell(`C${currentRow}`).value = "Entraîneur Référent"
-    worksheet.getCell(`D${currentRow}`).value = "Effectif Max"
+    worksheet.getCell(`D${currentRow}`).value = "Effectif"
     worksheet.getRow(currentRow).height = 22
     formatRange(currentRow, 1, currentRow, 4, {
       font: { name: "Segoe UI", size: 10, bold: true, color: { argb: "FF065F46" } }, // Emerald 800
@@ -418,7 +419,7 @@ export default function EquipeClient({
       worksheet.getCell(`A${currentRow}`).value = cat.name
       worksheet.getCell(`B${currentRow}`).value = cat.league
       worksheet.getCell(`C${currentRow}`).value = cat.coach
-      worksheet.getCell(`D${currentRow}`).value = `${cat.maxPlayers} max`
+      worksheet.getCell(`D${currentRow}`).value = cat.playerCount ?? 0
       worksheet.getRow(currentRow).height = 20
 
       const isEven = index % 2 === 0
@@ -694,7 +695,7 @@ export default function EquipeClient({
                         <th className="py-3 px-4">Équipe / Catégorie</th>
                         <th className="py-3 px-4">Championnat / Division</th>
                         <th className="py-3 px-4">Entraîneur Référent</th>
-                        <th className="py-3 px-4 text-center">Effectif Max</th>
+                        <th className="py-3 px-4 text-center">Effectif</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-200">
@@ -704,7 +705,7 @@ export default function EquipeClient({
                           <td className="py-3.5 px-4 font-semibold text-zinc-500">{cat.league}</td>
                           <td className="py-3.5 px-4 font-bold text-zinc-700">{cat.coach}</td>
                           <td className="py-3.5 px-4 text-center font-black text-emerald-600 bg-emerald-500/5 text-sm">
-                            {cat.maxPlayers} max
+                            {cat.playerCount ?? 0}
                           </td>
                         </tr>
                       ))}
@@ -924,7 +925,7 @@ export default function EquipeClient({
                     <th className="py-3 px-4">Nom de la Catégorie / Équipe</th>
                     <th className="py-3 px-4">Championnat / Division</th>
                     <th className="py-3 px-4">Entraîneur Référent</th>
-                    <th className="py-3 px-4 text-center">Effectif Max</th>
+                    <th className="py-3 px-4 text-center">Effectif</th>
                     {canEdit && <th className="py-3 px-4 text-center">Actions</th>}
                   </tr>
                 </thead>
@@ -942,7 +943,7 @@ export default function EquipeClient({
                         <td className="py-3.5 px-4 font-semibold text-zinc-500 dark:text-zinc-400">{cat.league}</td>
                         <td className="py-3.5 px-4 font-bold text-zinc-700 dark:text-zinc-300">{cat.coach}</td>
                         <td className="py-3.5 px-4 text-center font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 dark:bg-emerald-500/10 text-sm">
-                          {cat.maxPlayers} max
+                          {cat.playerCount ?? 0} / {cat.maxPlayers} max
                         </td>
                         {canEdit && (
                           <td className="py-3.5 px-4 text-center">

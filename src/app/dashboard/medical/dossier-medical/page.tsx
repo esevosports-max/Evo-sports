@@ -25,7 +25,6 @@ export default async function DossierMedicalPage() {
   }
 
   if (!club) {
-    // If it's a staff member, retrieve their club
     const staffRecord = await db.staff.findUnique({
       where: { userId },
       include: { club: true }
@@ -36,7 +35,6 @@ export default async function DossierMedicalPage() {
   }
 
   if (!club) {
-    // If it's a player, retrieve their club
     const playerRecord = await db.player.findUnique({
       where: { userId },
       include: { club: true }
@@ -56,19 +54,42 @@ export default async function DossierMedicalPage() {
 
   const clubId = club.id
 
-  // Fetch players with medical details
-  let dbPlayers = []
+  const clubInfo = {
+    name: club.name,
+    logo: club.logo || null,
+    creationDate: club.creationDate ? new Date(club.creationDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "Non spécifiée"
+  }
 
-  if (userRole === "ENTRAINEUR_PRINCIPAL" || userRole === "ENTRAINEUR_ADJOINT") {
+  // Fetch categories
+  const teamCategories = await db.teamCategory.findMany({
+    where: { clubId },
+    orderBy: { name: "asc" }
+  })
+
+  let dbPlayers: any[] = []
+  let dbStaff: any[] = []
+
+  if (userRole === "JOUEUR") {
+    dbPlayers = await db.player.findMany({
+      where: { userId },
+      include: { teamCategory: true, user: true },
+      orderBy: { user: { name: "asc" } }
+    })
+  } else if (userRole === "ENTRAINEUR_PRINCIPAL" || userRole === "ENTRAINEUR_ADJOINT") {
     const staff = await db.staff.findUnique({
       where: { userId },
       include: { categories: true }
     })
-    const categoryIds = staff?.categories.map((c) => c.id) || []
+    const categoryIds = staff?.categories.map((c: any) => c.id) || []
 
     dbPlayers = await db.player.findMany({
       where: { clubId, teamCategoryId: { in: categoryIds } },
       include: { teamCategory: true, user: true },
+      orderBy: { user: { name: "asc" } }
+    })
+    dbStaff = await db.staff.findMany({
+      where: { clubId },
+      include: { categories: true, user: { include: { role: true } } },
       orderBy: { user: { name: "asc" } }
     })
   } else {
@@ -77,22 +98,65 @@ export default async function DossierMedicalPage() {
       include: { teamCategory: true, user: true },
       orderBy: { user: { name: "asc" } }
     })
+    dbStaff = await db.staff.findMany({
+      where: { clubId },
+      include: { categories: true, user: { include: { role: true } } },
+      orderBy: { user: { name: "asc" } }
+    })
   }
 
-  const players = dbPlayers.map((p) => ({
+  const mappedPlayers = dbPlayers.map((p) => ({
     id: p.id,
+    userId: p.userId,
     name: p.user?.name || "Joueur Inconnu",
-    number: p.number,
-    position: p.position,
-    teamCategoryName: p.teamCategory?.name || null,
+    type: "JOUEUR" as const,
+    roleLabel: "Joueur",
+    teamCategoryName: p.teamCategory?.name || "Sans Équipe",
+    teamCategoryId: p.teamCategoryId,
     bloodGroup: p.bloodGroup,
     allergies: p.allergies,
     lastCheckup: p.lastCheckup,
     clearance: p.clearance,
-    medicalNotes: p.medicalNotes
+    medicalNotes: p.medicalNotes,
+    number: p.number,
+    position: p.position,
+    age: p.age || null,
+    nationality: p.nationality || null,
+    birthDate: p.birthDate || null,
+    medicalTreatment: p.medicalTreatment || null,
+    medication: p.medication || null
   }))
 
+  const mappedStaff = dbStaff.map((s) => ({
+    id: s.id,
+    userId: s.userId,
+    name: s.user?.name || "Staff Inconnu",
+    type: "STAFF" as const,
+    roleLabel: s.title || s.user?.role?.name || "Staff",
+    teamCategoryName: s.categories.map((c: any) => c.name).join(", ") || "Toutes",
+    teamCategoryId: s.categories[0]?.id || null,
+    bloodGroup: s.bloodGroup,
+    allergies: s.allergies,
+    lastCheckup: s.lastCheckup,
+    clearance: s.clearance,
+    medicalNotes: s.medicalNotes,
+    number: null,
+    position: null,
+    age: s.age || null,
+    nationality: s.nationality || null,
+    birthDate: s.birthDate || null,
+    medicalTreatment: s.medicalTreatment || null,
+    medication: s.medication || null
+  }))
+
+  const allRecords = [...mappedPlayers, ...mappedStaff]
+
   return (
-    <DossierMedicalClient initialPlayers={players} userRole={userRole} />
+    <DossierMedicalClient
+      initialRecords={allRecords}
+      teamCategories={teamCategories}
+      userRole={userRole}
+      clubInfo={clubInfo}
+    />
   )
 }

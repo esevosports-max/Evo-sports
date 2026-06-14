@@ -57,9 +57,11 @@ interface Player {
 interface EffectifsClientProps {
   initialPlayers: Player[]
   categories: Category[]
+  userRole?: string
 }
 
-export default function EffectifsClient({ initialPlayers, categories }: EffectifsClientProps) {
+export default function EffectifsClient({ initialPlayers, categories, userRole }: EffectifsClientProps) {
+  const isPlayer = userRole === "JOUEUR"
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [filter, setFilter] = useState<"Tous" | "Gardien" | "Défenseur" | "Milieu" | "Attaquant">("Tous")
@@ -346,65 +348,70 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
       <section className="rounded-2xl border border-zinc-200/50 bg-white p-8 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-            Effectifs
+            {isPlayer ? "Mes Stats" : "Effectifs"}
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Gérez la liste des joueurs licenciés et attribuez-les aux différentes équipes du club.
+            {isPlayer 
+              ? "Visualisez vos statistiques individuelles, votre profil et vos derniers indices de performance physique."
+              : "Gérez la liste des joueurs licenciés et attribuez-les aux différentes équipes du club."
+            }
           </p>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Team Category Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-black text-zinc-450 dark:text-zinc-400 uppercase">Équipe :</span>
-            <select
-              value={selectedCategoryFilter}
-              onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-900 shadow-sm outline-none transition-all dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
-            >
-              <option value="Tous">Toutes les équipes</option>
-              <option value="Sans équipe">Sans équipe</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name} ({cat.playersCount}/{cat.maxPlayers})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Position Filter tabs */}
-          <div className="flex flex-wrap gap-1.5 bg-zinc-100 p-1 rounded-xl dark:bg-zinc-800 shrink-0">
-            {(["Tous", "Gardien", "Défenseur", "Milieu", "Attaquant"] as const).map((pos) => (
-              <button
-                key={pos}
-                onClick={() => setFilter(pos)}
-                className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all cursor-pointer uppercase tracking-wider ${
-                  filter === pos
-                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white"
-                    : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-                }`}
+        {!isPlayer && (
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Team Category Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-black text-zinc-450 dark:text-zinc-400 uppercase">Équipe :</span>
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-900 shadow-sm outline-none transition-all dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
               >
-                {pos}s
-              </button>
-            ))}
-          </div>
+                <option value="Tous">Toutes les équipes</option>
+                <option value="Sans équipe">Sans équipe</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name} ({cat.playersCount}/{cat.maxPlayers})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer ml-auto lg:ml-0"
-          >
-            Ajouter un Joueur ➕
-          </button>
-        </div>
+            {/* Position Filter tabs */}
+            <div className="flex flex-wrap gap-1.5 bg-zinc-100 p-1 rounded-xl dark:bg-zinc-800 shrink-0">
+              {(["Tous", "Gardien", "Défenseur", "Milieu", "Attaquant"] as const).map((pos) => (
+                <button
+                  key={pos}
+                  onClick={() => setFilter(pos)}
+                  className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all cursor-pointer uppercase tracking-wider ${
+                    filter === pos
+                      ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white"
+                      : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                  }`}
+                >
+                  {pos}s
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer ml-auto lg:ml-0"
+            >
+              Ajouter un Joueur ➕
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Roster Cards/Table Full Width List */}
       <div className="space-y-4">
           <div className="flex items-center justify-between gap-4 mb-4">
             <h3 className="text-sm font-black uppercase tracking-wider text-zinc-850 dark:text-white">
-              Joueurs ({filteredPlayers.length})
+              {isPlayer ? "Mon Profil & Stats" : `Joueurs (${filteredPlayers.length})`}
             </h3>
             <div className="flex bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5 text-[9px] font-black uppercase border border-zinc-200 dark:border-zinc-700">
               <button
@@ -536,30 +543,32 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                   </div>
 
                   {/* Actions Row */}
-                  <div className="flex gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                    <button
-                      onClick={() => handleEditClick(player)}
-                      className="flex-1 py-2 px-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => handleToggleBlock(player.id, player.name, player.isBlocked)}
-                      className={`flex-1 py-2 px-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                        player.isBlocked
-                          ? "bg-amber-500 text-white hover:bg-amber-450"
-                          : "bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200"
-                      }`}
-                    >
-                      {player.isBlocked ? "Débloquer" : "Bloquer"}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(player.id, player.name)}
-                      className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-650 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
-                    >
-                      Supprimer
-                    </button>
-                  </div>
+                  {!isPlayer && (
+                    <div className="flex gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <button
+                        onClick={() => handleEditClick(player)}
+                        className="flex-1 py-2 px-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => handleToggleBlock(player.id, player.name, player.isBlocked)}
+                        className={`flex-1 py-2 px-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          player.isBlocked
+                            ? "bg-amber-500 text-white hover:bg-amber-450"
+                            : "bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200"
+                        }`}
+                      >
+                        {player.isBlocked ? "Débloquer" : "Bloquer"}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(player.id, player.name)}
+                        className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-650 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -578,7 +587,7 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                     <th className="py-3 px-4 text-center font-bold">VMA / VO2</th>
                     <th className="py-3 px-4 text-center">Sprint 10/30m</th>
                     <th className="py-3 px-4 text-center">Explo / Agil / Gras</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
+                    {!isPlayer && <th className="py-3 px-4 text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-150 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-350 font-semibold">
@@ -727,32 +736,34 @@ export default function EffectifsClient({ initialPlayers, categories }: Effectif
                         </td>
 
                         {/* Actions Cell */}
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <div className="flex gap-1.5 justify-end">
-                            <button
-                              onClick={() => handleEditClick(player)}
-                              className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
-                            >
-                              Modifier
-                            </button>
-                            <button
-                              onClick={() => handleToggleBlock(player.id, player.name, player.isBlocked)}
-                              className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                                player.isBlocked
-                                  ? "bg-amber-500 text-white hover:bg-amber-450"
-                                  : "bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200"
-                              }`}
-                            >
-                              {player.isBlocked ? "Débloquer" : "Bloquer"}
-                            </button>
-                            <button
-                              onClick={() => handleDelete(player.id, player.name)}
-                              className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
-                            >
-                              Supprimer
-                            </button>
-                          </div>
-                        </td>
+                        {!isPlayer && (
+                          <td className="py-3 px-4 text-right whitespace-nowrap">
+                            <div className="flex gap-1.5 justify-end">
+                              <button
+                                onClick={() => handleEditClick(player)}
+                                className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                              >
+                                Modifier
+                              </button>
+                              <button
+                                onClick={() => handleToggleBlock(player.id, player.name, player.isBlocked)}
+                                className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                  player.isBlocked
+                                    ? "bg-amber-500 text-white hover:bg-amber-450"
+                                    : "bg-zinc-100 hover:bg-zinc-200 text-zinc-750 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200"
+                                }`}
+                              >
+                                {player.isBlocked ? "Débloquer" : "Bloquer"}
+                              </button>
+                              <button
+                                onClick={() => handleDelete(player.id, player.name)}
+                                className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-650 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
+                              >
+                                Supprimer
+                              </button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     )
                   })}

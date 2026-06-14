@@ -17,6 +17,7 @@ interface Category {
   coach: string
   league: string
   maxPlayers: number
+  playerCount?: number
 }
 
 interface StaffRoleGroup {
@@ -180,7 +181,7 @@ export default function EquipePrintClient({
                     <th className="py-3 px-4">Équipe / Catégorie</th>
                     <th className="py-3 px-4">Championnat / Division</th>
                     <th className="py-3 px-4">Entraîneur Référent</th>
-                    <th className="py-3 px-4 text-center">Effectif Max</th>
+                    <th className="py-3 px-4 text-center">Effectif</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200">
@@ -190,7 +191,7 @@ export default function EquipePrintClient({
                       <td className="py-3.5 px-4 font-semibold text-zinc-500">{cat.league}</td>
                       <td className="py-3.5 px-4 font-bold text-zinc-700">{cat.coach}</td>
                       <td className="py-3.5 px-4 text-center font-black text-emerald-600 bg-emerald-500/5 text-sm">
-                        {cat.maxPlayers} max
+                        {cat.playerCount ?? 0}
                       </td>
                     </tr>
                   ))}

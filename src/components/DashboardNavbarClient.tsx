@@ -36,6 +36,7 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
   const isManager = user.roleName === "MANAGER_EVO_SPORTS"
+  const isPlayer = user.roleName === "JOUEUR"
 
   // Roster of pages with their routes, labels, and roles allowed
   const menuItems = isManager
@@ -46,6 +47,18 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
         { href: "/dashboard/manager/demandes", label: t("db_reg_requests"), icon: "📥", description: t("desc_requests") },
         { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️", description: t("desc_clubs") },
         { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳", description: t("desc_payments") },
+      ]
+    : isPlayer
+    ? [
+        { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠", description: t("desc_dashboard") },
+        { href: "/dashboard/messagerie", label: t("feat_messaging_title"), icon: "💬", description: t("desc_messaging"), requiredRoles: ["JOUEUR"] },
+        { href: "/dashboard/sondage", label: t("feat_polls_title"), icon: "📊", description: t("desc_polls"), requiredRoles: ["JOUEUR"] },
+        { href: "/dashboard/planning", label: t("feat_planning_title"), icon: "📅", description: t("desc_planning_gen"), requiredRoles: ["JOUEUR"] },
+        { href: "/dashboard/quotidienne", label: t("feat_welfare_title"), icon: "📝", description: t("desc_welfare"), requiredRoles: ["JOUEUR"] },
+        { href: "/dashboard/test", label: t("feat_tests_title"), icon: "🧪", description: t("desc_tests"), requiredRoles: ["JOUEUR"] },
+        { href: "/dashboard/medical/dossier-medical", label: t("feat_medical_title"), icon: "📁", description: t("desc_medical"), requiredRoles: ["JOUEUR"] },
+        { href: "/dashboard/medical/blessures", label: t("feat_injuries_title"), icon: "🩹", description: t("desc_injuries"), requiredRoles: ["JOUEUR"] },
+        { href: "/dashboard/effectifs", label: language === "FR" ? "Mes Stats" : language === "AR" ? "إحصائياتي" : "My Stats", icon: "⚽", description: "Visualiser mes statistiques et indices physiques", requiredRoles: ["JOUEUR"] },
       ]
     : [
         { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠", description: t("desc_dashboard") },
@@ -94,7 +107,7 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
           label: t("feat_injuries_title"), 
           icon: "🩹", 
           description: t("desc_injuries"),
-          requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"] 
+          requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE"] 
         },
         { 
           href: "/dashboard/medical/dossier-medical", 
@@ -270,42 +283,37 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
             grid gap-3 py-6 max-h-[calc(100vh-14rem)] overflow-y-auto custom-scrollbar
             ${isScrolled ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"}
           `}>
-            {menuItems.map((item) => {
-              const authorized = isRoleAuthorized(item.requiredRoles)
-              const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
+            {menuItems
+              .filter((item) => isRoleAuthorized(item.requiredRoles))
+              .map((item) => {
+                const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
 
-              return (
-                <Link
-                  key={item.href}
-                  href={authorized ? item.href : "#"}
-                  onClick={authorized ? handleLinkClick : (e) => e.preventDefault()}
-                  className={`
-                    flex items-center justify-between p-3 rounded-2xl transition-all duration-200 group border
-                    ${active 
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-md" 
-                      : "text-white/70 hover:text-white hover:bg-white/5 border-transparent hover:border-white/5"
-                    }
-                    ${!authorized && "opacity-40 cursor-not-allowed select-none"}
-                  `}
-                >
-                  <div className="flex items-center min-w-0">
-                    <div className="min-w-0">
-                      <p className={`text-[11px] font-black tracking-wide ${active ? "text-emerald-400" : "text-white/90 group-hover:text-white"}`}>
-                        {item.label}
-                      </p>
-                      {!isScrolled && (
-                        <p className="text-[9px] text-white/40 truncate font-semibold mt-0.5">{item.description}</p>
-                      )}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={handleLinkClick}
+                    className={`
+                      flex items-center justify-between p-3 rounded-2xl transition-all duration-200 group border
+                      ${active 
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-md" 
+                        : "text-white/70 hover:text-white hover:bg-white/5 border-transparent hover:border-white/5"
+                      }
+                    `}
+                  >
+                    <div className="flex items-center min-w-0">
+                      <div className="min-w-0">
+                        <p className={`text-[11px] font-black tracking-wide ${active ? "text-emerald-400" : "text-white/90 group-hover:text-white"}`}>
+                          {item.label}
+                        </p>
+                        {!isScrolled && (
+                          <p className="text-[9px] text-white/40 truncate font-semibold mt-0.5">{item.description}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {!authorized && (
-                    <span className="text-[8px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-lg uppercase tracking-wider">
-                      🔒 {t("db_blocked")}
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
+                  </Link>
+                )
+              })}
           </nav>
 
           {/* Dropdown Footer: User Profile info (Mobile) & Sign Out */}

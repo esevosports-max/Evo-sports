@@ -37,6 +37,106 @@ body {
   }
 }
 
+@keyframes glow-emerald {
+  0%, 100% {
+    text-shadow: 0 0 6px rgba(16, 185, 129, 0.3), 0 0 12px rgba(16, 185, 129, 0.2);
+    opacity: 0.85;
+  }
+  50% {
+    text-shadow: 0 0 14px rgba(16, 185, 129, 0.65), 0 0 24px rgba(16, 185, 129, 0.45);
+    opacity: 1;
+  }
+}
+
+@keyframes glow-emerald-strong {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.6), 0 0 16px rgba(52, 211, 153, 0.4);
+    opacity: 0.45;
+  }
+  50% {
+    text-shadow: 0 0 25px rgba(52, 211, 153, 1), 0 0 45px rgba(52, 211, 153, 0.95), 0 0 60px rgba(16, 185, 129, 0.8);
+    opacity: 1;
+  }
+}
+
+@keyframes glow-zinc {
+  0%, 100% {
+    text-shadow: 0 0 6px rgba(161, 161, 170, 0.3), 0 0 12px rgba(161, 161, 170, 0.2);
+    opacity: 0.85;
+  }
+  50% {
+    text-shadow: 0 0 14px rgba(161, 161, 170, 0.65), 0 0 24px rgba(161, 161, 170, 0.45);
+    opacity: 1;
+  }
+}
+
+@keyframes glow-zinc-strong {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 16px rgba(255, 255, 255, 0.4);
+    opacity: 0.45;
+  }
+  50% {
+    text-shadow: 0 0 25px rgba(255, 255, 255, 1), 0 0 45px rgba(244, 244, 245, 0.95), 0 0 60px rgba(212, 212, 216, 0.8);
+    opacity: 1;
+  }
+}
+
 .animate-glow {
   animation: glow 2s ease-in-out infinite;
 }
+
+.animate-glow-emerald {
+  animation: glow-emerald 2s ease-in-out infinite;
+  transition: transform 0.1s ease;
+  -webkit-text-stroke: 1px #000000;
+}
+
+.animate-glow-emerald:hover {
+  animation: glow-emerald-strong 0.8s ease-in-out infinite, shake 0.3s ease-in-out infinite;
+}
+
+.animate-glow-zinc {
+  animation: glow-zinc 2s ease-in-out infinite;
+  transition: transform 0.1s ease;
+  -webkit-text-stroke: 1px #000000;
+}
+
+.animate-glow-zinc:hover {
+  animation: glow-zinc-strong 0.8s ease-in-out infinite, shake 0.3s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-0.6px, 0.4px);
+  }
+  40% {
+    transform: translate(0.6px, -0.4px);
+  }
+  60% {
+    transform: translate(-0.4px, -0.4px);
+  }
+  80% {
+    transform: translate(0.4px, 0.4px);
+  }
+}
+
+@keyframes slideUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up-fade {
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+

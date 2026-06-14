@@ -123,7 +123,10 @@ export default async function PrintFichePage() {
     try {
       dbCategories = await db.teamCategory.findMany({
         where: { clubId },
-        include: { staffMembers: { include: { user: true } } },
+        include: { 
+          staffMembers: { include: { user: true } },
+          _count: { select: { players: true } }
+        },
         orderBy: { createdAt: "asc" }
       })
     } catch (e) {
@@ -155,7 +158,8 @@ export default async function PrintFichePage() {
       name: cat.name,
       coach: assignedCoach,
       league: cat.league,
-      maxPlayers: cat.maxPlayers !== undefined ? cat.maxPlayers : (cat.playersCount || 0)
+      maxPlayers: cat.maxPlayers !== undefined ? cat.maxPlayers : (cat.playersCount || 0),
+      playerCount: cat._count?.players || 0
     }
   })
 

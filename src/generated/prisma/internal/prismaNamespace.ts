@@ -405,7 +405,9 @@ export const ModelName = {
   PollVote: 'PollVote',
   ChatChannel: 'ChatChannel',
   ChatMessage: 'ChatMessage',
-  ChatMessageView: 'ChatMessageView'
+  ChatMessageView: 'ChatMessageView',
+  Announcement: 'Announcement',
+  SystemSetting: 'SystemSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView"
+    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView" | "announcement" | "systemSetting"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2053,6 +2055,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Announcement: {
+      payload: Prisma.$AnnouncementPayload<ExtArgs>
+      fields: Prisma.AnnouncementFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AnnouncementFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AnnouncementFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        findFirst: {
+          args: Prisma.AnnouncementFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AnnouncementFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        findMany: {
+          args: Prisma.AnnouncementFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>[]
+        }
+        create: {
+          args: Prisma.AnnouncementCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        createMany: {
+          args: Prisma.AnnouncementCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AnnouncementCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>[]
+        }
+        delete: {
+          args: Prisma.AnnouncementDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        update: {
+          args: Prisma.AnnouncementUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        deleteMany: {
+          args: Prisma.AnnouncementDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AnnouncementUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AnnouncementUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>[]
+        }
+        upsert: {
+          args: Prisma.AnnouncementUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AnnouncementPayload>
+        }
+        aggregate: {
+          args: Prisma.AnnouncementAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAnnouncement>
+        }
+        groupBy: {
+          args: Prisma.AnnouncementGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnnouncementGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AnnouncementCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AnnouncementCountAggregateOutputType> | number
+        }
+      }
+    }
+    SystemSetting: {
+      payload: Prisma.$SystemSettingPayload<ExtArgs>
+      fields: Prisma.SystemSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SystemSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SystemSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.SystemSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SystemSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        findMany: {
+          args: Prisma.SystemSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        create: {
+          args: Prisma.SystemSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        createMany: {
+          args: Prisma.SystemSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SystemSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.SystemSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        update: {
+          args: Prisma.SystemSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.SystemSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SystemSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SystemSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.SystemSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.SystemSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSystemSetting>
+        }
+        groupBy: {
+          args: Prisma.SystemSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SystemSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2168,7 +2318,8 @@ export const ClubScalarFieldEnum = {
   subscriptionStatus: 'subscriptionStatus',
   subscriptionExpires: 'subscriptionExpires',
   subscriptionPaid: 'subscriptionPaid',
-  subscriptionMethod: 'subscriptionMethod'
+  subscriptionMethod: 'subscriptionMethod',
+  questionnaireTemplate: 'questionnaireTemplate'
 } as const
 
 export type ClubScalarFieldEnum = (typeof ClubScalarFieldEnum)[keyof typeof ClubScalarFieldEnum]
@@ -2215,7 +2366,17 @@ export const StaffScalarFieldEnum = {
   clubId: 'clubId',
   title: 'title',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  bloodGroup: 'bloodGroup',
+  allergies: 'allergies',
+  lastCheckup: 'lastCheckup',
+  clearance: 'clearance',
+  medicalNotes: 'medicalNotes',
+  age: 'age',
+  nationality: 'nationality',
+  birthDate: 'birthDate',
+  medicalTreatment: 'medicalTreatment',
+  medication: 'medication'
 } as const
 
 export type StaffScalarFieldEnum = (typeof StaffScalarFieldEnum)[keyof typeof StaffScalarFieldEnum]
@@ -2247,7 +2408,11 @@ export const PlayerScalarFieldEnum = {
   allergies: 'allergies',
   lastCheckup: 'lastCheckup',
   clearance: 'clearance',
-  medicalNotes: 'medicalNotes'
+  medicalNotes: 'medicalNotes',
+  nationality: 'nationality',
+  birthDate: 'birthDate',
+  medicalTreatment: 'medicalTreatment',
+  medication: 'medication'
 } as const
 
 export type PlayerScalarFieldEnum = (typeof PlayerScalarFieldEnum)[keyof typeof PlayerScalarFieldEnum]
@@ -2295,7 +2460,8 @@ export const DailyQuestionnaireScalarFieldEnum = {
   scheduledFor: 'scheduledFor',
   expiresAt: 'expiresAt',
   active: 'active',
-  isApplied: 'isApplied'
+  isApplied: 'isApplied',
+  questions: 'questions'
 } as const
 
 export type DailyQuestionnaireScalarFieldEnum = (typeof DailyQuestionnaireScalarFieldEnum)[keyof typeof DailyQuestionnaireScalarFieldEnum]
@@ -2310,6 +2476,7 @@ export const DailyResponseScalarFieldEnum = {
   stress: 'stress',
   soreness: 'soreness',
   heartRate: 'heartRate',
+  answers: 'answers',
   createdAt: 'createdAt'
 } as const
 
@@ -2461,6 +2628,38 @@ export const ChatMessageViewScalarFieldEnum = {
 export type ChatMessageViewScalarFieldEnum = (typeof ChatMessageViewScalarFieldEnum)[keyof typeof ChatMessageViewScalarFieldEnum]
 
 
+export const AnnouncementScalarFieldEnum = {
+  id: 'id',
+  badgeText: 'badgeText',
+  badgeStyle: 'badgeStyle',
+  icon: 'icon',
+  title: 'title',
+  titleStyle: 'titleStyle',
+  description: 'description',
+  linkText: 'linkText',
+  linkUrl: 'linkUrl',
+  mediaType: 'mediaType',
+  mediaUrl: 'mediaUrl',
+  active: 'active',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AnnouncementScalarFieldEnum = (typeof AnnouncementScalarFieldEnum)[keyof typeof AnnouncementScalarFieldEnum]
+
+
+export const SystemSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2469,19 +2668,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -2551,6 +2750,20 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -2575,20 +2788,6 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 /**
@@ -2723,6 +2922,8 @@ export type GlobalOmitConfig = {
   chatChannel?: Prisma.ChatChannelOmit
   chatMessage?: Prisma.ChatMessageOmit
   chatMessageView?: Prisma.ChatMessageViewOmit
+  announcement?: Prisma.AnnouncementOmit
+  systemSetting?: Prisma.SystemSettingOmit
 }
 
 /* Types for Logging */

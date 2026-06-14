@@ -388,7 +388,7 @@ export default function PaymentPage() {
               }}
               className="flex-1 rounded-xl bg-zinc-900 hover:bg-zinc-850 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 px-6 py-3.5 text-xs font-black uppercase tracking-wider shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all text-center cursor-pointer font-sport italic flex items-center justify-center gap-1.5 border border-zinc-850 dark:border-zinc-200"
             >
-              🚪 Sortir (Tableau de Bord)
+              Revenir au Tableau de Bord
             </button>
 
             {clubInfo?.subscriptionPlan !== "Elite" && (

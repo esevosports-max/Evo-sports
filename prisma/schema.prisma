@@ -100,6 +100,7 @@ model Club {
   subscriptionExpires DateTime?
   subscriptionPaid    Boolean   @default(true)
   subscriptionMethod  String?   @default("Gratuit") // e.g. "BARIDIMOB", "SERIAL", "CHEQUE", "Gratuit"
+  questionnaireTemplate Json?
 }
 
 model CalendarEvent {
@@ -148,6 +149,18 @@ model Staff {
   categories TeamCategory[] @relation("StaffCategories")
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
+
+  // Medical Record fields
+  bloodGroup      String?
+  allergies       String?
+  lastCheckup     String?
+  clearance       String?         @default("Autorisé")
+  medicalNotes    String[]
+  age             Int?
+  nationality     String?
+  birthDate       String?
+  medicalTreatment String?
+  medication      String?
 }
 
 model Player {
@@ -187,6 +200,10 @@ model Player {
   lastCheckup     String?
   clearance       String?         @default("Autorisé")
   medicalNotes     String[]
+  nationality     String?
+  birthDate       String?
+  medicalTreatment String?
+  medication      String?
 }
 
 model PhysicalIndex {
@@ -230,6 +247,7 @@ model DailyQuestionnaire {
   expiresAt      DateTime
   active         Boolean         @default(true)
   isApplied      Boolean         @default(false)
+  questions      Json?
   responses      DailyResponse[]
 }
 
@@ -244,6 +262,7 @@ model DailyResponse {
   stress          Int
   soreness        Int
   heartRate       Int
+  answers         Json?
   createdAt       DateTime           @default(now())
 
   @@unique([questionnaireId, playerId])
@@ -382,4 +401,30 @@ model ChatMessageView {
   viewedAt    DateTime    @default(now())
 
   @@unique([messageId, userId])
+}
+
+model Announcement {
+  id           String    @id @default(cuid())
+  badgeText    String
+  badgeStyle   String    @default("bg-blue-500/20 border-blue-500/35 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.25)]")
+  icon         String    @default("📢")
+  title        String
+  titleStyle   String    @default("from-emerald-400 to-teal-400")
+  description  String
+  linkText     String    @default("En savoir plus")
+  linkUrl      String    @default("/")
+  mediaType    String    @default("image") // "image" or "video"
+  mediaUrl     String
+  active       Boolean   @default(true)
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model SystemSetting {
+  key          String    @id @unique
+  value        String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

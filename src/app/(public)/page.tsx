@@ -192,18 +192,12 @@ export default function Home() {
   const activeCategory = categories.find((c) => c.id === activeTab) || categories[0]
 
   return (
-    <section className="relative overflow-hidden py-16 sm:py-24">
-      {/* Background Gradients */}
-      <div className="absolute top-0 left-1/2 -z-10 h-[600px] w-[1000px] -translate-x-1/2 [mask-image:radial-gradient(100%_100%_at_top,white,transparent)]">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 blur-3xl" />
-      </div>
-
+    <section className="relative overflow-hidden py-16 sm:py-24 bg-transparent">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center relative">
 
-        {/* Title */}
         <h1 className="mx-auto max-w-4xl text-4xl font-sport font-black italic uppercase tracking-wide text-black sm:text-6xl dark:text-white">
-          {t("hero_title_1")} <span className="text-emerald-500 normal-case">{t("hero_title_2")}</span>{" "}
-          <span className="text-zinc-400 normal-case">{t("hero_title_3")}</span>
+          {t("hero_title_1")} <span className="text-emerald-500 normal-case animate-glow-emerald inline-block cursor-default">{t("hero_title_2")}</span>{" "}
+          <span className="text-zinc-400 normal-case animate-glow-zinc inline-block cursor-default">{t("hero_title_3")}</span>
           <span className="block mt-2">
             {t("hero_title_4")}
           </span>
@@ -218,6 +212,8 @@ export default function Home() {
         <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-zinc-600 dark:text-zinc-300 leading-relaxed">
           {t("hero_desc")}
         </p>
+
+
 
         {/* CTA Buttons */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">

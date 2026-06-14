@@ -49,6 +49,18 @@ export default async function QuotidiennePage() {
     )
   }
 
+  // Fetch questionnaire template
+  let clubTemplate: any = null
+  try {
+    const club = await db.club.findUnique({
+      where: { id: clubId },
+      select: { questionnaireTemplate: true }
+    })
+    clubTemplate = club?.questionnaireTemplate || null
+  } catch (e) {
+    console.error("Error loading club template:", e)
+  }
+
   // 2. Fetch categories, players, and history
   let categories = []
   let players = []
@@ -189,6 +201,7 @@ export default async function QuotidiennePage() {
     expiresAt: q.expiresAt.toISOString(),
     active: q.active,
     isApplied: q.isApplied,
+    questions: (q.questions as any[]) || null,
     responses: q.responses.map((r) => ({
       id: r.id,
       playerId: r.playerId,
@@ -198,6 +211,7 @@ export default async function QuotidiennePage() {
       stress: r.stress,
       soreness: r.soreness,
       heartRate: r.heartRate,
+      answers: (r.answers as Record<string, any>) || null,
       createdAt: r.createdAt.toISOString()
     }))
   }))
@@ -210,7 +224,8 @@ export default async function QuotidiennePage() {
         createdAt: activeQuestionnaire.createdAt.toISOString(),
         scheduledFor: activeQuestionnaire.scheduledFor.toISOString(),
         expiresAt: activeQuestionnaire.expiresAt.toISOString(),
-        active: activeQuestionnaire.active
+        active: activeQuestionnaire.active,
+        questions: (activeQuestionnaire.questions as any[]) || null
       }
     : null
 
@@ -220,7 +235,8 @@ export default async function QuotidiennePage() {
         fatigue: draftResponse.fatigue,
         stress: draftResponse.stress,
         soreness: draftResponse.soreness,
-        heartRate: draftResponse.heartRate
+        heartRate: draftResponse.heartRate,
+        answers: (draftResponse.answers as Record<string, any>) || null
       }
     : null
 
@@ -235,6 +251,7 @@ export default async function QuotidiennePage() {
       draftResponse={clientDraftResponse}
       currentPlayerId={playerProfile?.id || null}
       currentPlayerName={playerProfile?.user?.name || ""}
+      clubTemplate={clubTemplate}
     />
   )
 }

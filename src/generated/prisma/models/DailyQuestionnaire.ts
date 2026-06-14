@@ -68,6 +68,7 @@ export type DailyQuestionnaireCountAggregateOutputType = {
   expiresAt: number
   active: number
   isApplied: number
+  questions: number
   _all: number
 }
 
@@ -114,6 +115,7 @@ export type DailyQuestionnaireCountAggregateInputType = {
   expiresAt?: true
   active?: true
   isApplied?: true
+  questions?: true
   _all?: true
 }
 
@@ -213,6 +215,7 @@ export type DailyQuestionnaireGroupByOutputType = {
   expiresAt: Date
   active: boolean
   isApplied: boolean
+  questions: runtime.JsonValue | null
   _count: DailyQuestionnaireCountAggregateOutputType | null
   _avg: DailyQuestionnaireAvgAggregateOutputType | null
   _sum: DailyQuestionnaireSumAggregateOutputType | null
@@ -248,6 +251,7 @@ export type DailyQuestionnaireWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"DailyQuestionnaire"> | Date | string
   active?: Prisma.BoolFilter<"DailyQuestionnaire"> | boolean
   isApplied?: Prisma.BoolFilter<"DailyQuestionnaire"> | boolean
+  questions?: Prisma.JsonNullableFilter<"DailyQuestionnaire">
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryNullableScalarRelationFilter, Prisma.TeamCategoryWhereInput> | null
   responses?: Prisma.DailyResponseListRelationFilter
@@ -263,6 +267,7 @@ export type DailyQuestionnaireOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrder
   active?: Prisma.SortOrder
   isApplied?: Prisma.SortOrder
+  questions?: Prisma.SortOrderInput | Prisma.SortOrder
   club?: Prisma.ClubOrderByWithRelationInput
   teamCategory?: Prisma.TeamCategoryOrderByWithRelationInput
   responses?: Prisma.DailyResponseOrderByRelationAggregateInput
@@ -281,6 +286,7 @@ export type DailyQuestionnaireWhereUniqueInput = Prisma.AtLeast<{
   expiresAt?: Prisma.DateTimeFilter<"DailyQuestionnaire"> | Date | string
   active?: Prisma.BoolFilter<"DailyQuestionnaire"> | boolean
   isApplied?: Prisma.BoolFilter<"DailyQuestionnaire"> | boolean
+  questions?: Prisma.JsonNullableFilter<"DailyQuestionnaire">
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryNullableScalarRelationFilter, Prisma.TeamCategoryWhereInput> | null
   responses?: Prisma.DailyResponseListRelationFilter
@@ -296,6 +302,7 @@ export type DailyQuestionnaireOrderByWithAggregationInput = {
   expiresAt?: Prisma.SortOrder
   active?: Prisma.SortOrder
   isApplied?: Prisma.SortOrder
+  questions?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DailyQuestionnaireCountOrderByAggregateInput
   _avg?: Prisma.DailyQuestionnaireAvgOrderByAggregateInput
   _max?: Prisma.DailyQuestionnaireMaxOrderByAggregateInput
@@ -316,6 +323,7 @@ export type DailyQuestionnaireScalarWhereWithAggregatesInput = {
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"DailyQuestionnaire"> | Date | string
   active?: Prisma.BoolWithAggregatesFilter<"DailyQuestionnaire"> | boolean
   isApplied?: Prisma.BoolWithAggregatesFilter<"DailyQuestionnaire"> | boolean
+  questions?: Prisma.JsonNullableWithAggregatesFilter<"DailyQuestionnaire">
 }
 
 export type DailyQuestionnaireCreateInput = {
@@ -326,6 +334,7 @@ export type DailyQuestionnaireCreateInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   club: Prisma.ClubCreateNestedOneWithoutDailyQuestionnairesInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutDailyQuestionnairesInput
   responses?: Prisma.DailyResponseCreateNestedManyWithoutQuestionnaireInput
@@ -341,6 +350,7 @@ export type DailyQuestionnaireUncheckedCreateInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutQuestionnaireInput
 }
 
@@ -352,6 +362,7 @@ export type DailyQuestionnaireUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   club?: Prisma.ClubUpdateOneRequiredWithoutDailyQuestionnairesNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutDailyQuestionnairesNestedInput
   responses?: Prisma.DailyResponseUpdateManyWithoutQuestionnaireNestedInput
@@ -367,6 +378,7 @@ export type DailyQuestionnaireUncheckedUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responses?: Prisma.DailyResponseUncheckedUpdateManyWithoutQuestionnaireNestedInput
 }
 
@@ -380,6 +392,7 @@ export type DailyQuestionnaireCreateManyInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireUpdateManyMutationInput = {
@@ -390,6 +403,7 @@ export type DailyQuestionnaireUpdateManyMutationInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireUncheckedUpdateManyInput = {
@@ -402,6 +416,7 @@ export type DailyQuestionnaireUncheckedUpdateManyInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireListRelationFilter = {
@@ -424,6 +439,7 @@ export type DailyQuestionnaireCountOrderByAggregateInput = {
   expiresAt?: Prisma.SortOrder
   active?: Prisma.SortOrder
   isApplied?: Prisma.SortOrder
+  questions?: Prisma.SortOrder
 }
 
 export type DailyQuestionnaireAvgOrderByAggregateInput = {
@@ -569,6 +585,7 @@ export type DailyQuestionnaireCreateWithoutClubInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutDailyQuestionnairesInput
   responses?: Prisma.DailyResponseCreateNestedManyWithoutQuestionnaireInput
 }
@@ -582,6 +599,7 @@ export type DailyQuestionnaireUncheckedCreateWithoutClubInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutQuestionnaireInput
 }
 
@@ -624,6 +642,7 @@ export type DailyQuestionnaireScalarWhereInput = {
   expiresAt?: Prisma.DateTimeFilter<"DailyQuestionnaire"> | Date | string
   active?: Prisma.BoolFilter<"DailyQuestionnaire"> | boolean
   isApplied?: Prisma.BoolFilter<"DailyQuestionnaire"> | boolean
+  questions?: Prisma.JsonNullableFilter<"DailyQuestionnaire">
 }
 
 export type DailyQuestionnaireCreateWithoutTeamCategoryInput = {
@@ -634,6 +653,7 @@ export type DailyQuestionnaireCreateWithoutTeamCategoryInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   club: Prisma.ClubCreateNestedOneWithoutDailyQuestionnairesInput
   responses?: Prisma.DailyResponseCreateNestedManyWithoutQuestionnaireInput
 }
@@ -647,6 +667,7 @@ export type DailyQuestionnaireUncheckedCreateWithoutTeamCategoryInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutQuestionnaireInput
 }
 
@@ -684,6 +705,7 @@ export type DailyQuestionnaireCreateWithoutResponsesInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   club: Prisma.ClubCreateNestedOneWithoutDailyQuestionnairesInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutDailyQuestionnairesInput
 }
@@ -698,6 +720,7 @@ export type DailyQuestionnaireUncheckedCreateWithoutResponsesInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireCreateOrConnectWithoutResponsesInput = {
@@ -724,6 +747,7 @@ export type DailyQuestionnaireUpdateWithoutResponsesInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   club?: Prisma.ClubUpdateOneRequiredWithoutDailyQuestionnairesNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutDailyQuestionnairesNestedInput
 }
@@ -738,6 +762,7 @@ export type DailyQuestionnaireUncheckedUpdateWithoutResponsesInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireCreateManyClubInput = {
@@ -749,6 +774,7 @@ export type DailyQuestionnaireCreateManyClubInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireUpdateWithoutClubInput = {
@@ -759,6 +785,7 @@ export type DailyQuestionnaireUpdateWithoutClubInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutDailyQuestionnairesNestedInput
   responses?: Prisma.DailyResponseUpdateManyWithoutQuestionnaireNestedInput
 }
@@ -772,6 +799,7 @@ export type DailyQuestionnaireUncheckedUpdateWithoutClubInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responses?: Prisma.DailyResponseUncheckedUpdateManyWithoutQuestionnaireNestedInput
 }
 
@@ -784,6 +812,7 @@ export type DailyQuestionnaireUncheckedUpdateManyWithoutClubInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireCreateManyTeamCategoryInput = {
@@ -795,6 +824,7 @@ export type DailyQuestionnaireCreateManyTeamCategoryInput = {
   expiresAt: Date | string
   active?: boolean
   isApplied?: boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type DailyQuestionnaireUpdateWithoutTeamCategoryInput = {
@@ -805,6 +835,7 @@ export type DailyQuestionnaireUpdateWithoutTeamCategoryInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   club?: Prisma.ClubUpdateOneRequiredWithoutDailyQuestionnairesNestedInput
   responses?: Prisma.DailyResponseUpdateManyWithoutQuestionnaireNestedInput
 }
@@ -818,6 +849,7 @@ export type DailyQuestionnaireUncheckedUpdateWithoutTeamCategoryInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   responses?: Prisma.DailyResponseUncheckedUpdateManyWithoutQuestionnaireNestedInput
 }
 
@@ -830,6 +862,7 @@ export type DailyQuestionnaireUncheckedUpdateManyWithoutTeamCategoryInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isApplied?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  questions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -873,6 +906,7 @@ export type DailyQuestionnaireSelect<ExtArgs extends runtime.Types.Extensions.In
   expiresAt?: boolean
   active?: boolean
   isApplied?: boolean
+  questions?: boolean
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.DailyQuestionnaire$teamCategoryArgs<ExtArgs>
   responses?: boolean | Prisma.DailyQuestionnaire$responsesArgs<ExtArgs>
@@ -889,6 +923,7 @@ export type DailyQuestionnaireSelectCreateManyAndReturn<ExtArgs extends runtime.
   expiresAt?: boolean
   active?: boolean
   isApplied?: boolean
+  questions?: boolean
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.DailyQuestionnaire$teamCategoryArgs<ExtArgs>
 }, ExtArgs["result"]["dailyQuestionnaire"]>
@@ -903,6 +938,7 @@ export type DailyQuestionnaireSelectUpdateManyAndReturn<ExtArgs extends runtime.
   expiresAt?: boolean
   active?: boolean
   isApplied?: boolean
+  questions?: boolean
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.DailyQuestionnaire$teamCategoryArgs<ExtArgs>
 }, ExtArgs["result"]["dailyQuestionnaire"]>
@@ -917,9 +953,10 @@ export type DailyQuestionnaireSelectScalar = {
   expiresAt?: boolean
   active?: boolean
   isApplied?: boolean
+  questions?: boolean
 }
 
-export type DailyQuestionnaireOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clubId" | "teamCategoryId" | "timeLimit" | "createdAt" | "scheduledFor" | "expiresAt" | "active" | "isApplied", ExtArgs["result"]["dailyQuestionnaire"]>
+export type DailyQuestionnaireOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clubId" | "teamCategoryId" | "timeLimit" | "createdAt" | "scheduledFor" | "expiresAt" | "active" | "isApplied" | "questions", ExtArgs["result"]["dailyQuestionnaire"]>
 export type DailyQuestionnaireInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.DailyQuestionnaire$teamCategoryArgs<ExtArgs>
@@ -952,6 +989,7 @@ export type $DailyQuestionnairePayload<ExtArgs extends runtime.Types.Extensions.
     expiresAt: Date
     active: boolean
     isApplied: boolean
+    questions: runtime.JsonValue | null
   }, ExtArgs["result"]["dailyQuestionnaire"]>
   composites: {}
 }
@@ -1387,6 +1425,7 @@ export interface DailyQuestionnaireFieldRefs {
   readonly expiresAt: Prisma.FieldRef<"DailyQuestionnaire", 'DateTime'>
   readonly active: Prisma.FieldRef<"DailyQuestionnaire", 'Boolean'>
   readonly isApplied: Prisma.FieldRef<"DailyQuestionnaire", 'Boolean'>
+  readonly questions: Prisma.FieldRef<"DailyQuestionnaire", 'Json'>
 }
     
 

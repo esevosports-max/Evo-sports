@@ -58,7 +58,30 @@ export default async function BlessuresPage() {
   let dbCategories = []
   let dbPlayers = []
 
-  if (userRole === "ENTRAINEUR_PRINCIPAL" || userRole === "ENTRAINEUR_ADJOINT") {
+  if (userRole === "JOUEUR") {
+    dbCategories = await db.teamCategory.findMany({
+      where: { clubId }
+    })
+
+    // Automatically transition expired return dates to "Expiré" in the DB
+    await db.player.updateMany({
+      where: {
+        userId,
+        isInjured: true,
+        injuryStatus: "Actif",
+        injuryReturn: { lte: new Date() }
+      },
+      data: {
+        injuryStatus: "Expiré"
+      }
+    })
+
+    dbPlayers = await db.player.findMany({
+      where: { userId },
+      include: { teamCategory: true, user: true },
+      orderBy: { user: { name: "asc" } }
+    })
+  } else if (userRole === "ENTRAINEUR_PRINCIPAL" || userRole === "ENTRAINEUR_ADJOINT") {
     const staff = await db.staff.findUnique({
       where: { userId },
       include: { categories: true }
@@ -135,6 +158,6 @@ export default async function BlessuresPage() {
   }))
 
   return (
-    <BlessuresClient initialPlayers={players} categories={categories} />
+    <BlessuresClient initialPlayers={players} categories={categories} userRole={userRole} />
   )
 }

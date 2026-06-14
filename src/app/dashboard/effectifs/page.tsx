@@ -58,7 +58,28 @@ export default async function EffectifsPage() {
   let dbCategories = []
   let dbPlayers = []
 
-  if (userRole === "ENTRAINEUR_PRINCIPAL" || userRole === "ENTRAINEUR_ADJOINT") {
+  if (userRole === "JOUEUR") {
+    dbCategories = await db.teamCategory.findMany({
+      where: { clubId },
+      include: { players: true }
+    })
+
+    dbPlayers = await db.player.findMany({
+      where: { userId },
+      include: {
+        teamCategory: true,
+        user: true,
+        physicalIndices: {
+          orderBy: { date: "desc" },
+          take: 1
+        },
+        physicalTests: {
+          orderBy: { date: "desc" },
+          take: 1
+        }
+      }
+    })
+  } else if (userRole === "ENTRAINEUR_PRINCIPAL" || userRole === "ENTRAINEUR_ADJOINT") {
     const staff = await db.staff.findUnique({
       where: { userId },
       include: { categories: true }
@@ -164,6 +185,6 @@ export default async function EffectifsPage() {
   }))
 
   return (
-    <EffectifsClient initialPlayers={players} categories={categories} />
+    <EffectifsClient initialPlayers={players} categories={categories} userRole={userRole} />
   )
 }
