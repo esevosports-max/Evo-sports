@@ -60,6 +60,48 @@ export async function createStaffMember(data: {
       where: { name: data.roleTag }
     })
 
+    const isHeadCoach = data.roleTag === "ENTRAINEUR_PRINCIPAL"
+    const isAssistantCoach = data.roleTag === "ENTRAINEUR_ADJOINT"
+
+    if ((isHeadCoach || isAssistantCoach) && data.categoryIds.length > 1) {
+      throw new Error("Un entraîneur principal ou adjoint ne peut être affecté qu'à une seule équipe.")
+    }
+
+    // Check target category constraints
+    for (const catId of data.categoryIds) {
+      const category = await db.teamCategory.findUnique({
+        where: { id: catId },
+        include: {
+          staffMembers: {
+            include: {
+              user: {
+                include: { role: true }
+              }
+            }
+          }
+        }
+      })
+
+      if (category) {
+        if (isHeadCoach) {
+          const hasHeadCoach = category.staffMembers.some(
+            (sm) => sm.user?.role?.name === "ENTRAINEUR_PRINCIPAL"
+          )
+          if (hasHeadCoach) {
+            throw new Error(`L'équipe "${category.name}" a déjà un entraîneur principal.`)
+          }
+        }
+        if (isAssistantCoach) {
+          const hasAssistantCoach = category.staffMembers.some(
+            (sm) => sm.user?.role?.name === "ENTRAINEUR_ADJOINT"
+          )
+          if (hasAssistantCoach) {
+            throw new Error(`L'équipe "${category.name}" a déjà un entraîneur adjoint.`)
+          }
+        }
+      }
+    }
+
     // Create related User account
     const fullName = `${data.lastName.toUpperCase()} ${data.firstName}`
     const user = await db.user.create({
@@ -71,18 +113,6 @@ export async function createStaffMember(data: {
         roleId: staffRole?.id || null
       }
     })
-
-    // Ensure exclusive assignment by disconnecting this category from all other staff
-    for (const catId of data.categoryIds) {
-      await db.teamCategory.update({
-        where: { id: catId },
-        data: {
-          staffMembers: {
-            set: []
-          }
-        }
-      })
-    }
 
     // Create Staff record
     await db.staff.create({
@@ -195,6 +225,48 @@ export async function updateStaffMember(
       where: { name: data.roleTag }
     })
 
+    const isHeadCoach = data.roleTag === "ENTRAINEUR_PRINCIPAL"
+    const isAssistantCoach = data.roleTag === "ENTRAINEUR_ADJOINT"
+
+    if ((isHeadCoach || isAssistantCoach) && data.categoryIds.length > 1) {
+      throw new Error("Un entraîneur principal ou adjoint ne peut être affecté qu'à une seule équipe.")
+    }
+
+    // Check target category constraints
+    for (const catId of data.categoryIds) {
+      const category = await db.teamCategory.findUnique({
+        where: { id: catId },
+        include: {
+          staffMembers: {
+            include: {
+              user: {
+                include: { role: true }
+              }
+            }
+          }
+        }
+      })
+
+      if (category) {
+        if (isHeadCoach) {
+          const hasHeadCoach = category.staffMembers.some(
+            (sm) => sm.user?.role?.name === "ENTRAINEUR_PRINCIPAL" && sm.id !== staffId
+          )
+          if (hasHeadCoach) {
+            throw new Error(`L'équipe "${category.name}" a déjà un entraîneur principal.`)
+          }
+        }
+        if (isAssistantCoach) {
+          const hasAssistantCoach = category.staffMembers.some(
+            (sm) => sm.user?.role?.name === "ENTRAINEUR_ADJOINT" && sm.id !== staffId
+          )
+          if (hasAssistantCoach) {
+            throw new Error(`L'équipe "${category.name}" a déjà un entraîneur adjoint.`)
+          }
+        }
+      }
+    }
+
     await db.user.update({
       where: { id: staff.userId },
       data: {
@@ -205,18 +277,6 @@ export async function updateStaffMember(
         roleId: staffRole?.id || null
       }
     })
-
-    // Ensure exclusive assignment by disconnecting this category from all other staff
-    for (const catId of data.categoryIds) {
-      await db.teamCategory.update({
-        where: { id: catId },
-        data: {
-          staffMembers: {
-            set: []
-          }
-        }
-      })
-    }
 
     await db.staff.update({
       where: { id: staffId },

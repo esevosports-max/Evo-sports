@@ -255,6 +255,20 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
   const [editRole, setEditRole] = useState("ENTRAINEUR_ADJOINT")
   const [editAssignedTeams, setEditAssignedTeams] = useState<string[]>([]) // Category IDs!
 
+  const handleCreateRoleChange = (role: string) => {
+    setCreateRole(role)
+    if (role === "ENTRAINEUR_PRINCIPAL" || role === "ENTRAINEUR_ADJOINT") {
+      setCreateAssignedTeams((prev) => prev.slice(0, 1))
+    }
+  }
+
+  const handleEditRoleChange = (role: string) => {
+    setEditRole(role)
+    if (role === "ENTRAINEUR_PRINCIPAL" || role === "ENTRAINEUR_ADJOINT") {
+      setEditAssignedTeams((prev) => prev.slice(0, 1))
+    }
+  }
+
   const filteredStaff = initialStaff.filter((m) => {
     if (selectedFilter !== "ALL" && m.roleTag !== selectedFilter) return false
     if (statusFilter === "ACTIVE" && m.isBlocked) return false
@@ -436,7 +450,7 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
               <select
                 required
                 value={createRole}
-                onChange={(e) => setCreateRole(e.target.value)}
+                onChange={(e) => handleCreateRoleChange(e.target.value)}
                 className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
               >
                 {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
@@ -540,7 +554,11 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                           checked={isChecked}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setCreateAssignedTeams((prev) => [...prev, cat.id])
+                              if (createRole === "ENTRAINEUR_PRINCIPAL" || createRole === "ENTRAINEUR_ADJOINT") {
+                                setCreateAssignedTeams([cat.id])
+                              } else {
+                                setCreateAssignedTeams((prev) => [...prev, cat.id])
+                              }
                             } else {
                               setCreateAssignedTeams((prev) => prev.filter((t) => t !== cat.id))
                             }
@@ -899,7 +917,7 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                 <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">{tLoc.thRole}</label>
                 <select
                   value={editRole}
-                  onChange={(e) => setEditRole(e.target.value)}
+                  onChange={(e) => handleEditRoleChange(e.target.value)}
                   disabled={editingMember?.roleTag === "PRESIDENT"}
                   className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold disabled:opacity-75 disabled:cursor-not-allowed"
                 >
@@ -933,7 +951,11 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                           checked={isChecked}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setEditAssignedTeams((prev) => [...prev, cat.id])
+                              if (editRole === "ENTRAINEUR_PRINCIPAL" || editRole === "ENTRAINEUR_ADJOINT") {
+                                setEditAssignedTeams([cat.id])
+                              } else {
+                                setEditAssignedTeams((prev) => [...prev, cat.id])
+                              }
                             } else {
                               setEditAssignedTeams((prev) => prev.filter((t) => t !== cat.id))
                             }
