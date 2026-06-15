@@ -63,9 +63,27 @@ export async function getEvents() {
       return { success: true, events: [] }
     }
 
+    let whereClause: any = { clubId }
+
+    if (roleName === "JOUEUR") {
+      const player = await db.player.findUnique({
+        where: { userId },
+        include: { teamCategory: true }
+      })
+      const teamName = player?.teamCategory?.name
+      if (teamName) {
+        whereClause.OR = [
+          { assignedTeam: teamName },
+          { assignedTeam: null }
+        ]
+      } else {
+        whereClause.assignedTeam = null
+      }
+    }
+
     // Retrieve events
     let events = await db.calendarEvent.findMany({
-      where: { clubId },
+      where: whereClause,
       orderBy: [
         { date: "asc" },
         { time: "asc" }
@@ -102,6 +120,11 @@ export async function createEvent(data: {
       throw new Error("Club introuvable pour l'utilisateur")
     }
 
+    const allowedRoles = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "MEDECIN"]
+    if (!allowedRoles.includes(roleName)) {
+      throw new Error("Vous n'êtes pas autorisé à créer des événements.")
+    }
+
     if (roleName === "SECRETAIRE_GENERAL" && !["EXCURSION", "MEETING"].includes(data.type)) {
       throw new Error("Vous n'êtes autorisé qu'à planifier des excursions et des réunions.")
     }
@@ -131,12 +154,29 @@ export async function createEvent(data: {
     return { success: false, error: error.message || "Erreur lors de la création" }
   }
 }
-
 export async function deleteEvent(id: string) {
   try {
     const session = await auth()
     if (!session || !session.user) {
       throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const roleName = session.user.role?.name || ""
+    const userName = session.user.name || ""
+
+    const event = await db.calendarEvent.findUnique({
+      where: { id }
+    })
+    if (!event) {
+      throw new Error("Événement introuvable")
+    }
+
+    const isPresidentOrManager = ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName)
+    const isCreator = event.creatorName === userName
+
+    if (!isPresidentOrManager && !isCreator) {
+      throw new Error("Vous n'êtes pas autorisé à supprimer cet événement.")
     }
 
     await db.calendarEvent.delete({
