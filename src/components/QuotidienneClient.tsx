@@ -369,43 +369,67 @@ export default function QuotidienneClient({
       ? players.filter((p) => p.teamCategoryId === q.teamCategoryId)
       : players
 
-    const headers = ["Joueur", "Equipe", "Statut Réponse"]
+    const headers = ["Joueur"]
     if (q.questions) {
       q.questions.forEach((quest) => {
-        headers.push(`${quest.text} (${quest.type})`)
+        headers.push(quest.text)
       })
     } else {
-      headers.push("Sommeil (1-7)", "Fatigue (1-7)", "Stress (1-7)", "Courbatures (1-7)", "Rythme Cardiaque (BPM)")
+      headers.push("Sommeil", "Fatigue", "Stress", "Courbatures", "Pouls (BPM)")
     }
+    headers.push("Forme")
 
     const rows = targetedPlayers.map((p) => {
       const r = q.responses.find((resp) => resp.playerId === p.id)
-      const row = [p.name, p.teamCategoryName, r ? "Répondu" : "N/A"]
+      const row = [p.name]
       if (q.questions) {
         q.questions.forEach((quest) => {
           if (r) {
             const val = r.answers ? r.answers[quest.key] : (r as any)[quest.key]
-            row.push(val !== undefined && val !== null ? val.toString() : "N/A")
+            if (val !== undefined && val !== null) {
+              if (quest.type === "SCALE" || quest.type === "SCALE_10") {
+                const maxVal = quest.type === "SCALE_10" ? 10 : 7
+                row.push(`${val}/${maxVal}`)
+              } else {
+                row.push(quest.key === "heartRate" ? `❤️ ${val}` : val.toString())
+              }
+            } else {
+              row.push("N/A")
+            }
           } else {
             row.push("N/A")
           }
         })
       } else {
         row.push(
-          r ? r.sleepQuality.toString() : "N/A",
-          r ? r.fatigue.toString() : "N/A",
-          r ? r.stress.toString() : "N/A",
-          r ? r.soreness.toString() : "N/A",
-          r ? r.heartRate.toString() : "N/A"
+          r ? `${r.sleepQuality}/7` : "N/A",
+          r ? `${r.fatigue}/7` : "N/A",
+          r ? `${r.stress}/7` : "N/A",
+          r ? `${r.soreness}/7` : "N/A",
+          r ? `❤️ ${r.heartRate}` : "N/A"
         )
       }
+
+      // Add Readiness Score (Forme)
+      if (r) {
+        const score = q.questions
+          ? getDynamicReadinessScore(q.questions, r.answers)
+          : getReadinessScore(r.sleepQuality, r.fatigue, r.stress, r.soreness)
+        row.push(`${score}%`)
+      } else {
+        row.push("N/A")
+      }
+
       return row
     })
 
     // Semicolon separator for default compatibility with Excel French edition
     const csvContent =
       "data:text/csv;charset=utf-8,\uFEFF" +
-      [headers.join(";"), ...rows.map((e) => e.join(";"))].join("\n")
+      [
+        headers.map((h) => String(h).replace(/;/g, " ")).join(";"),
+        ...rows.map((row) => row.map((cell) => String(cell).replace(/;/g, " ")).join(";"))
+      ].join("\n")
 
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement("a")
