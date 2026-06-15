@@ -44,6 +44,17 @@ export interface PlayerDashboardClientProps {
   }>
 }
 
+const JerseyIcon = ({ number }: { number: number | null }) => (
+  <div className="relative flex items-center justify-center w-14 h-14 select-none shrink-0 animate-in zoom-in duration-300">
+    <svg className="w-full h-full text-emerald-500 dark:text-emerald-400 fill-current drop-shadow-sm" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 2L3 5.5V9h2.5v11h13V9H21V5.5L18 2h-3.5c-.2 1.3-1.3 2.5-2.5 2.5S9.7 3.3 9.5 2H6z" />
+    </svg>
+    <span className="absolute inset-0 flex items-center justify-center text-base font-black text-white dark:text-zinc-950 mt-1">
+      {number !== null ? number : "🏃‍♂️"}
+    </span>
+  </div>
+)
+
 export default function PlayerDashboardClient({
   playerProfile,
   todayEvents,
@@ -121,9 +132,7 @@ export default function PlayerDashboardClient({
       {/* 1. Header Hero Welcome */}
       <section className="rounded-3xl border border-zinc-200/50 bg-white p-6 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-2xl font-black text-white shadow-md shadow-emerald-500/10">
-            {playerProfile.number || "🏃‍♂️"}
-          </div>
+          <JerseyIcon number={playerProfile.number} />
           <div className="space-y-1">
             <p className="text-[10px] text-zinc-450 dark:text-zinc-400 font-black uppercase tracking-widest">ESPACE JOUEUR</p>
             <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white uppercase">
