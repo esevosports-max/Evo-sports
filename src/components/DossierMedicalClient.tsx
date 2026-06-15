@@ -96,6 +96,8 @@ export default function DossierMedicalClient({
 }: DossierMedicalClientProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const isPlayer = userRole === "JOUEUR"
+  const canEdit = ["PRESIDENT", "MANAGER_EVO_SPORTS", "MEDECIN", "DIRECTEUR_SPORTIF"].includes(userRole)
 
   // State for all medical records
   const [records, setRecords] = useState<UnifiedMedicalRecord[]>(initialRecords)
@@ -107,7 +109,9 @@ export default function DossierMedicalClient({
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL")
   const [selectedRole, setSelectedRole] = useState<string>("ALL")
-  const [viewRecord, setViewRecord] = useState<UnifiedMedicalRecord | null>(null)
+  const [viewRecord, setViewRecord] = useState<UnifiedMedicalRecord | null>(
+    isPlayer && initialRecords.length > 0 ? initialRecords[0] : null
+  )
 
   // Tab 2 (Manage / Create-Modify) States
   const [manageMode, setManageMode] = useState<"CREATE" | "MODIFY">("CREATE")
@@ -127,9 +131,6 @@ export default function DossierMedicalClient({
 
   const [errorMsg, setErrorMsg] = useState("")
   const [successMsg, setSuccessMsg] = useState("")
-
-  const isPlayer = userRole === "JOUEUR"
-  const canEdit = ["PRESIDENT", "MANAGER_EVO_SPORTS", "MEDECIN", "DIRECTEUR_SPORTIF"].includes(userRole)
 
   // Check if a record has actual medical data filled
   const hasMedicalData = (r: UnifiedMedicalRecord) => {
@@ -933,12 +934,16 @@ export default function DossierMedicalClient({
           
           {/* Action Navigation Header */}
           <div className="flex justify-between items-center bg-white dark:bg-zinc-900 border border-zinc-200/50 dark:border-zinc-800/50 p-4 rounded-2xl shadow-sm print-hide">
-            <button
-              onClick={() => setViewRecord(null)}
-              className="rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider px-5 py-2.5 transition-colors cursor-pointer shadow-md shadow-red-600/10"
-            >
-              Retour
-            </button>
+            {!isPlayer ? (
+              <button
+                onClick={() => setViewRecord(null)}
+                className="rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider px-5 py-2.5 transition-colors cursor-pointer shadow-md shadow-red-600/10"
+              >
+                Retour
+              </button>
+            ) : (
+              <div />
+            )}
             <button
               onClick={() => {
                 const style = document.createElement("style")
