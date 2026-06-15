@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo } from "react"
+import { useMemo, useState, useTransition } from "react"
+import { submitVote } from "@/app/dashboard/sondage/actions"
 
 export interface PlayerDashboardClientProps {
   playerProfile: {
@@ -42,6 +43,22 @@ export interface PlayerDashboardClientProps {
     createdAt: string
     channelName: string
   }>
+  activePolls: Array<{
+    id: string
+    title: string
+    description: string | null
+    type: string
+    status: string
+    expiresAt: string
+    voted: boolean
+    userVoteOptionId: string | null
+    totalVotes: number
+    options: Array<{
+      id: string
+      text: string
+      votesCount: number
+    }>
+  }>
 }
 
 const JerseyIcon = ({ number }: { number: number | null }) => (
@@ -61,7 +78,21 @@ export default function PlayerDashboardClient({
   pendingQuestionnaires,
   latestPhysicalTest,
   unreadMessages,
+  activePolls,
 }: PlayerDashboardClientProps) {
+  const [isPending, startTransition] = useTransition()
+
+  const handleCastVote = async (pollId: string, optionId: string) => {
+    startTransition(async () => {
+      const res = await submitVote(pollId, optionId)
+      if (res.success) {
+        alert("Vote enregistré avec succès !")
+        window.location.reload()
+      } else {
+        alert(`Erreur lors du vote: ${res.error}`)
+      }
+    })
+  }
   
   // Renders type badge for planning events
   const getTypeBadge = (type: string) => {
@@ -298,6 +329,105 @@ export default function PlayerDashboardClient({
                 </Link>
               </div>
             )}
+          </div>
+
+          {/* Active Polls Card */}
+          <div className="rounded-3xl border border-zinc-200/50 bg-white dark:border-zinc-800/50 dark:bg-zinc-900 p-6 shadow-sm space-y-5">
+            <h3 className="text-sm font-black uppercase tracking-wider text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-3">
+              📊 Sondages en cours
+            </h3>
+
+            {activePolls.length === 0 ? (
+              <div className="p-4 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-450 text-[11px] font-bold">
+                Aucun sondage actif pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+                {activePolls.map((poll) => {
+                  const hasVoted = poll.voted
+                  return (
+                    <div
+                      key={poll.id}
+                      className="p-4 rounded-2xl border border-zinc-150 dark:border-zinc-800 bg-zinc-50/10 space-y-3"
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <h4 className="text-xs font-black text-zinc-900 dark:text-white uppercase leading-snug">
+                          {poll.title}
+                        </h4>
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded shrink-0 ${
+                          hasVoted
+                            ? "bg-zinc-100 text-zinc-500 dark:bg-zinc-800"
+                            : "bg-emerald-500/10 text-emerald-650 dark:text-emerald-400"
+                        }`}>
+                          {hasVoted ? "A voté" : "Ouvert"}
+                        </span>
+                      </div>
+
+                      {poll.description && (
+                        <p className="text-[10px] text-zinc-500 font-semibold leading-normal">
+                          {poll.description}
+                        </p>
+                      )}
+
+                      {/* Options list */}
+                      <div className="space-y-2 pt-1">
+                        {poll.options.map((opt) => {
+                          const percentage = poll.totalVotes > 0 ? Math.round((opt.votesCount / poll.totalVotes) * 100) : 0
+                          const isSelected = poll.userVoteOptionId === opt.id
+
+                          if (hasVoted) {
+                            return (
+                              <div
+                                key={opt.id}
+                                className={`w-full rounded-xl border p-2.5 flex items-center justify-between text-[11px] bg-zinc-50/50 dark:bg-zinc-950/20 relative overflow-hidden ${
+                                  isSelected ? "border-emerald-500 dark:border-emerald-700" : "border-zinc-150/60 dark:border-zinc-800"
+                                }`}
+                              >
+                                <div
+                                  className="absolute inset-y-0 left-0 bg-emerald-500/10 transition-all duration-1000 ease-out"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                                <span className="font-bold text-zinc-700 dark:text-zinc-300 relative z-10">
+                                  {opt.text} {isSelected && "⭐️"}
+                                </span>
+                                <span className="font-black text-emerald-650 dark:text-emerald-400 relative z-10 shrink-0 ml-2">
+                                  {percentage}% ({opt.votesCount})
+                                </span>
+                              </div>
+                            )
+                          } else {
+                            return (
+                              <button
+                                key={opt.id}
+                                onClick={() => handleCastVote(poll.id, opt.id)}
+                                disabled={isPending}
+                                className="w-full rounded-xl border border-zinc-200 hover:border-emerald-500 bg-white hover:bg-emerald-50/5 p-2.5 flex items-center justify-between text-[11px] font-bold text-zinc-700 dark:text-zinc-350 transition-all duration-200 active:scale-[0.99] cursor-pointer disabled:opacity-50"
+                              >
+                                <span>{opt.text}</span>
+                                <span className="text-[10px] text-emerald-500">🗳️ Voter</span>
+                              </button>
+                            )
+                          }
+                        })}
+                      </div>
+
+                      <div className="pt-2 text-[9px] text-zinc-400 font-bold border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
+                        <span>Total: {poll.totalVotes} votes</span>
+                        <span>Exp: {new Date(poll.expiresAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            <div className="pt-1">
+              <Link
+                href="/dashboard/sondage"
+                className="w-full block rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900 text-zinc-750 dark:text-zinc-300 font-black text-[10px] uppercase tracking-wider py-2.5 transition-colors text-center"
+              >
+                Voir tous les sondages
+              </Link>
+            </div>
           </div>
 
           {/* Physical Tests Summary Card */}

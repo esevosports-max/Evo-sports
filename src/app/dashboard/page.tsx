@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import ManagerRequestsList from "@/components/ManagerRequestsList"
 import DashboardSummaryClient from "@/components/DashboardSummaryClient"
 import PlayerDashboardClient from "@/components/PlayerDashboardClient"
+import { getPolls } from "@/app/dashboard/sondage/actions"
 
 export default async function Dashboard() {
   const session = await auth()
@@ -203,6 +204,12 @@ export default async function Dashboard() {
 
     unreadMessagesList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
+    // Fetch active polls for the user
+    const pollsRes = await getPolls()
+    const activePolls = pollsRes.success
+      ? (pollsRes.polls || []).filter((p: any) => p.status === "ACTIVE")
+      : []
+
     return (
       <PlayerDashboardClient
         playerProfile={{
@@ -237,6 +244,7 @@ export default async function Dashboard() {
           date: latestPhysicalTest.date.toISOString()
         } : null}
         unreadMessages={unreadMessagesList}
+        activePolls={activePolls}
       />
     )
   }
