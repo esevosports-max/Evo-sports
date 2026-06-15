@@ -4,6 +4,7 @@ import { ROLE_LABELS } from "@/lib/rbac"
 import { db } from "@/lib/db"
 import ManagerRequestsList from "@/components/ManagerRequestsList"
 import DashboardSummaryClient from "@/components/DashboardSummaryClient"
+import PlayerDashboardClient from "@/components/PlayerDashboardClient"
 
 export default async function Dashboard() {
   const session = await auth()
@@ -86,6 +87,158 @@ export default async function Dashboard() {
 
   if (isRestricted) {
     redirect("/dashboard/paiement")
+  }
+
+  // If role is JOUEUR, render the dedicated player dashboard directly
+  if (roleName === "JOUEUR") {
+    const playerProfile = await db.player.findUnique({
+      where: { userId: user.id },
+      include: { teamCategory: true, user: true }
+    })
+
+    if (!playerProfile) {
+      return (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center text-zinc-500 font-bold dark:border-zinc-800 dark:bg-zinc-900">
+          Profil joueur introuvable. Veuillez contacter votre administrateur.
+        </div>
+      )
+    }
+
+    const clubId = playerProfile.clubId
+    const teamCategoryId = playerProfile.teamCategoryId
+    const teamCategoryName = playerProfile.teamCategory?.name || null
+
+    // Format local timezone YYYY-MM-DD
+    const localDate = new Date()
+    const offset = localDate.getTimezoneOffset()
+    const adjustedDate = new Date(localDate.getTime() - (offset * 60 * 1000))
+    const todayStr = adjustedDate.toISOString().split('T')[0]
+
+    let eventWhereClause: any = {
+      clubId,
+      date: todayStr
+    }
+    if (teamCategoryName) {
+      eventWhereClause.OR = [
+        { assignedTeam: teamCategoryName },
+        { assignedTeam: null }
+      ]
+    } else {
+      eventWhereClause.assignedTeam = null
+    }
+
+    const todayEvents = await db.calendarEvent.findMany({
+      where: eventWhereClause,
+      orderBy: { time: "asc" }
+    })
+
+    const activeQuestionnaires = await db.dailyQuestionnaire.findMany({
+      where: {
+        clubId,
+        active: true,
+        scheduledFor: { lte: new Date() },
+        expiresAt: { gt: new Date() },
+        OR: [
+          { teamCategoryId: null },
+          { teamCategoryId }
+        ]
+      },
+      include: {
+        responses: {
+          where: { playerId: playerProfile.id }
+        }
+      }
+    })
+    const pendingQuestionnaires = activeQuestionnaires.filter(q => q.responses.length === 0)
+
+    const latestPhysicalTest = await db.physicalTest.findFirst({
+      where: { playerId: playerProfile.id },
+      orderBy: { createdAt: "desc" }
+    })
+
+    const channels = await db.chatChannel.findMany({
+      where: { clubId }
+    })
+
+    const accessibleChannels = channels.filter(channel => {
+      if (channel.creatorId === user.id) return true
+      if (!channel.isPrivate && !channel.isCustom) return true
+      if (channel.isCustom) {
+        const targetUserIds = channel.targetUserIds as string[] | null
+        return targetUserIds && targetUserIds.includes(user.id)
+      }
+      if (channel.isPrivate && !channel.isCustom) {
+        const targetRoles = channel.targetRoles as string[] | null
+        if (targetRoles && targetRoles.includes("JOUEUR")) return true
+        const targetTeams = channel.targetTeams as string[] | null
+        if (targetTeams && teamCategoryId && targetTeams.includes(teamCategoryId)) return true
+      }
+      return false
+    })
+
+    const unreadMessagesList = []
+    for (const channel of accessibleChannels) {
+      const msgs = await db.chatMessage.findMany({
+        where: {
+          channelId: channel.id,
+          senderId: { not: user.id },
+          views: {
+            none: {
+              userId: user.id
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" }
+      })
+      for (const m of msgs) {
+        unreadMessagesList.push({
+          id: m.id,
+          senderName: m.senderName,
+          content: m.content,
+          createdAt: m.createdAt.toISOString(),
+          channelName: channel.name
+        })
+      }
+    }
+
+    unreadMessagesList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+    return (
+      <PlayerDashboardClient
+        playerProfile={{
+          id: playerProfile.id,
+          name: playerProfile.user?.name || user.name || "Joueur",
+          position: playerProfile.position,
+          number: playerProfile.number,
+          teamCategoryName
+        }}
+        todayEvents={todayEvents.map(evt => ({
+          id: evt.id,
+          title: evt.title,
+          type: evt.type,
+          time: evt.time,
+          location: evt.location,
+          details: evt.details,
+          status: evt.status
+        }))}
+        pendingQuestionnaires={pendingQuestionnaires.map(q => ({
+          id: q.id,
+          expiresAt: q.expiresAt.toISOString()
+        }))}
+        latestPhysicalTest={latestPhysicalTest ? {
+          vma: latestPhysicalTest.vma,
+          vo2Max: latestPhysicalTest.vo2Max,
+          sprint10m: latestPhysicalTest.sprint10m,
+          sprint30m: latestPhysicalTest.sprint30m,
+          cmj: latestPhysicalTest.cmj,
+          sj: latestPhysicalTest.sj,
+          illinois: latestPhysicalTest.illinois,
+          fat: latestPhysicalTest.fat,
+          date: latestPhysicalTest.date.toISOString()
+        } : null}
+        unreadMessages={unreadMessagesList}
+      />
+    )
   }
   
   // Custom French label

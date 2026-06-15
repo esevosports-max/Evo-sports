@@ -123,6 +123,7 @@ export async function getChannels() {
         messages: {
           select: {
             id: true,
+            senderId: true,
             createdAt: true,
             views: {
               where: { userId }
@@ -192,7 +193,7 @@ export async function getChannels() {
         canReply: c.canReply,
         creatorId: c.creatorId,
         creatorName: c.creatorName,
-        totalMessages,
+        totalMessages: c.messages.length,
         unreadCount
       }
     })
