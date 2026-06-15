@@ -181,8 +181,7 @@ export async function getChannels() {
 
     // Format output
     const formatted = accessible.map(c => {
-      const totalMessages = c.messages.length
-      const unreadCount = c.messages.filter(m => m.views.length === 0).length
+      const unreadCount = c.messages.filter(m => m.senderId !== userId && !m.views.some(v => v.userId === userId)).length
 
       return {
         id: c.id,
@@ -329,15 +328,7 @@ export async function sendMessage(channelId: string, content: string) {
       }
     })
 
-    // Automatically mark own message as read
-    await db.chatMessageView.create({
-      data: {
-        messageId: message.id,
-        userId,
-        userName,
-        userRole: roleName
-      }
-    })
+
 
     revalidatePath("/dashboard/messagerie")
     return { success: true }
@@ -372,8 +363,8 @@ export async function createCustomChannel(data: {
       throw new Error("Club introuvable")
     }
 
-    // Only allowed for PRESIDENT, DIRECTEUR_SPORTIF, ENTRAINEUR_PRINCIPAL
-    const allowedRoles = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"]
+    // Only allowed for PRESIDENT, DIRECTEUR_SPORTIF, SECRETAIRE_GENERAL, ENTRAINEUR_PRINCIPAL
+    const allowedRoles = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"]
     if (!allowedRoles.includes(roleName)) {
       throw new Error("Vous n'avez pas l'autorisation de créer une diffusion")
     }
@@ -413,15 +404,7 @@ export async function createCustomChannel(data: {
         }
       })
 
-      // Self read
-      await db.chatMessageView.create({
-        data: {
-          messageId: msg.id,
-          userId,
-          userName,
-          userRole: roleName
-        }
-      })
+
     }
 
     revalidatePath("/dashboard/messagerie")
@@ -601,6 +584,26 @@ export async function getRecipientStructure() {
       name: s.user.name || "Membre Staff",
       role: s.title || s.user.role?.name || "Staff"
     }))
+
+    // Fetch club's president
+    const club = await db.club.findUnique({
+      where: { id: clubId },
+      include: {
+        president: {
+          include: {
+            role: true
+          }
+        }
+      }
+    })
+
+    if (club?.president) {
+      formattedStaff.unshift({
+        userId: club.president.id,
+        name: club.president.name || "Le Président",
+        role: "Président"
+      })
+    }
 
     return { success: true, teams: formattedTeams, staff: formattedStaff }
   } catch (e: any) {

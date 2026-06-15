@@ -102,6 +102,10 @@ export async function createEvent(data: {
       throw new Error("Club introuvable pour l'utilisateur")
     }
 
+    if (roleName === "SECRETAIRE_GENERAL" && !["EXCURSION", "MEETING"].includes(data.type)) {
+      throw new Error("Vous n'êtes autorisé qu'à planifier des excursions et des réunions.")
+    }
+
     const newEvent = await db.calendarEvent.create({
       data: {
         title: data.title,
@@ -146,5 +150,53 @@ export async function deleteEvent(id: string) {
   } catch (error: any) {
     console.error("Error deleting event:", error)
     return { success: false, error: error.message || "Erreur lors de la suppression" }
+  }
+}
+
+export async function getClubTeams() {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const roleName = session.user.role?.name || ""
+    const clubId = await getClubIdForUser(userId, roleName)
+
+    if (!clubId) {
+      return { success: true, allTeams: [], myTeams: [] }
+    }
+
+    // Get all categories/teams created in the club
+    const allCategories = await db.teamCategory.findMany({
+      where: { clubId },
+      select: { name: true }
+    })
+    const allTeams = allCategories.map(c => c.name)
+
+    // For staff, get their assigned categories/teams
+    let myTeams: string[] = []
+    if (!["PRESIDENT", "MANAGER_EVO_SPORTS", "SECRETAIRE_GENERAL"].includes(roleName)) {
+      const staffMember = await db.staff.findUnique({
+        where: { userId },
+        include: { categories: { select: { name: true } } }
+      })
+      if (staffMember) {
+        myTeams = staffMember.categories.map(c => c.name)
+      }
+    } else {
+      myTeams = allTeams
+    }
+
+    // If myTeams is empty (e.g. staff not assigned to any category yet), fall back to allTeams
+    if (myTeams.length === 0) {
+      myTeams = allTeams
+    }
+
+    return { success: true, allTeams, myTeams }
+  } catch (error: any) {
+    console.error("Error in getClubTeams:", error)
+    return { success: false, error: error.message || "Erreur de chargement" }
   }
 }

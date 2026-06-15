@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 
-import { getEvents, createEvent, deleteEvent } from "@/app/dashboard/planning/actions"
+import { getEvents, createEvent, deleteEvent, getClubTeams } from "@/app/dashboard/planning/actions"
 
 interface CalendarEvent {
   id: string
@@ -33,16 +33,7 @@ const LOCAL_ROLE_LABELS: Record<string, string> = {
   JOUEUR: "Joueur",
 }
 
-// Map roles below Club President to their command teams in the club
-const STAFF_ASSIGNED_TEAMS: Record<string, string[]> = {
-  DIRECTEUR_SPORTIF: ["Séniors A", "Séniors B", "U19 Nationaux", "U17 R1"],
-  SECRETAIRE_GENERAL: ["Séniors A", "Séniors B", "U19 Nationaux", "U17 R1"],
-  ENTRAINEUR_PRINCIPAL: ["Séniors A"],
-  ENTRAINEUR_ADJOINT: ["Séniors B"],
-  PREPARATEUR_PHYSIQUE: ["U19 Nationaux"],
-  ENTRAINEUR_GARDIENS: ["Séniors A", "Séniors B"],
-  MEDECIN: ["Séniors A", "U19 Nationaux", "U17 R1"],
-}
+
 
 export default function PlanningCalendarClient({
   roleName,
@@ -70,8 +61,18 @@ export default function PlanningCalendarClient({
     setLoading(false)
   }
 
+  const [myAllowedTeams, setMyAllowedTeams] = useState<string[]>([])
+
+  const loadTeams = async () => {
+    const res = await getClubTeams()
+    if (res.success && res.myTeams) {
+      setMyAllowedTeams(res.myTeams)
+    }
+  }
+
   useEffect(() => {
     refreshEvents()
+    loadTeams()
   }, [])
 
   const [activeFilter, setActiveFilter] = useState<"ALL" | "MATCH" | "TRAINING" | "MEETING" | "MEDICAL_EXAM" | "EXCURSION">("ALL")
@@ -98,6 +99,13 @@ export default function PlanningCalendarClient({
     setSelectedDayEvents(events.filter((e) => e.date === todayStr))
   }, [todayStr, events])
 
+  // Set default type to EXCURSION for Secretary
+  useEffect(() => {
+    if (roleName === "SECRETAIRE_GENERAL") {
+      setNewEventType("EXCURSION")
+    }
+  }, [roleName])
+
   // Planner form state
   const [newEventTitle, setNewEventTitle] = useState("")
   const [newEventType, setNewEventType] = useState<"MATCH" | "TRAINING" | "MEETING" | "MEDICAL_EXAM" | "EXCURSION">("TRAINING")
@@ -109,13 +117,11 @@ export default function PlanningCalendarClient({
   const [successMsg, setSuccessMsg] = useState("")
 
   // Determine permissions
-  const canAddEvents = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "MEDECIN"].includes(roleName)
+  const canAddEvents = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "MEDECIN"].includes(roleName)
 
   // Determine team list available for the logged-in user
   const isPresidentOrManager = ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName)
-  const userAllowedTeams = isPresidentOrManager
-    ? ["Séniors A", "Séniors B", "U19 Nationaux", "U17 R1"]
-    : (STAFF_ASSIGNED_TEAMS[roleName] || ["Séniors A"])
+  const userAllowedTeams = myAllowedTeams
 
   // Generate calendar days for June 2026
   // June 1st, 2026 is a Monday. June has 30 days.
@@ -489,11 +495,20 @@ export default function PlanningCalendarClient({
                       onChange={(e) => setNewEventType(e.target.value as any)}
                       className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
                     >
-                      <option value="TRAINING">🟢 Entraînement</option>
-                      <option value="MATCH">🔵 Match</option>
-                      <option value="MEETING">⚫ Réunion</option>
-                      <option value="MEDICAL_EXAM">🔴 Examen Médical</option>
-                      <option value="EXCURSION">🟡 Excursion</option>
+                      {roleName === "SECRETAIRE_GENERAL" ? (
+                        <>
+                          <option value="EXCURSION">🟡 Excursion</option>
+                          <option value="MEETING">⚫ Réunion</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="TRAINING">🟢 Entraînement</option>
+                          <option value="MATCH">🔵 Match</option>
+                          <option value="MEETING">⚫ Réunion</option>
+                          <option value="MEDICAL_EXAM">🔴 Examen Médical</option>
+                          <option value="EXCURSION">🟡 Excursion</option>
+                        </>
+                      )}
                     </select>
                   </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from "react"
 import { useLanguage } from "@/components/LanguageProvider"
-import { getChannelMessages, sendMessage, createCustomChannel, getChannelRecipients } from "@/app/dashboard/messagerie/actions"
+import { getChannelMessages, createCustomChannel, getChannelRecipients } from "@/app/dashboard/messagerie/actions"
 
 const dict = {
   FR: {
@@ -157,7 +157,6 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
   const [searchQuery, setSearchQuery] = useState("")
 
   // Form states
-  const [newMsgText, setNewMsgText] = useState("")
   const [isPending, startTransition] = useTransition()
 
   // Custom Channel Modal States
@@ -178,7 +177,7 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
-  const canCreate = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(userSession.role)
+  const canCreate = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(userSession.role)
   const activeChannel = channels.find(c => c.id === activeChannelId)
 
   // Scroll to bottom
@@ -229,24 +228,7 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
     return () => clearInterval(interval)
   }, [activeChannelId, messages.length])
 
-  // Send message
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newMsgText.trim() || !activeChannelId) return
 
-    const textToSend = newMsgText
-    setNewMsgText("") // Clear input immediately for UX
-
-    startTransition(async () => {
-      const res = await sendMessage(activeChannelId, textToSend)
-      if (res.success) {
-        await loadChannelData(activeChannelId)
-        setTimeout(scrollToBottom, 50)
-      } else {
-        alert(`${tLoc.error_send}: ${res.error}`)
-      }
-    })
-  }
 
   // Teams & Players targeting helpers
   const handleTeamCheck = (catId: string, isChecked: boolean) => {
@@ -339,7 +321,6 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
   )
 
   // Composer reply state control
-  const isReadOnlyChannel = activeChannel && !activeChannel.canReply && activeChannel.creatorId !== userSession.id
 
   return (
     <div className={`space-y-6 animate-in fade-in duration-300 ${isRtl ? "text-right" : "text-left"}`} dir={isRtl ? "rtl" : "ltr"}>
@@ -536,7 +517,7 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
                           {/* Viewed Indicator */}
                           {isOwnMessage && (
                             <div className="text-[9px] text-zinc-400 font-bold text-right pr-2">
-                              👁️ {tLoc.vignette_read} {msg.views.length}
+                              👁️ {tLoc.vignette_read} {msg.views.filter((v: any) => v.userId !== msg.senderId).length}
                             </div>
                           )}
                         </div>
@@ -547,32 +528,7 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat Composer */}
-              <div className="p-3 border-t border-zinc-150/60 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/10">
-                {isReadOnlyChannel ? (
-                  <div className="text-center p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-bold text-xs">
-                    {tLoc.replies_disabled}
-                  </div>
-                ) : (
-                  <form onSubmit={handleSendMessage} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={newMsgText}
-                      onChange={(e) => setNewMsgText(e.target.value)}
-                      placeholder={tLoc.placeholder_msg}
-                      disabled={isPending}
-                      className="flex-1 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 shadow-inner outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold disabled:opacity-50"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isPending || !newMsgText.trim()}
-                      className="rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-white font-black uppercase text-xs tracking-wider px-5 py-3 shadow-md transition-all active:scale-95 cursor-pointer"
-                    >
-                      {tLoc.send}
-                    </button>
-                  </form>
-                )}
-              </div>
+
             </>
           ) : (
             <div className="h-full flex items-center justify-center text-zinc-400 text-xs italic">
@@ -779,8 +735,10 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
       {/* MESSAGE DETAILS MODAL (CLICK ON BUBBLE) */}
       {selectedMessageDetails && (() => {
         // Compute read stats
-        const viewsCount = selectedMessageDetails.views.length
-        const totalTargetsCount = activeRecipients.length
+        const filteredViews = selectedMessageDetails.views.filter((v: any) => v.userId !== selectedMessageDetails.senderId)
+        const viewsCount = filteredViews.length
+        const isSenderInRecipients = activeRecipients.some(r => r.name === selectedMessageDetails.senderName)
+        const totalTargetsCount = isSenderInRecipients ? Math.max(0, activeRecipients.length - 1) : activeRecipients.length
         const ratioText = `${viewsCount} / ${totalTargetsCount}`
         
         return (
@@ -840,13 +798,13 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
                     </span>
                   </div>
 
-                  {selectedMessageDetails.views.length === 0 ? (
+                  {filteredViews.length === 0 ? (
                     <p className="text-xs text-zinc-400 italic text-center py-4 bg-zinc-50 dark:bg-zinc-950/20 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800">
                       {tLoc.detail_no_views}
                     </p>
                   ) : (
                     <div className="max-h-[15vh] overflow-y-auto space-y-2 bg-zinc-50/50 dark:bg-zinc-950/20 p-3 rounded-2xl border border-zinc-200/50 dark:border-zinc-800">
-                      {selectedMessageDetails.views.map((v: any, idx: number) => (
+                      {filteredViews.map((v: any, idx: number) => (
                         <div key={idx} className="flex justify-between text-xs font-semibold text-zinc-850 dark:text-zinc-300">
                           <span>✅ {v.userName} <span className="text-[10px] text-zinc-400 font-bold">({v.userRole})</span></span>
                           <span className="text-zinc-400 font-bold">{tLoc.vignette_read} {new Date(v.viewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -863,7 +821,7 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
                   </h4>
                   <div className="max-h-[15vh] overflow-y-auto grid grid-cols-2 gap-2 bg-zinc-50/50 dark:bg-zinc-950/20 p-3 rounded-2xl border border-zinc-200/50 dark:border-zinc-800">
                     {activeRecipients.map((rec: any, idx: number) => {
-                      const hasRead = selectedMessageDetails.views.some((v: any) => v.userName === rec.name)
+                      const hasRead = filteredViews.some((v: any) => v.userName === rec.name)
                       
                       return (
                         <div key={idx} className="flex items-center gap-2 text-xs font-bold text-zinc-700 dark:text-zinc-300">
