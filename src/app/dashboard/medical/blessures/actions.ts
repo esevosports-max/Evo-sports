@@ -23,8 +23,8 @@ export async function declareInjury(
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS" && userRole !== "MEDECIN" && userRole !== "DIRECTEUR_SPORTIF") {
-      throw new Error("Action réservée aux gestionnaires et personnel médical")
+    if (userRole !== "PRESIDENT" && userRole !== "MEDECIN" && userRole !== "PREPARATEUR_PHYSIQUE") {
+      throw new Error("Action réservée au président, médecin et préparateur physique")
     }
 
     // Verify player exists
@@ -94,8 +94,8 @@ export async function healPlayer(playerId: string) {
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS" && userRole !== "MEDECIN" && userRole !== "DIRECTEUR_SPORTIF") {
-      throw new Error("Action réservée aux gestionnaires et personnel médical")
+    if (userRole !== "PRESIDENT" && userRole !== "MEDECIN" && userRole !== "PREPARATEUR_PHYSIQUE") {
+      throw new Error("Action réservée au président, médecin et préparateur physique")
     }
 
     await db.player.update({

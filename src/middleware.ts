@@ -24,7 +24,7 @@ export default NextAuth(authConfig).auth((req) => {
       const allowedRolesForMedical = ["PRESIDENT", "MEDECIN", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"]
       
       if (pathname.startsWith("/dashboard/medical/blessures")) {
-        if (!allowedRolesForMedical.includes(role || "") && role !== "PREPARATEUR_PHYSIQUE") {
+        if (!allowedRolesForMedical.includes(role || "") && role !== "PREPARATEUR_PHYSIQUE" && role !== "JOUEUR") {
           return Response.redirect(new URL("/dashboard", req.nextUrl))
         }
       } else {

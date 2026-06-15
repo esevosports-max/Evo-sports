@@ -33,6 +33,7 @@ interface BlessuresClientProps {
 
 export default function BlessuresClient({ initialPlayers, categories, userRole }: BlessuresClientProps) {
   const isPlayer = userRole === "JOUEUR"
+  const canManageInjuries = userRole === "PRESIDENT" || userRole === "MEDECIN" || userRole === "PREPARATEUR_PHYSIQUE"
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   
@@ -236,7 +237,7 @@ export default function BlessuresClient({ initialPlayers, categories, userRole }
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Injury Logs (Left 2 cols) */}
-        <div className={`${isPlayer ? "lg:col-span-3" : "lg:col-span-2"} space-y-4`}>
+        <div className={`${!canManageInjuries ? "lg:col-span-3" : "lg:col-span-2"} space-y-4`}>
           <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
             <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-white">
               Rapports & Archives Médicales ({injuredPlayers.length})
@@ -370,7 +371,7 @@ export default function BlessuresClient({ initialPlayers, categories, userRole }
                           >
                             Rapport 📄
                           </button>
-                          {!isPlayer && (
+                          {canManageInjuries && (
                             <button
                               onClick={() => handleHeal(record.id, record.name)}
                               disabled={isPending}
@@ -397,7 +398,7 @@ export default function BlessuresClient({ initialPlayers, categories, userRole }
         </div>
 
         {/* Declare Injury Form (Right 1 col) */}
-        {!isPlayer && (
+        {canManageInjuries && (
           <div className="lg:col-span-1 rounded-2xl border border-emerald-500/30 bg-emerald-50/25 dark:border-emerald-800/40 dark:bg-emerald-950/20 p-6 shadow-sm space-y-6 h-fit backdrop-blur-sm">
           <div className="space-y-1 pb-3 border-b border-zinc-150 dark:border-zinc-850">
             <h3 className="text-sm font-black uppercase tracking-wider text-zinc-850 dark:text-white">

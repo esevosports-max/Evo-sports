@@ -85,7 +85,7 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
           label: t("feat_injuries_title"), 
           icon: "🩹", 
           description: t("desc_injuries"),
-          requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE"] 
+          requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR"] 
         },
         { 
           href: "/dashboard/medical/dossier-medical", 

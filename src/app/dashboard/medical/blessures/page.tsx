@@ -59,6 +59,18 @@ export default async function BlessuresPage() {
   let dbPlayers = []
 
   if (userRole === "JOUEUR") {
+    const playerMember = await db.player.findUnique({
+      where: { userId }
+    })
+
+    if (!playerMember || !playerMember.isInjured) {
+      return (
+        <div className="p-8 text-center font-bold text-zinc-500 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-800 rounded-2xl">
+          Accès restreint. Vous n&apos;avez aucune blessure active déclarée.
+        </div>
+      )
+    }
+
     dbCategories = await db.teamCategory.findMany({
       where: { clubId }
     })

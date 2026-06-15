@@ -40,7 +40,7 @@ export default function AdSpace({ announcements = [] }: AdSpaceProps) {
   const activeSlide = announcements[activeSlideIndex]
 
   return (
-    <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl px-4 py-1 mt-1">
+    <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl px-4 py-1 mt-6">
       <div className="relative overflow-hidden rounded-xl border border-white/10 dark:border-white/5 bg-[#0B1528]/45 backdrop-blur-lg px-6 py-3.5 md:py-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Background Slideshow Slider */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
