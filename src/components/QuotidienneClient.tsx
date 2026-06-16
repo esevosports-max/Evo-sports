@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { createQuestionnaire, submitDailyWellness, applyQuestionnaireIndices, deleteQuestionnaire, saveQuestionnaireTemplate } from "@/app/dashboard/quotidienne/actions"
+import ExcelJS from "exceljs"
 
 interface PlayerResponse {
   id: string
@@ -363,7 +364,7 @@ export default function QuotidienneClient({
   }
 
   // Export responses to Excel (French formatting with semicolons)
-  const handleExportCSV = (q: Questionnaire) => {
+  const handleExportCSV = async (q: Questionnaire) => {
     // Determine targeted players
     const targetedPlayers = q.teamCategoryId
       ? players.filter((p) => p.teamCategoryId === q.teamCategoryId)
@@ -423,18 +424,119 @@ export default function QuotidienneClient({
       return row
     })
 
-    // Semicolon separator for default compatibility with Excel French edition
-    const csvContent =
-      "data:text/csv;charset=utf-8,\uFEFF" +
-      [
-        headers.map((h) => String(h).replace(/;/g, " ")).join(";"),
-        ...rows.map((row) => row.map((cell) => String(cell).replace(/;/g, " ")).join(";"))
-      ].join("\n")
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet("Rapport Forme")
 
-    const encodedUri = encodeURI(csvContent)
+    // Ensure grid lines are visible
+    worksheet.views = [{ showGridLines: true }]
+
+    // Add header row
+    const headerRow = worksheet.addRow(headers)
+    headerRow.height = 28
+
+    headerRow.eachCell((cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF059669" } // Emerald 600
+      }
+      cell.font = {
+        name: "Segoe UI",
+        color: { argb: "FFFFFFFF" },
+        bold: true,
+        size: 11
+      }
+      cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true }
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFCBD5E1" } },
+        left: { style: "thin", color: { argb: "FFCBD5E1" } },
+        bottom: { style: "medium", color: { argb: "FF047857" } },
+        right: { style: "thin", color: { argb: "FFCBD5E1" } }
+      }
+    })
+
+    // Add data rows
+    rows.forEach((rowData) => {
+      const dataRow = worksheet.addRow(rowData)
+      dataRow.height = 22
+
+      dataRow.eachCell((cell, colNumber) => {
+        const valStr = cell.value ? String(cell.value) : ""
+
+        // Default cell style
+        cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF1F2937" } }
+        cell.border = {
+          top: { style: "thin", color: { argb: "FFE2E8F0" } },
+          left: { style: "thin", color: { argb: "FFE2E8F0" } },
+          bottom: { style: "thin", color: { argb: "FFE2E8F0" } },
+          right: { style: "thin", color: { argb: "FFE2E8F0" } }
+        }
+
+        if (colNumber === 1) {
+          cell.alignment = { vertical: "middle", horizontal: "left" }
+          cell.font = { name: "Segoe UI", size: 10, bold: true, color: { argb: "FF0F172A" } }
+        } else {
+          cell.alignment = { vertical: "middle", horizontal: "center" }
+        }
+
+        // Conditional styling based on value (Green = good, Yellow = moderate, Red = bad)
+        if (valStr.includes("/")) {
+          const parts = valStr.split("/")
+          const score = parseInt(parts[0])
+          const max = parseInt(parts[1])
+          if (!isNaN(score) && !isNaN(max)) {
+            const half = max / 2
+            if (score <= Math.floor(half - 0.5)) {
+              cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2F8F0" } }
+              cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF065F46" }, bold: true }
+            } else if (score <= Math.floor(half + 1.5)) {
+              cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEF3C7" } }
+              cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF92400E" }, bold: true }
+            } else {
+              cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEE2E2" } }
+              cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF991B1B" }, bold: true }
+            }
+          }
+        } else if (valStr.includes("%")) {
+          const scoreNum = parseInt(valStr.replace("%", ""))
+          if (!isNaN(scoreNum)) {
+            if (scoreNum >= 70) {
+              cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2F8F0" } }
+              cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF065F46" }, bold: true }
+            } else if (scoreNum >= 50) {
+              cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEF3C7" } }
+              cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF92400E" }, bold: true }
+            } else {
+              cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEE2E2" } }
+              cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF991B1B" }, bold: true }
+            }
+          }
+        } else if (valStr === "N/A") {
+          cell.font = { name: "Segoe UI", size: 10, color: { argb: "FF94A3B8" } }
+        }
+      })
+    })
+
+    // Auto fit column widths with padding
+    worksheet.columns.forEach((column) => {
+      let maxLen = 0
+      if (column && column.eachCell) {
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const val = cell.value ? String(cell.value) : ""
+          if (val.length > maxLen) {
+            maxLen = val.length
+          }
+        })
+      }
+      column.width = Math.max(14, maxLen + 4)
+    })
+
+    // Write file
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
     const link = document.createElement("a")
-    link.setAttribute("href", encodedUri)
-    link.setAttribute("download", `rapport_daily_${q.teamCategoryName.replace(/\s+/g, "_")}_${new Date(q.createdAt).toLocaleDateString("fr-FR").replace(/\//g, "-")}.csv`)
+    link.href = URL.createObjectURL(blob)
+    link.download = `rapport_daily_${q.teamCategoryName.replace(/\s+/g, "_")}_${new Date(q.createdAt).toLocaleDateString("fr-FR").replace(/\//g, "-")}.xlsx`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
