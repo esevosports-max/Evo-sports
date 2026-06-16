@@ -831,9 +831,9 @@ export default function EntrainementClient({
 
                 <button
                   onClick={handleExportToExcel}
-                  className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-650 hover:from-emerald-450 hover:to-teal-600 text-white font-black uppercase text-[10px] tracking-wider py-3.5 shadow-md shadow-emerald-500/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase text-[10px] tracking-wider py-3.5 shadow-md shadow-emerald-600/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center"
                 >
-                  📥 Exporter en Excel
+                  Exporter en Excel
                 </button>
               </div>
 
