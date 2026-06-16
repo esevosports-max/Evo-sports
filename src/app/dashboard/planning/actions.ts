@@ -248,3 +248,35 @@ export async function getClubTeams() {
     return { success: false, error: error.message || "Erreur de chargement" }
   }
 }
+
+export async function completeTraining(id: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const roleName = session.user.role?.name || ""
+    const allowedRoles = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS"]
+    if (!allowedRoles.includes(roleName)) {
+      throw new Error("Vous n'êtes pas autorisé à modifier cet événement.")
+    }
+
+    const updated = await db.calendarEvent.update({
+      where: { id },
+      data: {
+        status: "TERMINE"
+      }
+    })
+
+    revalidatePath("/dashboard/entrainement")
+    revalidatePath("/dashboard/planning")
+    revalidatePath("/dashboard")
+
+    return { success: true, event: JSON.parse(JSON.stringify(updated)) }
+  } catch (error: any) {
+    console.error("Error completing training:", error)
+    return { success: false, error: error.message || "Erreur lors de la clôture" }
+  }
+}
+

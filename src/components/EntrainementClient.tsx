@@ -28,6 +28,7 @@ interface TrainingEvent {
   location: string
   details?: string
   completed?: boolean
+  status?: string
 }
 
 interface ActivityItem {
@@ -117,7 +118,7 @@ export default function EntrainementClient({
       filtered = initialTrainings.filter((t) => coachCategories.includes(t.assignedTeam))
     }
     const updatedList = filtered.map((t) => {
-      const isCompleted = localStorage.getItem(`completed_training_id_${t.id}`) === "true"
+      const isCompleted = localStorage.getItem(`completed_training_id_${t.id}`) === "true" || t.status === "TERMINE"
       if (isCompleted) {
         const savedDrills = localStorage.getItem(`completed_training_activities_${t.id}`)
         const savedRoster = localStorage.getItem(`completed_training_roster_${t.id}`)
@@ -126,8 +127,13 @@ export default function EntrainementClient({
             activities: JSON.parse(savedDrills),
             roster: JSON.parse(savedRoster)
           }
-          return { ...t, completed: true }
+        } else {
+          loadedCompletedMap[t.id] = {
+            activities: [],
+            roster: []
+          }
         }
+        return { ...t, completed: true }
       }
       return t
     })
@@ -227,26 +233,38 @@ export default function EntrainementClient({
   const absentCount = totalPlayers - presentCount
 
   // Submit and lock training session
-  const handleCompleteSession = () => {
+  const handleCompleteSession = async () => {
     if (!selectedTraining) return
 
-    // Save completion state & logs persistently in localStorage
-    localStorage.setItem(`completed_training_id_${selectedTraining.id}`, "true")
-    localStorage.setItem(`completed_training_date_${selectedTraining.date}`, "true")
-    localStorage.setItem(`completed_training_activities_${selectedTraining.id}`, JSON.stringify(activities))
-    localStorage.setItem(`completed_training_roster_${selectedTraining.id}`, JSON.stringify(roster))
+    try {
+      const { completeTraining } = await import("../app/dashboard/planning/actions")
+      const res = await completeTraining(selectedTraining.id)
+      if (!res.success) {
+        alert(res.error || "Une erreur est survenue lors de la clôture.")
+        return
+      }
 
-    // Update state list to reflect completed
-    setTrainingsList((prev) =>
-      prev.map((t) => (t.id === selectedTraining.id ? { ...t, completed: true } : t))
-    )
-    setCompletedDataMap((prev) => ({
-      ...prev,
-      [selectedTraining.id]: { activities, roster }
-    }))
+      // Save completion state & logs persistently in localStorage
+      localStorage.setItem(`completed_training_id_${selectedTraining.id}`, "true")
+      localStorage.setItem(`completed_training_date_${selectedTraining.date}`, "true")
+      localStorage.setItem(`completed_training_activities_${selectedTraining.id}`, JSON.stringify(activities))
+      localStorage.setItem(`completed_training_roster_${selectedTraining.id}`, JSON.stringify(roster))
 
-    // Switch directly to sheet view
-    setActiveView("sheet")
+      // Update state list to reflect completed
+      setTrainingsList((prev) =>
+        prev.map((t) => (t.id === selectedTraining.id ? { ...t, completed: true, status: "TERMINE" } : t))
+      )
+      setCompletedDataMap((prev) => ({
+        ...prev,
+        [selectedTraining.id]: { activities, roster }
+      }))
+
+      // Switch directly to sheet view
+      setActiveView("sheet")
+    } catch (err) {
+      console.error(err)
+      alert("Une erreur est survenue lors de la communication avec le serveur.")
+    }
   }
 
   // Export to Excel function

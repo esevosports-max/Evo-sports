@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import ManagerRequestsList from "@/components/ManagerRequestsList"
 import DashboardSummaryClient from "@/components/DashboardSummaryClient"
 import PlayerDashboardClient from "@/components/PlayerDashboardClient"
+import CoachDashboardClient from "@/components/CoachDashboardClient"
 import { getPolls } from "@/app/dashboard/sondage/actions"
 
 export default async function Dashboard() {
@@ -117,7 +118,10 @@ export default async function Dashboard() {
 
     let eventWhereClause: any = {
       clubId,
-      date: todayStr
+      date: todayStr,
+      status: {
+        notIn: ["TERMINE", "N_A"]
+      }
     }
     if (teamCategoryName) {
       eventWhereClause.OR = [
@@ -248,7 +252,213 @@ export default async function Dashboard() {
       />
     )
   }
-  
+
+  if (["ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "ENTRAINEUR_GARDIENS"].includes(roleName)) {
+    const staffProfile = await db.staff.findUnique({
+      where: { userId: user.id },
+      include: { categories: true, club: true }
+    })
+
+    if (!staffProfile) {
+      return (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-center text-zinc-500 font-bold dark:border-zinc-800 dark:bg-zinc-900">
+          Profil technique introuvable. Veuillez contacter votre administrateur.
+        </div>
+      )
+    }
+
+    const clubId = staffProfile.clubId
+    const categoryIds = staffProfile.categories.map(c => c.id)
+    const categoryNames = staffProfile.categories.map(c => c.name)
+
+    // Fetch players in the coach's categories
+    const players = await db.player.findMany({
+      where: {
+        teamCategoryId: { in: categoryIds }
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { number: "asc" }
+    })
+
+    // Fetch matches for these categories
+    const matches = await db.calendarEvent.findMany({
+      where: {
+        clubId,
+        type: "MATCH",
+        assignedTeam: { in: categoryNames }
+      },
+      orderBy: [
+        { date: "desc" },
+        { time: "desc" }
+      ]
+    })
+
+    // Fetch training sessions for these categories
+    const trainings = await db.calendarEvent.findMany({
+      where: {
+        clubId,
+        type: "TRAINING",
+        assignedTeam: { in: categoryNames }
+      },
+      orderBy: [
+        { date: "desc" },
+        { time: "desc" }
+      ]
+    })
+
+    // Fetch daily questionnaires
+    const dailyQuestionnaires = await db.dailyQuestionnaire.findMany({
+      where: {
+        clubId,
+        teamCategoryId: { in: categoryIds }
+      },
+      include: {
+        teamCategory: true,
+        responses: {
+          select: {
+            id: true
+          }
+        }
+      },
+      orderBy: { scheduledFor: "desc" }
+    })
+
+    // Fetch all polls in the club and filter for this coach's categories in JS
+    const allPolls = await db.poll.findMany({
+      where: {
+        clubId
+      },
+      include: {
+        options: true,
+        votes: true
+      },
+      orderBy: { createdAt: "desc" }
+    })
+
+    const polls = allPolls.filter(poll => {
+      if (!poll.targetTeams) return true
+      try {
+        const targetTeamsList = poll.targetTeams as string[]
+        return targetTeamsList.some(id => categoryIds.includes(id))
+      } catch {
+        return true
+      }
+    })
+
+    // Fetch physical tests for players in this coach's categories
+    const physicalTests = await db.physicalTest.findMany({
+      where: {
+        playerId: { in: players.map(p => p.id) }
+      },
+      include: {
+        player: {
+          include: {
+            user: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { date: "desc" }
+    })
+
+    return (
+      <CoachDashboardClient
+        roleName={roleName}
+        clubLogo={staffProfile.club?.logo || null}
+        categories={staffProfile.categories.map(c => ({
+          id: c.id,
+          name: c.name,
+          league: c.league,
+          coach: c.coach,
+          maxPlayers: c.maxPlayers
+        }))}
+        players={players.map(p => ({
+          id: p.id,
+          name: p.user?.name || "Joueur sans nom",
+          email: p.user?.email || "",
+          position: p.position || "Non spécifié",
+          number: p.number,
+          age: p.age,
+          height: p.height,
+          weight: p.weight,
+          foot: p.foot,
+          isInjured: p.isInjured,
+          injuryType: p.injuryType,
+          injurySeverity: p.injurySeverity,
+          injuryDuration: p.injuryDuration,
+          injuryDate: p.injuryDate ? p.injuryDate.toISOString() : null,
+          injuryReturn: p.injuryReturn ? p.injuryReturn.toISOString() : null,
+          injuryStatus: p.injuryStatus,
+          injuryProgress: p.injuryProgress
+        }))}
+        matches={matches.map(m => ({
+          id: m.id,
+          title: m.title,
+          location: m.location,
+          stadiumName: m.location === "Domicile" ? "Terrain EVO" : m.location,
+          date: m.date,
+          time: m.time,
+          status: m.status,
+          score: m.score,
+          assignedTeam: m.assignedTeam
+        }))}
+        trainings={trainings.map(t => ({
+          id: t.id,
+          title: t.title,
+          date: t.date,
+          time: t.time,
+          location: t.location,
+          details: t.details,
+          status: t.status,
+          assignedTeam: t.assignedTeam
+        }))}
+        dailyQuestionnaires={dailyQuestionnaires.map(q => ({
+          id: q.id,
+          teamCategoryName: q.teamCategory?.name || "Tous",
+          scheduledFor: q.scheduledFor.toISOString(),
+          expiresAt: q.expiresAt.toISOString(),
+          active: q.active,
+          responsesCount: q.responses.length
+        }))}
+        polls={polls.map(p => ({
+          id: p.id,
+          title: p.title,
+          status: p.status,
+          expiresAt: p.expiresAt.toISOString(),
+          totalVotes: p.votes.length,
+          options: p.options.map(o => ({
+            id: o.id,
+            text: o.text,
+            votesCount: p.votes.filter(v => v.optionId === o.id).length
+          }))
+        }))}
+        physicalTests={physicalTests.map(pt => ({
+          id: pt.id,
+          playerName: pt.player.user?.name || "Joueur",
+          vma: pt.vma,
+          vo2Max: pt.vo2Max,
+          sprint10m: pt.sprint10m,
+          sprint30m: pt.sprint30m,
+          cmj: pt.cmj,
+          sj: pt.sj,
+          illinois: pt.illinois,
+          fat: pt.fat,
+          date: pt.date.toISOString()
+        }))}
+      />
+    )
+  }
+
   // Custom French label
   const roleLabel = ROLE_LABELS[roleName as keyof typeof ROLE_LABELS] || roleName
 
