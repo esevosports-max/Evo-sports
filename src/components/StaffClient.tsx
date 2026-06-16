@@ -226,6 +226,15 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
   const tLoc = pageDict[language] || pageDict["FR"]
   const rolesLabelMap = ROLE_LABELS_DICT[language] || ROLE_LABELS_DICT["FR"]
 
+  const restrictedRoles = [
+    "ENTRAINEUR_PRINCIPAL",
+    "ENTRAINEUR_ADJOINT",
+    "ENTRAINEUR_GARDIENS",
+    "PREPARATEUR_PHYSIQUE",
+    "MEDECIN"
+  ]
+  const canManage = !currentUserRole || !restrictedRoles.includes(currentUserRole)
+
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [activeView, setActiveView] = useState<"list" | "create">("list")
@@ -647,12 +656,14 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
         </div>
         
         <div className="flex items-center gap-3 self-start sm:self-center">
-          <button
-            onClick={() => setActiveView("create")}
-            className="rounded-xl bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-300 hover:from-zinc-300 hover:via-zinc-200 hover:to-zinc-400 text-emerald-800 font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md border border-zinc-300/80 transition-all active:scale-95 cursor-pointer shrink-0"
-          >
-            {tLoc.btnInvite}
-          </button>
+          {canManage && (
+            <button
+              onClick={() => setActiveView("create")}
+              className="rounded-xl bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-300 hover:from-zinc-300 hover:via-zinc-200 hover:to-zinc-400 text-emerald-800 font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md border border-zinc-300/80 transition-all active:scale-95 cursor-pointer shrink-0"
+            >
+              {tLoc.btnInvite}
+            </button>
+          )}
           <span className="text-[9px] font-black bg-blue-500/10 text-blue-600 px-2.5 py-2.5 rounded-full uppercase tracking-wider">
             {tLoc.restrictedAccess}
           </span>
@@ -729,7 +740,7 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                 <th className="py-3.5 px-4">{tLoc.thContact}</th>
                 <th className="py-3.5 px-4">{tLoc.thJoined}</th>
                 <th className="py-3.5 px-4">{tLoc.thStatus}</th>
-                <th className="py-3.5 px-4 text-center">{tLoc.thActions}</th>
+                {canManage && <th className="py-3.5 px-4 text-center">{tLoc.thActions}</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850 text-xs">
@@ -798,44 +809,46 @@ export default function StaffClient({ initialStaff, categories, currentUserRole,
                       </span>
                     )}
                   </td>
-                  <td className="py-3.5 px-4">
-                    <div className="flex items-center justify-center gap-1.5">
-                      {!((currentUserRole === "SECRETAIRE_GENERAL" || currentUserRole === "ENTRAINEUR_PRINCIPAL" || currentUserRole === "ENTRAINEUR_ADJOINT") && ["PRESIDENT", "SECRETAIRE_GENERAL", "DIRECTEUR_SPORTIF"].includes(member.roleTag)) && (
-                        <>
-                          <button 
-                            onClick={() => handleOpenEdit(member)}
-                            className="px-2.5 py-1 rounded-lg border border-blue-500 hover:bg-blue-500/10 text-blue-600 dark:border-blue-400 dark:text-blue-400 font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer"
-                          >
-                            {tLoc.btnEdit}
-                          </button>
-                          <button 
-                            onClick={() => handleToggleBlock(member.id, member.name, !!member.isBlocked)}
-                            className={`px-2.5 py-1 rounded-lg border font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer ${
-                              member.isBlocked
-                                ? "border-emerald-500 hover:bg-emerald-500/10 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400"
-                                : "border-amber-500 hover:bg-amber-500/10 text-amber-600 dark:border-amber-400 dark:text-amber-400"
-                            }`}
-                          >
-                            {member.isBlocked
-                              ? (language === "EN" ? "Unblock" : language === "AR" ? "إلغاء الحظر" : "Débloquer")
-                              : (language === "EN" ? "Block" : language === "AR" ? "حظر" : "Bloquer")
-                            }
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(member.id, member.name)}
-                            className="px-2.5 py-1 rounded-lg border border-red-500 hover:bg-red-500/10 text-red-655 dark:border-red-400 dark:text-red-400 font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer"
-                          >
-                            {tLoc.btnDelete}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
+                  {canManage && (
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {!((currentUserRole === "SECRETAIRE_GENERAL" || currentUserRole === "ENTRAINEUR_PRINCIPAL" || currentUserRole === "ENTRAINEUR_ADJOINT") && ["PRESIDENT", "SECRETAIRE_GENERAL", "DIRECTEUR_SPORTIF"].includes(member.roleTag)) && (
+                          <>
+                            <button 
+                              onClick={() => handleOpenEdit(member)}
+                              className="px-2.5 py-1 rounded-lg border border-blue-500 hover:bg-blue-500/10 text-blue-600 dark:border-blue-400 dark:text-blue-400 font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer"
+                            >
+                              {tLoc.btnEdit}
+                            </button>
+                            <button 
+                              onClick={() => handleToggleBlock(member.id, member.name, !!member.isBlocked)}
+                              className={`px-2.5 py-1 rounded-lg border font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer ${
+                                member.isBlocked
+                                  ? "border-emerald-500 hover:bg-emerald-500/10 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400"
+                                  : "border-amber-500 hover:bg-amber-500/10 text-amber-600 dark:border-amber-400 dark:text-amber-400"
+                              }`}
+                            >
+                              {member.isBlocked
+                                ? (language === "EN" ? "Unblock" : language === "AR" ? "إلغاء الحظر" : "Débloquer")
+                                : (language === "EN" ? "Block" : language === "AR" ? "حظر" : "Bloquer")
+                              }
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(member.id, member.name)}
+                              className="px-2.5 py-1 rounded-lg border border-red-500 hover:bg-red-500/10 text-red-655 dark:border-red-400 dark:text-red-400 font-black uppercase text-[9px] tracking-wide transition-all duration-155 active:scale-95 cursor-pointer"
+                            >
+                              {tLoc.btnDelete}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {filteredStaff.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-zinc-400 font-bold uppercase tracking-wider text-[10px]">
+                  <td colSpan={canManage ? 6 : 5} className="py-8 text-center text-zinc-400 font-bold uppercase tracking-wider text-[10px]">
                     {tLoc.noMembersFound}
                   </td>
                 </tr>

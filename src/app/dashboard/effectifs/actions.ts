@@ -25,8 +25,9 @@ export async function createPlayer(data: {
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires")
+    const ALLOWED_PLAYER_MANAGERS = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL"]
+    if (!userRole || !ALLOWED_PLAYER_MANAGERS.includes(userRole)) {
+      throw new Error("Action réservée aux gestionnaires autorisés")
     }
 
     // Find the club ID
@@ -149,6 +150,11 @@ export async function deletePlayer(playerId: string) {
     if (!session || !session.user) {
       throw new Error("Non autorisé")
     }
+    const userRole = session.user.role?.name
+    const ALLOWED_PLAYER_MANAGERS = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL"]
+    if (!userRole || !ALLOWED_PLAYER_MANAGERS.includes(userRole)) {
+      throw new Error("Action réservée aux gestionnaires autorisés")
+    }
 
     const player = await db.player.findUnique({
       where: { id: playerId },
@@ -192,8 +198,9 @@ export async function updatePlayer(data: {
     }
 
     const userRole = session.user.role?.name
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires")
+    const ALLOWED_PLAYER_MANAGERS = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL"]
+    if (!userRole || !ALLOWED_PLAYER_MANAGERS.includes(userRole)) {
+      throw new Error("Action réservée aux gestionnaires autorisés")
     }
 
     const player = await db.player.findUnique({
@@ -279,8 +286,9 @@ export async function toggleBlockPlayer(playerId: string) {
     }
 
     const userRole = session.user.role?.name
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires")
+    const ALLOWED_PLAYER_MANAGERS = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL"]
+    if (!userRole || !ALLOWED_PLAYER_MANAGERS.includes(userRole)) {
+      throw new Error("Action réservée aux gestionnaires autorisés")
     }
 
     const player = await db.player.findUnique({

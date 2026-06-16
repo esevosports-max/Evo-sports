@@ -62,6 +62,14 @@ interface EffectifsClientProps {
 
 export default function EffectifsClient({ initialPlayers, categories, userRole }: EffectifsClientProps) {
   const isPlayer = userRole === "JOUEUR"
+  const restrictedRoles = [
+    "ENTRAINEUR_PRINCIPAL",
+    "ENTRAINEUR_ADJOINT",
+    "ENTRAINEUR_GARDIENS",
+    "PREPARATEUR_PHYSIQUE",
+    "MEDECIN"
+  ]
+  const canManage = !userRole || (!restrictedRoles.includes(userRole) && userRole !== "JOUEUR")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [filter, setFilter] = useState<"Tous" | "Gardien" | "Défenseur" | "Milieu" | "Attaquant">("Tous")
@@ -396,13 +404,15 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer ml-auto lg:ml-0"
-            >
-              Ajouter un Joueur ➕
-            </button>
+            {canManage && (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer ml-auto lg:ml-0"
+              >
+                Ajouter un Joueur ➕
+              </button>
+            )}
           </div>
         )}
       </section>
@@ -543,7 +553,7 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
                   </div>
 
                   {/* Actions Row */}
-                  {!isPlayer && (
+                  {canManage && (
                     <div className="flex gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                       <button
                         onClick={() => handleEditClick(player)}
@@ -563,7 +573,7 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
                       </button>
                       <button
                         onClick={() => handleDelete(player.id, player.name)}
-                        className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-650 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
+                        className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-655 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
                       >
                         Supprimer
                       </button>
@@ -587,7 +597,7 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
                     <th className="py-3 px-4 text-center font-bold">VMA / VO2</th>
                     <th className="py-3 px-4 text-center">Sprint 10/30m</th>
                     <th className="py-3 px-4 text-center">Explo / Agil / Gras</th>
-                    {!isPlayer && <th className="py-3 px-4 text-right">Actions</th>}
+                    {canManage && <th className="py-3 px-4 text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-150 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-350 font-semibold">
@@ -736,7 +746,7 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
                         </td>
 
                         {/* Actions Cell */}
-                        {!isPlayer && (
+                        {canManage && (
                           <td className="py-3 px-4 text-right whitespace-nowrap">
                             <div className="flex gap-1.5 justify-end">
                               <button
