@@ -717,9 +717,12 @@ export default function EntrainementClient({
                 {/* Meta details */}
                 <div className="flex justify-between items-start gap-4 pb-4 border-b-2 border-emerald-850/15">
                   <div className="space-y-1">
-                    <h3 className="text-xl font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-500">
-                      EVO SPORTS
-                    </h3>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src="/logo.png" 
+                      alt="EVO SPORTS" 
+                      className="h-10 w-auto object-contain" 
+                    />
                     <p className="text-[10px] text-zinc-450 font-black tracking-widest uppercase">
                       Plateforme d&apos;Optimisation & Performance
                     </p>
