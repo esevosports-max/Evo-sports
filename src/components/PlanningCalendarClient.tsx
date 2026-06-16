@@ -99,10 +99,12 @@ export default function PlanningCalendarClient({
     setSelectedDayEvents(events.filter((e) => e.date === todayStr))
   }, [todayStr, events])
 
-  // Set default type to EXCURSION for Secretary
+  // Set default type to EXCURSION for Secretary or MEDICAL_EXAM for Doctor
   useEffect(() => {
     if (roleName === "SECRETAIRE_GENERAL") {
       setNewEventType("EXCURSION")
+    } else if (roleName === "MEDECIN") {
+      setNewEventType("MEDICAL_EXAM")
     }
   }, [roleName])
 
@@ -504,6 +506,10 @@ export default function PlanningCalendarClient({
                         <>
                           <option value="TRAINING">🟢 Entraînement</option>
                           <option value="MATCH">🔵 Match</option>
+                        </>
+                      ) : roleName === "MEDECIN" ? (
+                        <>
+                          <option value="MEDICAL_EXAM">🔴 Examen Médical</option>
                         </>
                       ) : (
                         <>

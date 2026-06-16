@@ -133,6 +133,10 @@ export async function createEvent(data: {
       throw new Error("Vous n'êtes autorisé qu'à planifier des entraînements et des matchs.")
     }
 
+    if (roleName === "MEDECIN" && data.type !== "MEDICAL_EXAM") {
+      throw new Error("Vous n'êtes autorisé qu'à planifier des examens médicaux.")
+    }
+
     const newEvent = await db.calendarEvent.create({
       data: {
         title: data.title,
