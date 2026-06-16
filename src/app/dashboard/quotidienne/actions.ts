@@ -18,8 +18,16 @@ export async function createQuestionnaire(
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires (Staff)")
+    const ALLOWED_STAFF_ROLES = [
+      "PRESIDENT",
+      "MANAGER_EVO_SPORTS",
+      "ENTRAINEUR_PRINCIPAL",
+      "ENTRAINEUR_ADJOINT",
+      "PREPARATEUR_PHYSIQUE"
+    ]
+
+    if (!userRole || !ALLOWED_STAFF_ROLES.includes(userRole)) {
+      throw new Error("Action réservée aux membres autorisés du staff")
     }
 
     // Get the staff's clubId
@@ -189,8 +197,16 @@ export async function saveQuestionnaireTemplate(template: any[]) {
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires")
+    const ALLOWED_STAFF_ROLES = [
+      "PRESIDENT",
+      "MANAGER_EVO_SPORTS",
+      "ENTRAINEUR_PRINCIPAL",
+      "ENTRAINEUR_ADJOINT",
+      "PREPARATEUR_PHYSIQUE"
+    ]
+
+    if (!userRole || !ALLOWED_STAFF_ROLES.includes(userRole)) {
+      throw new Error("Action réservée aux membres autorisés du staff")
     }
 
     // Get the staff's clubId
@@ -236,8 +252,16 @@ export async function applyQuestionnaireIndices(questionnaireId: string) {
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires")
+    const ALLOWED_STAFF_ROLES = [
+      "PRESIDENT",
+      "MANAGER_EVO_SPORTS",
+      "ENTRAINEUR_PRINCIPAL",
+      "ENTRAINEUR_ADJOINT",
+      "PREPARATEUR_PHYSIQUE"
+    ]
+
+    if (!userRole || !ALLOWED_STAFF_ROLES.includes(userRole)) {
+      throw new Error("Action réservée aux membres autorisés du staff")
     }
 
     const questionnaire = await db.dailyQuestionnaire.findUnique({
@@ -298,8 +322,16 @@ export async function deleteQuestionnaire(questionnaireId: string) {
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires")
+    const ALLOWED_STAFF_ROLES = [
+      "PRESIDENT",
+      "MANAGER_EVO_SPORTS",
+      "ENTRAINEUR_PRINCIPAL",
+      "ENTRAINEUR_ADJOINT",
+      "PREPARATEUR_PHYSIQUE"
+    ]
+
+    if (!userRole || !ALLOWED_STAFF_ROLES.includes(userRole)) {
+      throw new Error("Action réservée aux membres autorisés du staff")
     }
 
     // 1. Delete physical indices associated with this questionnaire
