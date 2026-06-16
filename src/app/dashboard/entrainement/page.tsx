@@ -31,9 +31,21 @@ export default async function EntrainementPage() {
   // Fetch real training events and category rosters
   let initialTrainings: any[] = []
   let clubRosters: Record<string, any[]> = {}
+  let clubLogo: string | null = null
+  let clubName: string = "EVO SPORTS"
+
   try {
     const clubId = await getClubIdForUser(session.user.id, roleName)
     if (clubId) {
+      const club = await db.club.findUnique({
+        where: { id: clubId },
+        select: { logo: true, name: true }
+      })
+      if (club) {
+        clubLogo = club.logo
+        clubName = club.name
+      }
+
       initialTrainings = await db.calendarEvent.findMany({
         where: {
           clubId,
@@ -76,6 +88,8 @@ export default async function EntrainementPage() {
       coachCategories={coachCategories}
       initialTrainings={JSON.parse(JSON.stringify(initialTrainings))}
       clubRosters={clubRosters}
+      clubLogo={clubLogo}
+      clubName={clubName}
     />
   )
 }

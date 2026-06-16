@@ -90,18 +90,22 @@ export default function EntrainementClient({
   coachCategories = [],
   initialTrainings = [],
   clubRosters = {},
+  clubLogo = null,
+  clubName = "EVO SPORTS",
 }: {
   roleName: string
   userName: string
   coachCategories?: string[]
   initialTrainings?: TrainingEvent[]
   clubRosters?: Record<string, Omit<PlayerPresence, "present">[]>
+  clubLogo?: string | null
+  clubName?: string
 }) {
   const { language } = useLanguage()
 
   // Trainings list that can mutate with state
   const [trainingsList, setTrainingsList] = useState<TrainingEvent[]>([])
-  
+
   // Completed training data store
   const [completedDataMap, setCompletedDataMap] = useState<Record<string, CompletedData>>({})
 
@@ -249,7 +253,7 @@ export default function EntrainementClient({
   const handleExportToExcel = () => {
     if (!selectedTraining) return
 
-    const clubName = "EVO SPORTS"
+    const clubNameStr = clubName || "EVO SPORTS"
     const dateStr = selectedTraining.date
     const titleStr = "Feuille d'Entraînement Officielle"
     const teamStr = selectedTraining.assignedTeam
@@ -272,7 +276,7 @@ export default function EntrainementClient({
         </style>
       </head>
       <body>
-        <div class="club-title">${clubName}</div>
+        <div class="club-title">${clubNameStr}</div>
         <div>Date : ${dateStr}</div>
         <div class="doc-title">${titleStr}</div>
         <p><span class="meta-label">Équipe :</span> ${teamStr}</p>
@@ -362,7 +366,7 @@ export default function EntrainementClient({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      
+
       {/* ---------------------------------------- */}
       {/* VIEW 1: SELECT TRAINING */}
       {/* ---------------------------------------- */}
@@ -392,11 +396,10 @@ export default function EntrainementClient({
               {trainingsList.map((train) => (
                 <div
                   key={train.id}
-                  className={`rounded-2xl border p-5 shadow-sm flex flex-col justify-between gap-6 transition-all group relative overflow-hidden ${
-                    train.completed
+                  className={`rounded-2xl border p-5 shadow-sm flex flex-col justify-between gap-6 transition-all group relative overflow-hidden ${train.completed
                       ? "border-zinc-200 bg-zinc-50/50 dark:border-zinc-850 dark:bg-zinc-950/20 grayscale opacity-80"
                       : "border-zinc-150 bg-white dark:border-zinc-800 dark:bg-zinc-950 hover:border-emerald-500"
-                  }`}
+                    }`}
                 >
                   <div className={`absolute top-0 left-0 bottom-0 w-1 ${train.completed ? "bg-zinc-400" : "bg-emerald-500"}`} />
                   <div className="space-y-3">
@@ -405,11 +408,10 @@ export default function EntrainementClient({
                         📅 {new Date(train.date).toLocaleDateString("fr-FR", { dateStyle: "long" })}
                       </span>
                       <span className="text-[9px] font-black text-zinc-400">⏱ {train.time}</span>
-                      <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${
-                        train.completed
+                      <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${train.completed
                           ? "bg-zinc-200/50 text-zinc-500 dark:bg-zinc-850"
                           : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                      }`}>
+                        }`}>
                         ⚽ {train.assignedTeam}
                       </span>
 
@@ -469,7 +471,7 @@ export default function EntrainementClient({
       {/* ---------------------------------------- */}
       {activeView === "live" && selectedTraining && (
         <div className="space-y-6">
-          
+
           {/* Header Controls */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-150 pb-4 dark:border-zinc-800">
             <div className="space-y-1">
@@ -483,7 +485,7 @@ export default function EntrainementClient({
                 Lieu : {selectedTraining.location} | Date : {new Date(selectedTraining.date).toLocaleDateString("fr-FR", { dateStyle: "long" })}
               </p>
             </div>
-            
+
             <button
               onClick={() => setActiveView("select")}
               className="rounded-xl bg-zinc-950 hover:bg-zinc-900 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 transition-all active:scale-95 cursor-pointer dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 border border-zinc-950 dark:border-white shadow-sm"
@@ -493,10 +495,10 @@ export default function EntrainementClient({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* Column 1: Activities Logger */}
             <div className="lg:col-span-1 space-y-6">
-              
+
               {/* Form to add drill */}
               <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
                 <h3 className="text-xs font-black uppercase tracking-wider text-zinc-850 dark:text-white pb-3 border-b border-zinc-100 dark:border-zinc-800">
@@ -584,9 +586,9 @@ export default function EntrainementClient({
 
             {/* Column 2: Roster Presence Tracker */}
             <div className="lg:col-span-2 space-y-6">
-              
+
               <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
-                
+
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-3 border-b border-zinc-100 dark:border-zinc-800 select-none">
                   <div>
                     <h3 className="text-xs font-black uppercase tracking-wider text-zinc-850 dark:text-white">
@@ -596,7 +598,7 @@ export default function EntrainementClient({
                       Pointez les joueurs présents à la séance
                     </p>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <span className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-wider">
                       Présents : {presentCount}
@@ -612,16 +614,14 @@ export default function EntrainementClient({
                     <div
                       key={player.id}
                       onClick={() => togglePlayerPresence(player.id)}
-                      className={`rounded-xl border p-3.5 flex items-center justify-between gap-4 cursor-pointer select-none transition-all ${
-                        player.present
+                      className={`rounded-xl border p-3.5 flex items-center justify-between gap-4 cursor-pointer select-none transition-all ${player.present
                           ? "border-emerald-500 bg-emerald-500/5 dark:bg-emerald-950/10"
                           : "border-red-200 bg-red-50/10 dark:border-red-950/20"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase ${
-                          player.present ? "bg-emerald-600" : "bg-red-500"
-                        }`}>
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 uppercase ${player.present ? "bg-emerald-600" : "bg-red-500"
+                          }`}>
                           {player.name.charAt(0)}
                         </div>
                         <div>
@@ -634,11 +634,10 @@ export default function EntrainementClient({
                         </div>
                       </div>
 
-                      <div className={`h-6 px-3 rounded-lg flex items-center justify-center text-[9px] font-black uppercase tracking-wider border shrink-0 ${
-                        player.present
+                      <div className={`h-6 px-3 rounded-lg flex items-center justify-center text-[9px] font-black uppercase tracking-wider border shrink-0 ${player.present
                           ? "bg-emerald-500 text-white border-emerald-500"
                           : "text-red-550 border-red-200 hover:bg-red-50 dark:border-red-900/50"
-                      }`}>
+                        }`}>
                         {player.present ? "✓ Présent" : "✗ Absent"}
                       </div>
                     </div>
@@ -650,11 +649,10 @@ export default function EntrainementClient({
                   <button
                     onClick={handleCompleteSession}
                     disabled={activities.length === 0}
-                    className={`w-full rounded-xl font-black uppercase text-[10px] tracking-wider py-3.5 shadow-md transition-all text-center flex items-center justify-center gap-2 cursor-pointer ${
-                      activities.length > 0
+                    className={`w-full rounded-xl font-black uppercase text-[10px] tracking-wider py-3.5 shadow-md transition-all text-center flex items-center justify-center gap-2 cursor-pointer ${activities.length > 0
                         ? "bg-gradient-to-b from-zinc-100 to-zinc-350 hover:from-zinc-50 hover:to-zinc-200 border border-zinc-300 text-emerald-800 active:scale-95"
                         : "bg-zinc-100 text-zinc-400 border border-zinc-200 cursor-not-allowed"
-                    }`}
+                      }`}
                   >
                     📝 Clôturer l&apos;entraînement & Générer la Feuille
                   </button>
@@ -679,7 +677,7 @@ export default function EntrainementClient({
       {/* ---------------------------------------- */}
       {activeView === "sheet" && selectedTraining && (
         <div className="space-y-6">
-          
+
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-150 pb-4 dark:border-zinc-800 select-none">
             <div className="space-y-0.5">
               <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
@@ -707,13 +705,13 @@ export default function EntrainementClient({
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            
+
             {/* Sheet Preview Card (Left 2 cols) */}
             <div className="xl:col-span-2 rounded-2xl border border-zinc-250 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900 shadow-lg space-y-8 relative overflow-hidden select-none">
-              
+
               {/* Decorative print headers */}
               <div className="border-4 double border-emerald-800/20 p-6 space-y-6">
-                
+
                 {/* Meta details */}
                 <div className="flex justify-between items-start gap-4 pb-4 border-b-2 border-emerald-850/15">
                   <div className="space-y-1">
@@ -739,10 +737,20 @@ export default function EntrainementClient({
                 </div>
 
                 {/* Title */}
-                <div className="text-center py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-1">
-                  <h4 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">
-                    Feuille d&apos;Entraînement
-                  </h4>
+                <div className="text-center py-2 bg-emerald-500/5 border border-emerald-500/10 rounded-xl space-y-1 flex flex-col items-center justify-center">
+                  <div className="flex items-center justify-center gap-2">
+                    {clubLogo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img 
+                        src={clubLogo} 
+                        alt="Logo Club" 
+                        className="h-5 w-auto object-contain rounded" 
+                      />
+                    )}
+                    <h4 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">
+                      Feuille d&apos;Entraînement
+                    </h4>
+                  </div>
                   <p className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">
                     Thème : {selectedTraining.title} | Équipe : {selectedTraining.assignedTeam}
                   </p>
@@ -802,9 +810,8 @@ export default function EntrainementClient({
                             <td className="p-2.5 text-zinc-800 dark:text-zinc-200 uppercase font-black">{player.name}</td>
                             <td className="p-2.5 text-zinc-450 font-bold">{player.position}</td>
                             <td className="p-2.5 text-right">
-                              <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${
-                                player.present ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-650"
-                              }`}>
+                              <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${player.present ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-650"
+                                }`}>
                                 {player.present ? "Présent" : "Absent"}
                               </span>
                             </td>
@@ -821,7 +828,7 @@ export default function EntrainementClient({
 
             {/* Sidebar Exporter Controls (Right col) */}
             <div className="lg:col-span-1 space-y-6">
-              
+
               <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
                 <h3 className="text-xs font-black uppercase tracking-wider text-zinc-850 dark:text-white pb-3 border-b border-zinc-100 dark:border-zinc-800">
                   📥 Téléchargement Excel
