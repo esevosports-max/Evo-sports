@@ -500,6 +500,11 @@ export default function PlanningCalendarClient({
                           <option value="EXCURSION">🟡 Excursion</option>
                           <option value="MEETING">⚫ Réunion</option>
                         </>
+                      ) : ["ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "ENTRAINEUR_GARDIENS"].includes(roleName) ? (
+                        <>
+                          <option value="TRAINING">🟢 Entraînement</option>
+                          <option value="MATCH">🔵 Match</option>
+                        </>
                       ) : (
                         <>
                           <option value="TRAINING">🟢 Entraînement</option>

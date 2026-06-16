@@ -129,6 +129,10 @@ export async function createEvent(data: {
       throw new Error("Vous n'êtes autorisé qu'à planifier des excursions et des réunions.")
     }
 
+    if (["ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "ENTRAINEUR_GARDIENS"].includes(roleName) && !["TRAINING", "MATCH"].includes(data.type)) {
+      throw new Error("Vous n'êtes autorisé qu'à planifier des entraînements et des matchs.")
+    }
+
     const newEvent = await db.calendarEvent.create({
       data: {
         title: data.title,
