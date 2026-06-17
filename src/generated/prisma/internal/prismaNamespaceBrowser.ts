@@ -74,7 +74,8 @@ export const ModelName = {
   ChatMessage: 'ChatMessage',
   ChatMessageView: 'ChatMessageView',
   Announcement: 'Announcement',
-  SystemSetting: 'SystemSetting'
+  SystemSetting: 'SystemSetting',
+  Notification: 'Notification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -295,6 +296,8 @@ export const CompositionScalarFieldEnum = {
   formation: 'formation',
   slots: 'slots',
   substitutes: 'substitutes',
+  isCommunicated: 'isCommunicated',
+  communicatedAt: 'communicatedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -492,6 +495,7 @@ export const AnnouncementScalarFieldEnum = {
   mediaType: 'mediaType',
   mediaUrl: 'mediaUrl',
   active: 'active',
+  type: 'type',
   startDate: 'startDate',
   endDate: 'endDate',
   createdAt: 'createdAt',
@@ -509,6 +513,20 @@ export const SystemSettingScalarFieldEnum = {
 } as const
 
 export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  message: 'message',
+  type: 'type',
+  read: 'read',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const SortOrder = {

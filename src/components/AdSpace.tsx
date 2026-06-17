@@ -15,6 +15,7 @@ interface AnnouncementDB {
   linkUrl: string
   mediaType: string
   mediaUrl: string
+  type?: string
 }
 
 interface AdSpaceProps {

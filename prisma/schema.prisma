@@ -32,6 +32,7 @@ model User {
   player        Player?
   staff         Staff?
   club          Club?     @relation("ClubPresident")
+  notifications Notification[]
 }
 
 
@@ -231,6 +232,8 @@ model Composition {
   formation      Json         // e.g. {"defenders": 4, "midfielders": 3, "forwards": 3}
   slots          Json         // [{ id, type, label, x, y, playerId }]
   substitutes    Json         // Array of player IDs: ["id1", "id2"]
+  isCommunicated Boolean      @default(false)
+  communicatedAt DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
@@ -416,6 +419,7 @@ model Announcement {
   mediaType    String    @default("image") // "image" or "video"
   mediaUrl     String
   active       Boolean   @default(true)
+  type         String    @default("HOMEPAGE") // "HOMEPAGE" | "PROMOTION" | "SPONSOR"
   startDate    DateTime?
   endDate      DateTime?
   createdAt    DateTime  @default(now())
@@ -427,4 +431,16 @@ model SystemSetting {
   value        String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("INFO") // "COMPOSITION", "SYSTEM", etc.
+  read      Boolean  @default(false)
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
 }

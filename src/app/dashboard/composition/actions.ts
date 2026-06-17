@@ -23,9 +23,10 @@ export async function saveCompositionAction(data: {
     const userId = session.user.id
     const userRole = session.user.role?.name
 
-    // Check authorization: only president and manager can edit composition
-    if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
-      throw new Error("Action réservée aux gestionnaires")
+    // Check authorization: only president, manager, principal coach and assistant coach can edit composition
+    const ALLOWED_COMPOSITION_WRITERS = ["PRESIDENT", "MANAGER_EVO_SPORTS", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"]
+    if (!userRole || !ALLOWED_COMPOSITION_WRITERS.includes(userRole)) {
+      throw new Error("Action réservée aux gestionnaires et entraîneurs")
     }
 
     // Verify the category belongs to the user's club context
@@ -87,3 +88,105 @@ export async function sendCompositionNotificationAction(data: {
   }
 }
 
+export async function communicateCompositionAction(teamCategoryId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const userRole = session.user.role?.name
+
+    const ALLOWED_COMPOSITION_WRITERS = ["PRESIDENT", "MANAGER_EVO_SPORTS", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"]
+    if (!userRole || !ALLOWED_COMPOSITION_WRITERS.includes(userRole)) {
+      throw new Error("Action réservée aux gestionnaires et entraîneurs")
+    }
+
+    // Verify the composition exists and load it
+    const composition = await db.composition.findUnique({
+      where: { teamCategoryId }
+    })
+
+    if (!composition) {
+      throw new Error("Composition introuvable. Veuillez l'enregistrer d'abord.")
+    }
+
+    // Verify slots and substitutes meet requirements: exactly 11 starters, >= 2 substitutes
+    const slots = composition.slots as any[]
+    const substitutes = composition.substitutes as string[]
+    const startersCount = slots.filter((s: any) => s.playerId !== null).length
+
+    if (startersCount !== 11) {
+      throw new Error("Il doit y avoir exactement 11 titulaires pour communiquer la composition.")
+    }
+
+    if (!substitutes || substitutes.length < 2) {
+      throw new Error("Il doit y avoir au moins 2 joueurs remplaçants pour communiquer la composition.")
+    }
+
+    // Set as communicated in the database
+    await db.composition.update({
+      where: { teamCategoryId },
+      data: {
+        isCommunicated: true,
+        communicatedAt: new Date()
+      }
+    })
+
+    // Get the category details
+    const category = await db.teamCategory.findUnique({
+      where: { id: teamCategoryId }
+    })
+    const categoryName = category?.name || "votre équipe"
+
+    // Create notifications for selected starters and substitutes
+    const starterPlayerIds = slots.map((s: any) => s.playerId).filter(Boolean) as string[]
+    
+    // Fetch user IDs for starters
+    const starterPlayers = await db.player.findMany({
+      where: { id: { in: starterPlayerIds } },
+      select: { userId: true }
+    })
+
+    // Fetch user IDs for substitutes
+    const substitutePlayers = await db.player.findMany({
+      where: { id: { in: substitutes } },
+      select: { userId: true }
+    })
+
+    // Create notifications in database
+    for (const player of starterPlayers) {
+      if (player.userId) {
+        await db.notification.create({
+          data: {
+            userId: player.userId,
+            title: "Sélection Match : Titulaire 🟢",
+            message: `Félicitations, vous êtes sélectionné comme TITULAIRE dans la composition pour l'équipe ${categoryName} !`,
+            type: "COMPOSITION"
+          }
+        })
+      }
+    }
+
+    for (const player of substitutePlayers) {
+      if (player.userId) {
+        await db.notification.create({
+          data: {
+            userId: player.userId,
+            title: "Sélection Match : Remplaçant 🟡",
+            message: `Vous êtes sélectionné sur le BANC des remplaçants pour le match de l'équipe ${categoryName} !`,
+            type: "COMPOSITION"
+          }
+        })
+      }
+    }
+
+    revalidatePath("/dashboard")
+    revalidatePath("/dashboard/composition")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error communicating composition:", e)
+    return { success: false, error: e.message || "Erreur lors de la communication" }
+  }
+}

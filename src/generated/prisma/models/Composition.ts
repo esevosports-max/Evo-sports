@@ -27,6 +27,8 @@ export type AggregateComposition = {
 export type CompositionMinAggregateOutputType = {
   id: string | null
   teamCategoryId: string | null
+  isCommunicated: boolean | null
+  communicatedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -34,6 +36,8 @@ export type CompositionMinAggregateOutputType = {
 export type CompositionMaxAggregateOutputType = {
   id: string | null
   teamCategoryId: string | null
+  isCommunicated: boolean | null
+  communicatedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +48,8 @@ export type CompositionCountAggregateOutputType = {
   formation: number
   slots: number
   substitutes: number
+  isCommunicated: number
+  communicatedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -53,6 +59,8 @@ export type CompositionCountAggregateOutputType = {
 export type CompositionMinAggregateInputType = {
   id?: true
   teamCategoryId?: true
+  isCommunicated?: true
+  communicatedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -60,6 +68,8 @@ export type CompositionMinAggregateInputType = {
 export type CompositionMaxAggregateInputType = {
   id?: true
   teamCategoryId?: true
+  isCommunicated?: true
+  communicatedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +80,8 @@ export type CompositionCountAggregateInputType = {
   formation?: true
   slots?: true
   substitutes?: true
+  isCommunicated?: true
+  communicatedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -153,6 +165,8 @@ export type CompositionGroupByOutputType = {
   formation: runtime.JsonValue
   slots: runtime.JsonValue
   substitutes: runtime.JsonValue
+  isCommunicated: boolean
+  communicatedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: CompositionCountAggregateOutputType | null
@@ -184,6 +198,8 @@ export type CompositionWhereInput = {
   formation?: Prisma.JsonFilter<"Composition">
   slots?: Prisma.JsonFilter<"Composition">
   substitutes?: Prisma.JsonFilter<"Composition">
+  isCommunicated?: Prisma.BoolFilter<"Composition"> | boolean
+  communicatedAt?: Prisma.DateTimeNullableFilter<"Composition"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Composition"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Composition"> | Date | string
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryScalarRelationFilter, Prisma.TeamCategoryWhereInput>
@@ -195,6 +211,8 @@ export type CompositionOrderByWithRelationInput = {
   formation?: Prisma.SortOrder
   slots?: Prisma.SortOrder
   substitutes?: Prisma.SortOrder
+  isCommunicated?: Prisma.SortOrder
+  communicatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   teamCategory?: Prisma.TeamCategoryOrderByWithRelationInput
@@ -209,6 +227,8 @@ export type CompositionWhereUniqueInput = Prisma.AtLeast<{
   formation?: Prisma.JsonFilter<"Composition">
   slots?: Prisma.JsonFilter<"Composition">
   substitutes?: Prisma.JsonFilter<"Composition">
+  isCommunicated?: Prisma.BoolFilter<"Composition"> | boolean
+  communicatedAt?: Prisma.DateTimeNullableFilter<"Composition"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Composition"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Composition"> | Date | string
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryScalarRelationFilter, Prisma.TeamCategoryWhereInput>
@@ -220,6 +240,8 @@ export type CompositionOrderByWithAggregationInput = {
   formation?: Prisma.SortOrder
   slots?: Prisma.SortOrder
   substitutes?: Prisma.SortOrder
+  isCommunicated?: Prisma.SortOrder
+  communicatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CompositionCountOrderByAggregateInput
@@ -236,6 +258,8 @@ export type CompositionScalarWhereWithAggregatesInput = {
   formation?: Prisma.JsonWithAggregatesFilter<"Composition">
   slots?: Prisma.JsonWithAggregatesFilter<"Composition">
   substitutes?: Prisma.JsonWithAggregatesFilter<"Composition">
+  isCommunicated?: Prisma.BoolWithAggregatesFilter<"Composition"> | boolean
+  communicatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Composition"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Composition"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Composition"> | Date | string
 }
@@ -245,6 +269,8 @@ export type CompositionCreateInput = {
   formation: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: boolean
+  communicatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   teamCategory: Prisma.TeamCategoryCreateNestedOneWithoutCompositionInput
@@ -256,6 +282,8 @@ export type CompositionUncheckedCreateInput = {
   formation: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: boolean
+  communicatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -265,6 +293,8 @@ export type CompositionUpdateInput = {
   formation?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  communicatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teamCategory?: Prisma.TeamCategoryUpdateOneRequiredWithoutCompositionNestedInput
@@ -276,6 +306,8 @@ export type CompositionUncheckedUpdateInput = {
   formation?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  communicatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -286,6 +318,8 @@ export type CompositionCreateManyInput = {
   formation: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: boolean
+  communicatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -295,6 +329,8 @@ export type CompositionUpdateManyMutationInput = {
   formation?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  communicatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -305,6 +341,8 @@ export type CompositionUncheckedUpdateManyInput = {
   formation?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  communicatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -320,6 +358,8 @@ export type CompositionCountOrderByAggregateInput = {
   formation?: Prisma.SortOrder
   slots?: Prisma.SortOrder
   substitutes?: Prisma.SortOrder
+  isCommunicated?: Prisma.SortOrder
+  communicatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -327,6 +367,8 @@ export type CompositionCountOrderByAggregateInput = {
 export type CompositionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teamCategoryId?: Prisma.SortOrder
+  isCommunicated?: Prisma.SortOrder
+  communicatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -334,6 +376,8 @@ export type CompositionMaxOrderByAggregateInput = {
 export type CompositionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   teamCategoryId?: Prisma.SortOrder
+  isCommunicated?: Prisma.SortOrder
+  communicatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -375,6 +419,8 @@ export type CompositionCreateWithoutTeamCategoryInput = {
   formation: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: boolean
+  communicatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -384,6 +430,8 @@ export type CompositionUncheckedCreateWithoutTeamCategoryInput = {
   formation: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: boolean
+  communicatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -409,6 +457,8 @@ export type CompositionUpdateWithoutTeamCategoryInput = {
   formation?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  communicatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -418,6 +468,8 @@ export type CompositionUncheckedUpdateWithoutTeamCategoryInput = {
   formation?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slots?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   substitutes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  isCommunicated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  communicatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -430,6 +482,8 @@ export type CompositionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   formation?: boolean
   slots?: boolean
   substitutes?: boolean
+  isCommunicated?: boolean
+  communicatedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teamCategory?: boolean | Prisma.TeamCategoryDefaultArgs<ExtArgs>
@@ -441,6 +495,8 @@ export type CompositionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   formation?: boolean
   slots?: boolean
   substitutes?: boolean
+  isCommunicated?: boolean
+  communicatedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teamCategory?: boolean | Prisma.TeamCategoryDefaultArgs<ExtArgs>
@@ -452,6 +508,8 @@ export type CompositionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   formation?: boolean
   slots?: boolean
   substitutes?: boolean
+  isCommunicated?: boolean
+  communicatedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   teamCategory?: boolean | Prisma.TeamCategoryDefaultArgs<ExtArgs>
@@ -463,11 +521,13 @@ export type CompositionSelectScalar = {
   formation?: boolean
   slots?: boolean
   substitutes?: boolean
+  isCommunicated?: boolean
+  communicatedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CompositionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamCategoryId" | "formation" | "slots" | "substitutes" | "createdAt" | "updatedAt", ExtArgs["result"]["composition"]>
+export type CompositionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "teamCategoryId" | "formation" | "slots" | "substitutes" | "isCommunicated" | "communicatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["composition"]>
 export type CompositionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   teamCategory?: boolean | Prisma.TeamCategoryDefaultArgs<ExtArgs>
 }
@@ -489,6 +549,8 @@ export type $CompositionPayload<ExtArgs extends runtime.Types.Extensions.Interna
     formation: runtime.JsonValue
     slots: runtime.JsonValue
     substitutes: runtime.JsonValue
+    isCommunicated: boolean
+    communicatedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["composition"]>
@@ -920,6 +982,8 @@ export interface CompositionFieldRefs {
   readonly formation: Prisma.FieldRef<"Composition", 'Json'>
   readonly slots: Prisma.FieldRef<"Composition", 'Json'>
   readonly substitutes: Prisma.FieldRef<"Composition", 'Json'>
+  readonly isCommunicated: Prisma.FieldRef<"Composition", 'Boolean'>
+  readonly communicatedAt: Prisma.FieldRef<"Composition", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Composition", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Composition", 'DateTime'>
 }

@@ -102,7 +102,9 @@ export default async function CompositionPage() {
     teamCategoryId: comp.teamCategoryId,
     formation: comp.formation as any,
     slots: comp.slots as any,
-    substitutes: comp.substitutes as any
+    substitutes: comp.substitutes as any,
+    isCommunicated: comp.isCommunicated,
+    communicatedAt: comp.communicatedAt ? comp.communicatedAt.toISOString() : null,
   }))
 
   // Format players for the client component

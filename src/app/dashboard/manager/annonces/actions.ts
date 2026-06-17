@@ -41,7 +41,8 @@ export async function getAnnouncements() {
           linkUrl: "/pricing",
           mediaType: "video",
           mediaUrl: "https://player.vimeo.com/external/409224368.sd.mp4?s=d4f2bc181e18d6e326c7104b2bcf1b15c7e193fb&profile_id=165&oauth2_token_id=57447761",
-          active: true
+          active: true,
+          type: "SPONSOR"
         },
         {
           badgeText: "Nouveauté",
@@ -54,20 +55,22 @@ export async function getAnnouncements() {
           linkUrl: "/dashboard",
           mediaType: "image",
           mediaUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80",
-          active: true
+          active: true,
+          type: "NEWS"
         },
         {
-          badgeText: "Info Système",
+          badgeText: "Promo",
           badgeStyle: "bg-amber-500/20 border-amber-500/35 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.25)]",
-          icon: "💬",
-          title: "SUPPORT 24/7",
+          icon: "🏷️",
+          title: "RÉDUCTION -20%",
           titleStyle: "from-amber-400 to-orange-400",
-          description: "Une question ou besoin d'assistance ? Notre support technique est disponible en continu pour votre club.",
+          description: "Profitez de notre offre spéciale de fin d'année et bénéficiez de -20% sur l'abonnement Club annuel.",
           linkText: "Nous Contacter",
           linkUrl: "/contact",
-          mediaType: "video",
-          mediaUrl: "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c022f73b4d538e1bde334d588523558a&profile_id=139&oauth2_token_id=57447761",
-          active: true
+          mediaType: "image",
+          mediaUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+          active: true,
+          type: "PROMOTION"
         }
       ]
 
@@ -137,6 +140,7 @@ export async function saveAnnouncement(data: {
   mediaType: string
   mediaUrl: string
   active: boolean
+  type: string
   startDate?: string | null
   endDate?: string | null
 }) {
@@ -155,6 +159,7 @@ export async function saveAnnouncement(data: {
       mediaType: data.mediaType,
       mediaUrl: data.mediaUrl,
       active: data.active,
+      type: data.type,
       startDate: data.startDate ? new Date(data.startDate) : null,
       endDate: data.endDate ? new Date(data.endDate) : null
     }

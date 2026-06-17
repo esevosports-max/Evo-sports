@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { createPlayer, deletePlayer, updatePlayer as updatePlayerAction, toggleBlockPlayer } from "@/app/dashboard/effectifs/actions"
+import { createPlayer, deletePlayer, updatePlayer as updatePlayerAction, toggleBlockPlayer, convoquerPlayersAction, getSentConvocationsAction, deleteConvocationAction } from "@/app/dashboard/effectifs/actions"
 
 interface Category {
   id: string
@@ -95,6 +95,22 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
   // Edit modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
+
+  // Convocation modal states
+  const [isConvModalOpen, setIsConvModalOpen] = useState(false)
+  const [convMessage, setConvMessage] = useState("Vous êtes convoqué pour le prochain match de l'équipe.")
+  const [convSelectedPlayers, setConvSelectedPlayers] = useState<string[]>([])
+  const [convDate, setConvDate] = useState("")
+  const [convTime, setConvTime] = useState("18:00")
+  const [convLocation, setConvLocation] = useState("Stade municipal")
+  const [convSearch, setConvSearch] = useState("")
+  const [convCategoryFilter, setConvCategoryFilter] = useState("Tous")
+  const canConvoquer = userRole !== "JOUEUR"
+
+  // Convocation history states
+  const [convActiveTab, setConvActiveTab] = useState<"send" | "history">("send")
+  const [sentConvocations, setSentConvocations] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
 
   const [editFirstName, setEditFirstName] = useState("")
   const [editLastName, setEditLastName] = useState("")
@@ -208,6 +224,85 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
         setTimeout(() => setErrorMsg(""), 5000)
       }
     })
+  }
+
+  const handleSendConvocation = (e: React.FormEvent) => {
+    e.preventDefault()
+    setSuccessMsg("")
+    setErrorMsg("")
+
+    if (convSelectedPlayers.length === 0) {
+      setErrorMsg("Il faut sélectionner au moins un joueur.")
+      return
+    }
+
+    startTransition(async () => {
+      const res = await convoquerPlayersAction({
+        playerIds: convSelectedPlayers,
+        message: convMessage,
+        date: convDate,
+        time: convTime,
+        location: convLocation
+      })
+
+      if (res.success) {
+        setSuccessMsg("Convocation envoyée avec succès aux joueurs sélectionnés !")
+        setIsConvModalOpen(false)
+        setConvSelectedPlayers([])
+        router.refresh()
+        setTimeout(() => setSuccessMsg(""), 5000)
+      } else {
+        setErrorMsg(res.error || "Une erreur est survenue lors de l'envoi de la convocation.")
+        setTimeout(() => setErrorMsg(""), 5000)
+      }
+    })
+  }
+
+  const loadHistory = async () => {
+    setLoadingHistory(true)
+    const res = await getSentConvocationsAction()
+    if (res.success && res.convocations) {
+      const grouped: Record<string, any> = {}
+      res.convocations.forEach((conv: any) => {
+        const key = `${conv.title}-${conv.message}`
+        if (!grouped[key]) {
+          grouped[key] = {
+            title: conv.title,
+            message: conv.message,
+            createdAt: conv.createdAt,
+            expiresAt: conv.expiresAt,
+            players: []
+          }
+        }
+        const playerName = conv.user?.name || "Joueur"
+        const jersey = conv.user?.player?.number ? ` (N°${conv.user.player.number})` : ""
+        grouped[key].players.push(`${playerName}${jersey}`)
+      })
+      setSentConvocations(Object.values(grouped))
+    }
+    setLoadingHistory(false)
+  }
+
+  useEffect(() => {
+    if (isConvModalOpen && convActiveTab === "history") {
+      loadHistory()
+    }
+  }, [isConvModalOpen, convActiveTab])
+
+  const handleDeleteConvocation = async (title: string, message: string) => {
+    if (!confirm("Voulez-vous vraiment annuler/supprimer cette convocation ?")) {
+      return
+    }
+    const res = await deleteConvocationAction(title, message)
+    if (res.success) {
+      setSuccessMsg("Convocation annulée avec succès !")
+      loadHistory()
+      router.refresh()
+      setTimeout(() => setSuccessMsg(""), 5000)
+    } else {
+      setErrorMsg(res.error || "Erreur de suppression de la convocation.")
+      setTimeout(() => setErrorMsg(""), 5000)
+    }
   }
 
   const handleToggleBlock = (id: string, name: string, isBlocked?: boolean) => {
@@ -404,18 +499,48 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
               ))}
             </div>
 
-            {canManage && (
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer ml-auto lg:ml-0"
-              >
-                Ajouter un Joueur ➕
-              </button>
-            )}
+            <div className="flex gap-2 ml-auto lg:ml-0">
+              {canConvoquer && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConvActiveTab("send")
+                    setConvSelectedPlayers([])
+                    setConvMessage("Vous êtes convoqué pour le prochain match de l'équipe.")
+                    setConvDate(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+                    setConvTime("18:00")
+                    setConvLocation("Stade municipal")
+                    setIsConvModalOpen(true)
+                  }}
+                  className="rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md shadow-amber-500/20 transition-all active:scale-95 cursor-pointer"
+                >
+                  Convoquer 📢
+                </button>
+              )}
+              {canManage && (
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 shadow-md shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
+                >
+                  Ajouter un Joueur ➕
+                </button>
+              )}
+            </div>
           </div>
         )}
       </section>
+
+      {successMsg && (
+        <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4 text-xs font-black text-emerald-650 dark:text-emerald-400 text-center">
+          {successMsg}
+        </div>
+      )}
+      {errorMsg && (
+        <div className="rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-xs font-black text-red-655 dark:text-red-400 text-center">
+          {errorMsg}
+        </div>
+      )}
 
       {/* Roster Cards/Table Full Width List */}
       <div className="space-y-4">
@@ -1155,6 +1280,249 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
                 {isPending ? "Modification..." : "Modifier Joueur 💾"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Dialog for Convocation */}
+      {isConvModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-2xl border border-zinc-200/50 bg-white p-6 shadow-2xl dark:border-zinc-850 dark:bg-zinc-900 space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            {/* Close button */}
+            <button
+              onClick={() => setIsConvModalOpen(false)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-650 dark:hover:text-white cursor-pointer font-black text-sm"
+              title="Fermer"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-sm font-black uppercase tracking-wider text-zinc-850 dark:text-white pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              📢 Gestion des Convocations
+            </h3>
+
+            {/* Tabs */}
+            <div className="flex border-b border-zinc-100 dark:border-zinc-800 gap-4">
+              <button
+                type="button"
+                onClick={() => setConvActiveTab("send")}
+                className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all cursor-pointer text-center ${
+                  convActiveTab === "send"
+                    ? "border-amber-500 text-amber-500"
+                    : "border-transparent text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-200"
+                }`}
+              >
+                Nouvelle Convocation 📢
+              </button>
+              <button
+                type="button"
+                onClick={() => setConvActiveTab("history")}
+                className={`flex-1 pb-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all cursor-pointer text-center ${
+                  convActiveTab === "history"
+                    ? "border-amber-500 text-amber-500"
+                    : "border-transparent text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-200"
+                }`}
+              >
+                Envoyées / Historique 📜
+              </button>
+            </div>
+
+            {convActiveTab === "send" ? (
+              <form onSubmit={handleSendConvocation} className="space-y-4 animate-in fade-in duration-200">
+                {/* Message */}
+                <div>
+                  <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Message de convocation</label>
+                  <textarea
+                    required
+                    rows={2}
+                    value={convMessage}
+                    onChange={(e) => setConvMessage(e.target.value)}
+                    placeholder="Ex: Merci de vous présenter en tenue officielle..."
+                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-amber-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                  />
+                </div>
+
+                {/* Date / Time / Lieu */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={convDate}
+                      onChange={(e) => setConvDate(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-amber-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Heure</label>
+                    <input
+                      type="time"
+                      required
+                      value={convTime}
+                      onChange={(e) => setConvTime(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-amber-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">Lieu</label>
+                    <input
+                      type="text"
+                      required
+                      value={convLocation}
+                      onChange={(e) => setConvLocation(e.target.value)}
+                      placeholder="Ex: Stade municipal"
+                      className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none focus:border-amber-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                    />
+                  </div>
+                </div>
+
+                {/* Selection of players */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-[9px] font-black text-zinc-500 uppercase">
+                      Sélectionner les joueurs ({convSelectedPlayers.length} sélectionné(s))
+                    </label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const allIds = initialPlayers.map(p => p.id)
+                          setConvSelectedPlayers(allIds)
+                        }}
+                        className="text-[8px] font-black uppercase text-amber-600 hover:text-amber-500 cursor-pointer"
+                      >
+                        Tout sélectionner
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConvSelectedPlayers([])}
+                        className="text-[8px] font-black uppercase text-zinc-500 hover:text-zinc-400 cursor-pointer"
+                      >
+                        Effacer
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Player search / filter in modal */}
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="Rechercher un joueur..."
+                      value={convSearch}
+                      onChange={(e) => setConvSearch(e.target.value)}
+                      className="flex-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] text-zinc-900 outline-none focus:border-amber-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-semibold"
+                    />
+                    <select
+                      value={convCategoryFilter}
+                      onChange={(e) => setConvCategoryFilter(e.target.value)}
+                      className="rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-[11px] text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    >
+                      <option value="Tous">Toutes catégories</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Players Checkbox List */}
+                  <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl max-h-48 overflow-y-auto p-2 space-y-1.5 bg-zinc-50/50 dark:bg-zinc-950/20 custom-scrollbar">
+                    {(() => {
+                      const filtered = initialPlayers.filter(p => {
+                        const matchesSearch = p.name.toLowerCase().includes(convSearch.toLowerCase())
+                        const matchesCat = convCategoryFilter === "Tous" || p.teamCategoryId === convCategoryFilter
+                        return matchesSearch && matchesCat
+                      })
+
+                      if (filtered.length === 0) {
+                        return <p className="text-[10px] text-zinc-400 font-bold text-center py-4">Aucun joueur ne correspond</p>
+                      }
+
+                      return filtered.map((player) => {
+                        const isChecked = convSelectedPlayers.includes(player.id)
+                        return (
+                          <label
+                            key={player.id}
+                            className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition-colors hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 ${
+                              isChecked
+                                ? "bg-amber-500/5 border-amber-500/20 text-zinc-900 dark:text-white font-black"
+                                : "border-transparent text-zinc-700 dark:text-zinc-350"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {
+                                if (isChecked) {
+                                  setConvSelectedPlayers(prev => prev.filter(id => id !== player.id))
+                                } else {
+                                  setConvSelectedPlayers(prev => [...prev, player.id])
+                                }
+                              }}
+                              className="rounded text-amber-500 focus:ring-amber-500 cursor-pointer h-3.5 w-3.5"
+                            />
+                            <div className="flex justify-between w-full text-[11px]">
+                              <span>N°{player.number} - {player.name}</span>
+                              <span className="text-[9px] text-zinc-450 uppercase font-black">{player.teamCategoryName || "Sans catégorie"}</span>
+                            </div>
+                          </label>
+                        )
+                      })
+                    })()}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full rounded-xl bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-250 disabled:text-zinc-500 disabled:cursor-not-allowed text-white font-black uppercase text-xs tracking-wider py-3 shadow-md shadow-amber-500/20 transition-all active:scale-95 cursor-pointer flex items-center justify-center"
+                >
+                  {isPending ? "Envoi..." : "Envoyer la Convocation 🚀"}
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                {loadingHistory ? (
+                  <div className="flex flex-col items-center justify-center py-10 space-y-2">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></div>
+                    <span className="text-[10px] font-black uppercase text-zinc-400">Chargement de l'historique...</span>
+                  </div>
+                ) : sentConvocations.length === 0 ? (
+                  <div className="text-center py-10 text-zinc-400">
+                    <p className="text-xs font-bold">Aucune convocation envoyée récemment.</p>
+                    <p className="text-[10px] text-zinc-550">Les convocations sont supprimées de l'historique 24h après leur date d'expiration.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1 custom-scrollbar">
+                    {sentConvocations.map((conv, idx) => (
+                      <div key={idx} className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/20 space-y-2 relative group hover:border-amber-500/30 transition-all">
+                        <button
+                          onClick={() => handleDeleteConvocation(conv.title, conv.message)}
+                          className="absolute top-3 right-3 text-[10px] font-black text-red-500 hover:text-red-400 transition-colors cursor-pointer uppercase tracking-wider"
+                          title="Annuler cette convocation"
+                        >
+                          Annuler 🗑️
+                        </button>
+                        <div className="text-[10px] font-black uppercase text-amber-500 flex items-center gap-1.5">
+                          <span>🔔 {conv.title}</span>
+                          <span className="text-zinc-400 font-medium">| Envoyée le {new Date(conv.createdAt).toLocaleDateString('fr-FR')} à {new Date(conv.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <p className="text-xs text-zinc-850 dark:text-zinc-200 font-semibold whitespace-pre-wrap">{conv.message}</p>
+                        {conv.expiresAt && (
+                          <div className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500">
+                            ⏳ Supprimée automatiquement le : {new Date(conv.expiresAt).toLocaleDateString('fr-FR')} à {new Date(conv.expiresAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        )}
+                        <div className="pt-1.5 border-t border-zinc-100 dark:border-zinc-800/80">
+                          <span className="block text-[8px] font-black uppercase text-zinc-400">Joueurs convoqués :</span>
+                          <p className="text-[10px] text-zinc-650 dark:text-zinc-400 font-bold leading-relaxed">{conv.players.join(', ')}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

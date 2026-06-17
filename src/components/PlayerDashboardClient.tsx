@@ -59,6 +59,29 @@ export interface PlayerDashboardClientProps {
       votesCount: number
     }>
   }>
+  composition: {
+    formation: {
+      defenders: number
+      midfielders: number
+      forwards: number
+    }
+    slots: Array<{
+      id: string
+      type: string
+      label: string
+      x: number
+      y: number
+      playerId: string | null
+    }>
+    substitutes: string[]
+    communicatedAt: string | null
+  } | null
+  categoryPlayers: Array<{
+    id: string
+    name: string
+    number: number
+    position: string
+  }>
 }
 
 const JerseyIcon = ({ number }: { number: number | null }) => (
@@ -79,8 +102,11 @@ export default function PlayerDashboardClient({
   latestPhysicalTest,
   unreadMessages,
   activePolls,
+  composition,
+  categoryPlayers = [],
 }: PlayerDashboardClientProps) {
   const [isPending, startTransition] = useTransition()
+  const [activeTab, setActiveTab] = useState<"dashboard" | "composition">("dashboard")
 
   const handleCastVote = async (pollId: string, optionId: string) => {
     startTransition(async () => {
@@ -178,14 +204,42 @@ export default function PlayerDashboardClient({
           <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-full uppercase tracking-wider self-start md:self-auto">
             🟢 Connecté
           </span>
-          <p className="text-[10px] text-zinc-400 font-bold mt-1.5 uppercase tracking-wider">
+          <p className="text-[10px] text-zinc-400 font-bold mt-1.5 uppercase tracking-wider" suppressHydrationWarning>
             {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
           </p>
         </div>
       </section>
 
-      {/* 2. Grid Dashboard Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Tab Swifter Switcher */}
+      <div className="flex gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-px">
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 px-1 cursor-pointer transition-all ${
+            activeTab === "dashboard"
+              ? "border-emerald-500 text-emerald-600 dark:text-emerald-450"
+              : "border-transparent text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-200"
+          }`}
+        >
+          🎛️ Tableau de bord
+        </button>
+        <button
+          onClick={() => setActiveTab("composition")}
+          className={`pb-3 text-xs font-black uppercase tracking-wider border-b-2 px-1 cursor-pointer transition-all flex items-center gap-1.5 ${
+            activeTab === "composition"
+              ? "border-emerald-500 text-emerald-600 dark:text-emerald-450"
+              : "border-transparent text-zinc-400 hover:text-zinc-650 dark:hover:text-zinc-200"
+          }`}
+        >
+          ⚽ Composition de match
+          {composition && (
+            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" title="Nouvelle composition publiée" />
+          )}
+        </button>
+      </div>
+
+      {activeTab === "dashboard" ? (
+        /* 2. Grid Dashboard Content */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* LEFT & CENTER COLUMN (2/3): Today's events and Unread messages */}
         <div className="lg:col-span-2 space-y-6">
@@ -268,7 +322,7 @@ export default function PlayerDashboardClient({
                         <span className="text-[10px] font-black uppercase text-zinc-450">
                           {msg.senderName} dans <span className="text-red-500">{msg.channelName}</span>
                         </span>
-                        <span className="text-[9px] text-zinc-400 font-bold shrink-0">
+                        <span className="text-[9px] text-zinc-400 font-bold shrink-0" suppressHydrationWarning>
                           {new Date(msg.createdAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
@@ -413,7 +467,7 @@ export default function PlayerDashboardClient({
 
                       <div className="pt-2 text-[9px] text-zinc-400 font-bold border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
                         <span>Total: {poll.totalVotes} votes</span>
-                        <span>Exp: {new Date(poll.expiresAt).toLocaleDateString()}</span>
+                        <span suppressHydrationWarning>Exp: {new Date(poll.expiresAt).toLocaleDateString("fr-FR")}</span>
                       </div>
                     </div>
                   )
@@ -485,7 +539,188 @@ export default function PlayerDashboardClient({
 
         </div>
 
-      </div>
+        </div>
+      ) : (
+        /* Match Composition Tab Content */
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {!composition ? (
+            <div className="rounded-3xl border border-zinc-200 bg-white dark:border-zinc-850 dark:bg-zinc-900 p-12 text-center max-w-xl mx-auto space-y-4 shadow-sm">
+              <span className="text-5xl block animate-bounce">⚽</span>
+              <h3 className="text-lg font-black uppercase tracking-wider text-zinc-800 dark:text-white">
+                Aucune composition publiée
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                L&apos;entraîneur principal n&apos;a pas encore communiqué de composition de match officielle pour votre équipe ({playerProfile.teamCategoryName || "Sans Équipe"}).
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Tactical pitch viewer (Left 2 cols) */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="flex justify-between items-center rounded-2xl border border-zinc-200/50 bg-white p-4 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
+                  <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-400">
+                    Schéma Tactique de Match : <span className="text-emerald-500 font-extrabold">{composition.formation.defenders}-{composition.formation.midfielders}-{composition.formation.forwards}</span>
+                  </span>
+                  {composition.communicatedAt && (
+                    <span className="text-[10px] text-zinc-400 font-bold" suppressHydrationWarning>
+                      Publiée le : {new Date(composition.communicatedAt).toLocaleDateString("fr-FR")} à {new Date(composition.communicatedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  )}
+                </div>
+
+                <div className="w-full h-[550px] rounded-3xl border border-emerald-600/30 bg-[#166534] shadow-2xl relative overflow-hidden select-none">
+                  {/* Field Markings */}
+                  <div className="absolute inset-4 border-2 border-white/20 pointer-events-none rounded-2xl" />
+                  <div className="absolute top-1/2 left-4 right-4 h-0 border-t-2 border-white/20 pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-36 w-36 rounded-full border-2 border-white/20 pointer-events-none" />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-white/25 pointer-events-none" />
+
+                  {/* Penalty Box Top */}
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 h-32 w-[60%] border-b-2 border-x-2 border-white/20 pointer-events-none" />
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 h-12 w-[25%] border-b-2 border-x-2 border-white/20 pointer-events-none" />
+                  <div className="absolute top-28 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-white/25 pointer-events-none" />
+
+                  {/* Penalty Box Bottom */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 h-32 w-[65%] border-t-2 border-x-2 border-white/20 pointer-events-none" />
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 h-12 w-[25%] border-t-2 border-x-2 border-white/20 pointer-events-none" />
+                  <div className="absolute bottom-28 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-white/25 pointer-events-none" />
+
+                  {/* Corner Arcs */}
+                  <div className="absolute top-4 left-4 h-6 w-6 border-b border-r border-white/10 rounded-br-full pointer-events-none" />
+                  <div className="absolute top-4 right-4 h-6 w-6 border-b border-l border-white/10 rounded-bl-full pointer-events-none" />
+                  <div className="absolute bottom-4 left-4 h-6 w-6 border-t border-r border-white/10 rounded-tr-full pointer-events-none" />
+                  <div className="absolute bottom-4 right-4 h-6 w-6 border-t border-l border-white/10 rounded-tl-full pointer-events-none" />
+
+                  {/* Pitch Grass Striping */}
+                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-5">
+                    {Array.from({ length: 8 }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-full h-[12.5%] ${idx % 2 === 0 ? "bg-black" : "bg-transparent"}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Render Pitch Slots */}
+                  {composition.slots.map((slot) => {
+                    const assignedPlayer = categoryPlayers.find((p) => p.id === slot.playerId)
+                    const isMe = assignedPlayer?.id === playerProfile.id
+
+                    return (
+                      <div
+                        key={slot.id}
+                        style={{
+                          left: `${slot.x}%`,
+                          top: `${slot.y}%`,
+                        }}
+                        className="absolute -translate-x-1/2 -translate-y-1/2 z-20"
+                      >
+                        <div
+                          className={`h-14 w-14 sm:h-16 sm:w-16 rounded-full flex flex-col items-center justify-center border-2 shadow-xl transition-all select-none relative ${
+                            assignedPlayer
+                              ? isMe
+                                ? "bg-amber-400 border-amber-300 text-zinc-950 scale-110 ring-4 ring-amber-450/40"
+                                : slot.type === "GK"
+                                ? "bg-amber-500 border-white text-zinc-950"
+                                : "bg-emerald-500 border-white text-white"
+                              : "bg-black/35 border-dashed border-white/40 text-white/50"
+                          }`}
+                        >
+                          {assignedPlayer ? (
+                            <>
+                              <span className="text-sm sm:text-base font-black">
+                                {assignedPlayer.number}
+                              </span>
+                              <span className="text-[7px] font-black uppercase bg-black/20 px-1 rounded-sm mt-0.5">
+                                {slot.label}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-xs sm:text-sm font-black">+</span>
+                              <span className="text-[8px] font-bold uppercase tracking-wider">
+                                {slot.label}
+                              </span>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="text-center mt-1.5 max-w-[85px] mx-auto pointer-events-none">
+                          <p className={`text-[9px] sm:text-xs font-black border px-1.5 py-0.5 rounded-md drop-shadow-md truncate ${
+                            isMe
+                              ? "bg-amber-400 border-amber-300 text-zinc-950"
+                              : "bg-zinc-950/70 border-white/10 text-white"
+                          }`}>
+                            {assignedPlayer ? assignedPlayer.name.split(" ").pop() : "Vide"}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Substitutes panel (Right 1 col) */}
+              <div className="lg:col-span-1 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 flex flex-col max-h-[610px]">
+                <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-white pb-3 border-b border-zinc-150 dark:border-zinc-800 flex items-center justify-between">
+                  <span>🔄 REMPLAÇANTS</span>
+                  <span className="text-[10px] bg-zinc-100 dark:bg-zinc-850 px-2.5 py-0.5 rounded-full text-zinc-500">
+                    {composition.substitutes.length} joueurs
+                  </span>
+                </h3>
+
+                <div className="flex-1 overflow-y-auto pt-4 space-y-2 custom-scrollbar">
+                  {composition.substitutes.length === 0 ? (
+                    <div className="text-center py-12 text-zinc-400 text-xs font-bold border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl">
+                      Aucun remplaçant désigné pour ce match.
+                    </div>
+                  ) : (
+                    composition.substitutes.map((subId) => {
+                      const player = categoryPlayers.find((p) => p.id === subId)
+                      if (!player) return null
+                      const isMe = player.id === playerProfile.id
+
+                      return (
+                        <div
+                          key={subId}
+                          className={`p-3 rounded-xl border transition-all flex items-center justify-between ${
+                            isMe
+                              ? "bg-amber-500/10 border-amber-300"
+                              : "bg-white border-zinc-150 dark:bg-zinc-950 dark:border-zinc-850"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`text-xs font-black h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border ${
+                              isMe
+                                ? "bg-amber-400 border-amber-300 text-zinc-950"
+                                : "bg-amber-500/15 border-amber-500/20 text-amber-650"
+                            }`}>
+                              {player.number}
+                            </span>
+                            <div>
+                              <h4 className="text-xs font-extrabold text-zinc-850 dark:text-zinc-200 uppercase truncate">
+                                {player.name}
+                              </h4>
+                              <span className="text-[8px] font-black uppercase text-zinc-400 block mt-0.5">
+                                {player.position}
+                              </span>
+                            </div>
+                          </div>
+                          {isMe && (
+                            <span className="text-[8px] font-black text-amber-600 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded uppercase">
+                              Vous
+                            </span>
+                          )}
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
     </div>
   )

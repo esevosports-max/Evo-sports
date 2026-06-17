@@ -137,3 +137,8 @@ export type Announcement = Prisma.AnnouncementModel
  * 
  */
 export type SystemSetting = Prisma.SystemSettingModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel

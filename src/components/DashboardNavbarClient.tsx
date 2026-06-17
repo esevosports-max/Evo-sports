@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useLanguage } from "@/components/LanguageProvider"
+import { getNotificationsAction, markAsReadAction, markAllAsReadAction } from "@/app/dashboard/notifications/actions"
 
 interface NavbarProps {
   user: {
@@ -26,11 +27,59 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [langMenuOpen, setLangMenuOpen] = useState(false)
+  const [notifMenuOpen, setNotifMenuOpen] = useState(false)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const loadNotifications = async () => {
+    try {
+      const res = await getNotificationsAction()
+      if (res.success && res.notifications) {
+        setNotifications(res.notifications)
+        setUnreadCount(res.notifications.filter((n: any) => !n.read).length)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const res = await markAsReadAction(id)
+      if (res.success) {
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        )
+        setUnreadCount((prev) => Math.max(0, prev - 1))
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      const res = await markAllAsReadAction()
+      if (res.success) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+        setUnreadCount(0)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  useEffect(() => {
+    loadNotifications()
+    const interval = setInterval(loadNotifications, 10000)
+    return () => clearInterval(interval)
+  }, [pathname])
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0)
       setLangMenuOpen(false)
+      setNotifMenuOpen(false)
     }
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
@@ -43,6 +92,7 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
     ? [
         { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠", description: t("desc_dashboard") },
         { href: "/dashboard/planning", label: t("db_general_planning"), icon: "📅", description: t("desc_planning_gen") },
+        { href: "/dashboard/manager/annonces", label: t("db_announcements"), icon: "📢", description: t("desc_announcements") },
         { href: "/dashboard/roles", label: t("db_roles_permissions"), icon: "🔑", description: t("desc_roles") },
         { href: "/dashboard/manager/demandes", label: t("db_reg_requests"), icon: "📥", description: t("desc_requests") },
         { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️", description: t("desc_clubs") },
@@ -234,6 +284,81 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
                     <span>العربية</span>
                     <span>🇸🇦</span>
                   </button>
+                </div>
+              )}
+            </div>
+
+            {/* Notification Bell Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setNotifMenuOpen(!notifMenuOpen)
+                  setLangMenuOpen(false)
+                }}
+                className={`
+                  flex items-center justify-center transition-all text-white/90 cursor-pointer relative
+                  ${isScrolled 
+                    ? "p-1.5 rounded-full bg-white/10 border border-white/15 hover:bg-white/20" 
+                    : "p-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white/20 hover:border-white/25"
+                  }
+                `}
+                aria-label="Notifications"
+              >
+                <span>🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border border-[#0B1528] animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notifMenuOpen && (
+                <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-[#0B1528]/95 border border-white/10 shadow-2xl p-4 z-50 backdrop-blur-xl space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+                  <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                    <span className="text-[10px] font-black text-white/50 uppercase tracking-wider">
+                      Notifications ({unreadCount} non lues)
+                    </span>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-[9px] font-black text-emerald-400 hover:text-emerald-300 uppercase cursor-pointer"
+                      >
+                        Tout marquer lu
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                    {notifications.length === 0 ? (
+                      <p className="text-[10px] text-white/40 font-bold text-center py-6">
+                        Aucune notification.
+                      </p>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          onClick={() => handleMarkAsRead(notif.id)}
+                          className={`p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer text-left ${
+                            notif.read
+                              ? "bg-white/[0.02] border-white/5 text-white/60"
+                              : "bg-emerald-500/[0.05] border-emerald-500/20 text-white font-bold"
+                          }`}
+                        >
+                          <div className="flex justify-between items-baseline gap-2 mb-0.5">
+                            <span className={notif.read ? "text-white/60" : "text-emerald-400"}>
+                              {notif.title}
+                            </span>
+                            <span className="text-[8px] text-white/30 shrink-0 font-bold" suppressHydrationWarning>
+                              {new Date(notif.createdAt).toLocaleDateString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-white/70 font-medium leading-relaxed">
+                            {notif.message}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
             </div>

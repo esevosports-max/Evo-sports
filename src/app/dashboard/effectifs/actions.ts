@@ -315,3 +315,157 @@ export async function toggleBlockPlayer(playerId: string) {
     return { success: false, error: e.message || "Erreur de changement de statut" }
   }
 }
+
+export async function convoquerPlayersAction(data: {
+  playerIds: string[]
+  message: string
+  date: string
+  time: string
+  location: string
+}) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userRole = session.user.role?.name
+    if (userRole === "JOUEUR") {
+      throw new Error("Action non autorisée pour les joueurs")
+    }
+
+    if (!data.playerIds || data.playerIds.length === 0) {
+      throw new Error("Il faut sélectionner au moins un joueur")
+    }
+    if (!data.message || !data.message.trim()) {
+      throw new Error("Le message de convocation est obligatoire")
+    }
+    if (!data.date || !data.time || !data.location) {
+      throw new Error("La date, l'heure et le lieu sont obligatoires")
+    }
+
+    // Resolve user IDs for the selected players
+    const players = await db.player.findMany({
+      where: { id: { in: data.playerIds } },
+      select: { userId: true }
+    })
+
+    const title = "⚠️ Nouvelle Convocation"
+    const fullMessage = `${data.message}\n📅 Date: ${data.date}\n⏰ Heure: ${data.time}\n📍 Lieu: ${data.location}`
+
+    // Calculate expiresAt as convocation date/time + 24 hours
+    let expiresAt: Date | null = null
+    try {
+      const convDateTime = new Date(`${data.date}T${data.time}:00`)
+      if (!isNaN(convDateTime.getTime())) {
+        expiresAt = new Date(convDateTime.getTime() + 24 * 60 * 60 * 1000)
+      }
+    } catch (err) {
+      console.error("Error parsing convocation date/time:", err)
+    }
+
+    // Create notifications in the DB
+    await db.notification.createMany({
+      data: players.map((p) => ({
+        userId: p.userId,
+        title,
+        message: fullMessage,
+        type: "CONVOCATION",
+        read: false,
+        expiresAt
+      }))
+    })
+
+    revalidatePath("/dashboard")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error sending convocation:", e)
+    return { success: false, error: e.message || "Erreur lors de l'envoi de la convocation" }
+  }
+}
+
+export async function getSentConvocationsAction() {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userRole = session.user.role?.name
+    if (userRole === "JOUEUR") {
+      throw new Error("Action non autorisée")
+    }
+
+    // Auto-delete expired notifications:
+    // 1. Regular notifications (expiresAt is null) older than 24 hours.
+    // 2. Convocation/custom notifications where the calculated expiresAt has passed.
+    const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    await db.notification.deleteMany({
+      where: {
+        OR: [
+          {
+            expiresAt: null,
+            createdAt: { lt: cutoffTime }
+          },
+          {
+            expiresAt: { lt: new Date() }
+          }
+        ]
+      }
+    })
+
+    const convocations = await db.notification.findMany({
+      where: {
+        type: "CONVOCATION"
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            player: {
+              select: {
+                number: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    })
+
+    return { success: true, convocations }
+  } catch (e: any) {
+    console.error("Error fetching convocations:", e)
+    return { success: false, error: e.message || "Erreur de chargement" }
+  }
+}
+
+export async function deleteConvocationAction(title: string, message: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userRole = session.user.role?.name
+    if (userRole === "JOUEUR") {
+      throw new Error("Action non autorisée")
+    }
+
+    await db.notification.deleteMany({
+      where: {
+        title,
+        message,
+        type: "CONVOCATION"
+      }
+    })
+
+    revalidatePath("/dashboard")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error deleting convocation:", e)
+    return { success: false, error: e.message || "Erreur lors de la suppression" }
+  }
+}

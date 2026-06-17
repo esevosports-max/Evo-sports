@@ -214,6 +214,37 @@ export default async function Dashboard() {
       ? (pollsRes.polls || []).filter((p: any) => p.status === "ACTIVE")
       : []
 
+    // Fetch composition and players in category
+    let compositionData = null
+    let categoryPlayersData: any[] = []
+
+    if (teamCategoryId) {
+      const dbComposition = await db.composition.findUnique({
+        where: { teamCategoryId }
+      })
+
+      if (dbComposition && dbComposition.isCommunicated) {
+        compositionData = {
+          formation: dbComposition.formation as any,
+          slots: dbComposition.slots as any,
+          substitutes: dbComposition.substitutes as any,
+          communicatedAt: dbComposition.communicatedAt ? dbComposition.communicatedAt.toISOString() : null
+        }
+
+        const categoryPlayers = await db.player.findMany({
+          where: { teamCategoryId },
+          include: { user: true }
+        })
+
+        categoryPlayersData = categoryPlayers.map(p => ({
+          id: p.id,
+          name: p.user?.name || "Joueur Inconnu",
+          number: p.number || 0,
+          position: p.position || "Milieu"
+        }))
+      }
+    }
+
     return (
       <PlayerDashboardClient
         playerProfile={{
@@ -249,6 +280,8 @@ export default async function Dashboard() {
         } : null}
         unreadMessages={unreadMessagesList}
         activePolls={activePolls}
+        composition={compositionData}
+        categoryPlayers={categoryPlayersData}
       />
     )
   }

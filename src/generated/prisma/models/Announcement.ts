@@ -37,6 +37,7 @@ export type AnnouncementMinAggregateOutputType = {
   mediaType: string | null
   mediaUrl: string | null
   active: boolean | null
+  type: string | null
   startDate: Date | null
   endDate: Date | null
   createdAt: Date | null
@@ -56,6 +57,7 @@ export type AnnouncementMaxAggregateOutputType = {
   mediaType: string | null
   mediaUrl: string | null
   active: boolean | null
+  type: string | null
   startDate: Date | null
   endDate: Date | null
   createdAt: Date | null
@@ -75,6 +77,7 @@ export type AnnouncementCountAggregateOutputType = {
   mediaType: number
   mediaUrl: number
   active: number
+  type: number
   startDate: number
   endDate: number
   createdAt: number
@@ -96,6 +99,7 @@ export type AnnouncementMinAggregateInputType = {
   mediaType?: true
   mediaUrl?: true
   active?: true
+  type?: true
   startDate?: true
   endDate?: true
   createdAt?: true
@@ -115,6 +119,7 @@ export type AnnouncementMaxAggregateInputType = {
   mediaType?: true
   mediaUrl?: true
   active?: true
+  type?: true
   startDate?: true
   endDate?: true
   createdAt?: true
@@ -134,6 +139,7 @@ export type AnnouncementCountAggregateInputType = {
   mediaType?: true
   mediaUrl?: true
   active?: true
+  type?: true
   startDate?: true
   endDate?: true
   createdAt?: true
@@ -226,6 +232,7 @@ export type AnnouncementGroupByOutputType = {
   mediaType: string
   mediaUrl: string
   active: boolean
+  type: string
   startDate: Date | null
   endDate: Date | null
   createdAt: Date
@@ -266,6 +273,7 @@ export type AnnouncementWhereInput = {
   mediaType?: Prisma.StringFilter<"Announcement"> | string
   mediaUrl?: Prisma.StringFilter<"Announcement"> | string
   active?: Prisma.BoolFilter<"Announcement"> | boolean
+  type?: Prisma.StringFilter<"Announcement"> | string
   startDate?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
   endDate?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
@@ -285,6 +293,7 @@ export type AnnouncementOrderByWithRelationInput = {
   mediaType?: Prisma.SortOrder
   mediaUrl?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -307,6 +316,7 @@ export type AnnouncementWhereUniqueInput = Prisma.AtLeast<{
   mediaType?: Prisma.StringFilter<"Announcement"> | string
   mediaUrl?: Prisma.StringFilter<"Announcement"> | string
   active?: Prisma.BoolFilter<"Announcement"> | boolean
+  type?: Prisma.StringFilter<"Announcement"> | string
   startDate?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
   endDate?: Prisma.DateTimeNullableFilter<"Announcement"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Announcement"> | Date | string
@@ -326,6 +336,7 @@ export type AnnouncementOrderByWithAggregationInput = {
   mediaType?: Prisma.SortOrder
   mediaUrl?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -351,6 +362,7 @@ export type AnnouncementScalarWhereWithAggregatesInput = {
   mediaType?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   mediaUrl?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   active?: Prisma.BoolWithAggregatesFilter<"Announcement"> | boolean
+  type?: Prisma.StringWithAggregatesFilter<"Announcement"> | string
   startDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
   endDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Announcement"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Announcement"> | Date | string
@@ -370,6 +382,7 @@ export type AnnouncementCreateInput = {
   mediaType?: string
   mediaUrl: string
   active?: boolean
+  type?: string
   startDate?: Date | string | null
   endDate?: Date | string | null
   createdAt?: Date | string
@@ -389,6 +402,7 @@ export type AnnouncementUncheckedCreateInput = {
   mediaType?: string
   mediaUrl: string
   active?: boolean
+  type?: string
   startDate?: Date | string | null
   endDate?: Date | string | null
   createdAt?: Date | string
@@ -408,6 +422,7 @@ export type AnnouncementUpdateInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   mediaUrl?: Prisma.StringFieldUpdateOperationsInput | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -427,6 +442,7 @@ export type AnnouncementUncheckedUpdateInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   mediaUrl?: Prisma.StringFieldUpdateOperationsInput | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -446,6 +462,7 @@ export type AnnouncementCreateManyInput = {
   mediaType?: string
   mediaUrl: string
   active?: boolean
+  type?: string
   startDate?: Date | string | null
   endDate?: Date | string | null
   createdAt?: Date | string
@@ -465,6 +482,7 @@ export type AnnouncementUpdateManyMutationInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   mediaUrl?: Prisma.StringFieldUpdateOperationsInput | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -484,6 +502,7 @@ export type AnnouncementUncheckedUpdateManyInput = {
   mediaType?: Prisma.StringFieldUpdateOperationsInput | string
   mediaUrl?: Prisma.StringFieldUpdateOperationsInput | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.StringFieldUpdateOperationsInput | string
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -503,6 +522,7 @@ export type AnnouncementCountOrderByAggregateInput = {
   mediaType?: Prisma.SortOrder
   mediaUrl?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -522,6 +542,7 @@ export type AnnouncementMaxOrderByAggregateInput = {
   mediaType?: Prisma.SortOrder
   mediaUrl?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -541,6 +562,7 @@ export type AnnouncementMinOrderByAggregateInput = {
   mediaType?: Prisma.SortOrder
   mediaUrl?: Prisma.SortOrder
   active?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -562,6 +584,7 @@ export type AnnouncementSelect<ExtArgs extends runtime.Types.Extensions.Internal
   mediaType?: boolean
   mediaUrl?: boolean
   active?: boolean
+  type?: boolean
   startDate?: boolean
   endDate?: boolean
   createdAt?: boolean
@@ -581,6 +604,7 @@ export type AnnouncementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   mediaType?: boolean
   mediaUrl?: boolean
   active?: boolean
+  type?: boolean
   startDate?: boolean
   endDate?: boolean
   createdAt?: boolean
@@ -600,6 +624,7 @@ export type AnnouncementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   mediaType?: boolean
   mediaUrl?: boolean
   active?: boolean
+  type?: boolean
   startDate?: boolean
   endDate?: boolean
   createdAt?: boolean
@@ -619,13 +644,14 @@ export type AnnouncementSelectScalar = {
   mediaType?: boolean
   mediaUrl?: boolean
   active?: boolean
+  type?: boolean
   startDate?: boolean
   endDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AnnouncementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "badgeText" | "badgeStyle" | "icon" | "title" | "titleStyle" | "description" | "linkText" | "linkUrl" | "mediaType" | "mediaUrl" | "active" | "startDate" | "endDate" | "createdAt" | "updatedAt", ExtArgs["result"]["announcement"]>
+export type AnnouncementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "badgeText" | "badgeStyle" | "icon" | "title" | "titleStyle" | "description" | "linkText" | "linkUrl" | "mediaType" | "mediaUrl" | "active" | "type" | "startDate" | "endDate" | "createdAt" | "updatedAt", ExtArgs["result"]["announcement"]>
 
 export type $AnnouncementPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Announcement"
@@ -643,6 +669,7 @@ export type $AnnouncementPayload<ExtArgs extends runtime.Types.Extensions.Intern
     mediaType: string
     mediaUrl: string
     active: boolean
+    type: string
     startDate: Date | null
     endDate: Date | null
     createdAt: Date
@@ -1082,6 +1109,7 @@ export interface AnnouncementFieldRefs {
   readonly mediaType: Prisma.FieldRef<"Announcement", 'String'>
   readonly mediaUrl: Prisma.FieldRef<"Announcement", 'String'>
   readonly active: Prisma.FieldRef<"Announcement", 'Boolean'>
+  readonly type: Prisma.FieldRef<"Announcement", 'String'>
   readonly startDate: Prisma.FieldRef<"Announcement", 'DateTime'>
   readonly endDate: Prisma.FieldRef<"Announcement", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Announcement", 'DateTime'>

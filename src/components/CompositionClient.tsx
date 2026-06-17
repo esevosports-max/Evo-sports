@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { saveCompositionAction, sendCompositionNotificationAction } from "@/app/dashboard/composition/actions"
+import { saveCompositionAction, sendCompositionNotificationAction, communicateCompositionAction } from "@/app/dashboard/composition/actions"
 
 interface Player {
   id: string
@@ -35,6 +35,8 @@ interface DatabaseComposition {
   }
   slots: PitchSlot[]
   substitutes: string[]
+  isCommunicated?: boolean
+  communicatedAt?: string | null
 }
 
 interface CompositionClientProps {
@@ -95,6 +97,10 @@ export default function CompositionClient({
   const [isSavedAndComplete, setIsSavedAndComplete] = useState(false)
   const [isSendingNotifications, setIsSendingNotifications] = useState(false)
   const [sentNotifications, setSentNotifications] = useState<SentNotification[] | null>(null)
+
+  const [isCommunicated, setIsCommunicated] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isCommunicating, setIsCommunicating] = useState(false)
   
   // Drag and drop state
   const [activeDragSlotId, setActiveDragSlotId] = useState<string | null>(null)
@@ -185,7 +191,8 @@ export default function CompositionClient({
       setValidationError("")
       
       const totalStarters = dbComp.slots.filter((s) => s.playerId !== null).length
-      setIsSavedAndComplete(totalStarters === 11)
+      setIsSavedAndComplete(totalStarters === 11 && dbComp.substitutes.length >= 2)
+      setIsCommunicated(!!dbComp.isCommunicated)
       return
     }
 
@@ -229,6 +236,7 @@ export default function CompositionClient({
   // Save changes helper (saves locally to localStorage for quick restore on disconnect)
   const saveCompositionLocally = (updatedSlots: PitchSlot[], updatedSubs: string[], updatedFormation = formation) => {
     setIsSavedAndComplete(false) // Bypasses print/message actions until saved to database
+    setIsCommunicated(false)
     if (!selectedCategoryId) return
     localStorage.setItem(
       `evo_sports_composition_${selectedCategoryId}`,
@@ -259,8 +267,8 @@ export default function CompositionClient({
 
       if (res.success) {
         showToast("Composition enregistrée avec succès dans la base de données ! 💾")
-        // Check if composition is complete (11 starters)
-        setIsSavedAndComplete(totalStartersCount === 11)
+        // Check if composition is complete (11 starters and >= 2 substitutes)
+        setIsSavedAndComplete(totalStartersCount === 11 && substitutes.length >= 2)
       } else {
         setValidationError(res.error || "Une erreur est survenue lors de l'enregistrement.")
       }
@@ -1065,11 +1073,15 @@ export default function CompositionClient({
             {isSavedAndComplete && (
               <div className="mt-4 p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/10 flex flex-col sm:flex-row gap-3 justify-center animate-in slide-in-from-bottom duration-300">
                 <button
-                  onClick={handleSendNotifications}
-                  disabled={isSendingNotifications}
-                  className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-550 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-200 disabled:text-zinc-400 disabled:cursor-not-allowed border border-blue-500"
+                  onClick={() => setShowConfirmModal(true)}
+                  disabled={isCommunicating}
+                  className={`flex-1 py-3 px-4 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer border ${
+                    isCommunicated
+                      ? "bg-emerald-600 hover:bg-emerald-550 border-emerald-550"
+                      : "bg-blue-600 hover:bg-blue-550 border-blue-500"
+                  }`}
                 >
-                  {isSendingNotifications ? "Envoi en cours..." : "Envoyer message aux joueurs"}
+                  📢 {isCommunicated ? "Formation Communiquée (Renvoyer)" : "Communiquer la formation"}
                 </button>
                 <button
                   onClick={handlePrintMatchSheet}
@@ -1077,6 +1089,59 @@ export default function CompositionClient({
                 >
                   Imprimer la feuille de match
                 </button>
+              </div>
+            )}
+
+            {/* Confirm communication modal */}
+            {showConfirmModal && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-md shadow-2xl p-6 flex flex-col animate-in zoom-in-95 duration-200">
+                  <div className="text-center space-y-4">
+                    <div className="mx-auto h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 text-xl">
+                      📢
+                    </div>
+                    <h3 className="text-base font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+                      Communiquer la formation ?
+                    </h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                      En communiquant cette formation, un message et une notification en temps réel seront envoyés à tous les joueurs titulaires et remplaçants sélectionnés. Ils pourront consulter la composition depuis leur tableau de bord.
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex gap-3">
+                    <button
+                      onClick={() => setShowConfirmModal(false)}
+                      className="flex-1 py-2.5 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-200 text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer transition-all border border-zinc-200 dark:border-zinc-700"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!selectedCategoryId) return
+                        setIsCommunicating(true)
+                        try {
+                          const res = await communicateCompositionAction(selectedCategoryId)
+                          if (res.success) {
+                            setIsCommunicated(true)
+                            showToast("La formation a été communiquée aux joueurs avec succès ! 📢")
+                            setShowConfirmModal(false)
+                          } else {
+                            alert("Erreur lors de la communication : " + res.error)
+                          }
+                        } catch (e) {
+                          console.error(e)
+                          alert("Impossible de communiquer la formation.")
+                        } finally {
+                          setIsCommunicating(false)
+                        }
+                      }}
+                      disabled={isCommunicating}
+                      className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-550 text-white text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer transition-all border border-blue-500 shadow-md active:scale-95 disabled:opacity-50"
+                    >
+                      {isCommunicating ? "Envoi..." : "Confirmer"}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
