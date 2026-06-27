@@ -142,3 +142,33 @@ export type SystemSetting = Prisma.SystemSettingModel
  * 
  */
 export type Notification = Prisma.NotificationModel
+/**
+ * Model DeletedAccount
+ * 
+ */
+export type DeletedAccount = Prisma.DeletedAccountModel
+/**
+ * Model AccountActionLog
+ * 
+ */
+export type AccountActionLog = Prisma.AccountActionLogModel
+/**
+ * Model PlayerGPSData
+ * 
+ */
+export type PlayerGPSData = Prisma.PlayerGPSDataModel
+/**
+ * Model GpsDevice
+ * 
+ */
+export type GpsDevice = Prisma.GpsDeviceModel
+/**
+ * Model Telemetry
+ * 
+ */
+export type Telemetry = Prisma.TelemetryModel
+/**
+ * Model PaymentConfig
+ * 
+ */
+export type PaymentConfig = Prisma.PaymentConfigModel

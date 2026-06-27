@@ -130,6 +130,21 @@ export async function createTeamCategory(data: {
       throw new Error("Club introuvable")
     }
 
+    // Check subscription plan limits for 1 Équipe
+    const plan = club.subscriptionPlan || "Club"
+    const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
+    if (isOneTeamPlan) {
+      const existingCategoriesCount = await db.teamCategory.count({
+        where: { clubId: club.id }
+      })
+      if (existingCategoriesCount >= 1) {
+        throw new Error("Votre forfait '1 Équipe' ne vous permet de créer qu'une seule équipe.")
+      }
+      if (data.maxPlayers > 30) {
+        throw new Error("Le nombre maximum de joueurs par équipe est limité à 30 pour votre forfait.")
+      }
+    }
+
     await db.teamCategory.create({
       data: {
         clubId: club.id,

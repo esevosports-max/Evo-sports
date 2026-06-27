@@ -369,10 +369,18 @@ export default function PlanningCalendarClient({
                 </p>
                 {selectedDayEvents.map((evt) => {
                   const isEventToday = evt.date === todayStr
+                  const eventDateTime = new Date(`${evt.date}T${evt.time}`)
+                  const isExpired = evt.status === "EXPIRE" || (
+                    !isNaN(eventDateTime.getTime()) &&
+                    (new Date().getTime() - eventDateTime.getTime() > 24 * 60 * 60 * 1000) &&
+                    (evt.status !== "TERMINE" && evt.status !== "EN_COURS")
+                  )
                   const isEventPast = evt.date < todayStr || (evt.type === "TRAINING" && completedDates.includes(evt.date))
                   return (
                     <div key={evt.id} className={`rounded-xl border p-3 bg-zinc-50/50 space-y-1 transition-all duration-150 ${
-                      isEventToday 
+                      isExpired
+                        ? "border-red-300 bg-red-50/5 dark:border-red-950/20 dark:bg-red-950/10 opacity-75"
+                        : isEventToday 
                         ? `animate-pulse ${
                             evt.type === "MATCH"
                               ? "border-blue-500 bg-blue-5/10 shadow-[0_0_12px_rgba(59,130,246,0.15)]"
@@ -391,7 +399,7 @@ export default function PlanningCalendarClient({
                       <div className="flex justify-between items-start gap-4">
                         <div className="space-y-1 min-w-0 flex-1">
                           <div className="flex justify-between items-center gap-2">
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
                                 evt.type === "MATCH"
                                   ? "bg-blue-500/10 text-blue-600"
@@ -400,7 +408,7 @@ export default function PlanningCalendarClient({
                                   : evt.type === "MEETING"
                                   ? "bg-zinc-500/10 text-zinc-600"
                                   : evt.type === "MEDICAL_EXAM"
-                                  ? "bg-red-500/10 text-red-600"
+                                  ? "bg-red-500/10 text-red-650"
                                   : "bg-yellow-500/10 text-yellow-600"
                               }`}>
                                 <span className={`h-1.5 w-1.5 rounded-full ${
@@ -413,7 +421,7 @@ export default function PlanningCalendarClient({
                                     : evt.type === "MEDICAL_EXAM"
                                     ? "bg-red-500"
                                     : "bg-yellow-500"
-                                }`} />
+                                  }`} />
                                 {evt.type === "MATCH" 
                                   ? "Match" 
                                   : evt.type === "TRAINING" 
@@ -424,6 +432,12 @@ export default function PlanningCalendarClient({
                                   ? "Examen Médical"
                                   : "Excursion"}
                               </span>
+
+                              {isExpired && (
+                                <span className="bg-red-500/10 text-red-600 border border-red-500/20 rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider animate-pulse">
+                                  ⚠️ Expiré
+                                </span>
+                              )}
 
                               {/* Beautiful dynamic assigned team label badge */}
                               {evt.assignedTeam && (
@@ -446,7 +460,10 @@ export default function PlanningCalendarClient({
                           )}
                         </div>
                         
-                        {(roleName === "PRESIDENT" || evt.creatorName === userName) && !isEventPast && (
+                        {(isExpired
+                          ? ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName)
+                          : (roleName === "PRESIDENT" || roleName === "MANAGER_EVO_SPORTS" || evt.creatorName === userName) && !isEventPast
+                        ) && (
                           <button
                             onClick={() => handleDeleteEvent(evt.id)}
                             className="px-2 py-1 text-[8px] font-black uppercase tracking-widest rounded-lg bg-red-50 text-red-655 hover:bg-red-600 hover:text-white border border-red-200 transition-all duration-150 cursor-pointer shrink-0 shadow-sm"

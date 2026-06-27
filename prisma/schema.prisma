@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,256 +7,253 @@ generator clientDefault {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?   // Hashed credentials password
-  roleId        String?
-  role          Role?     @relation(fields: [roleId], references: [id])
-  phone         String?
-  blocked       Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  clubRequest   ClubRegistrationRequest?
-  player        Player?
-  staff         Staff?
-  club          Club?     @relation("ClubPresident")
-  notifications Notification[]
+  id             String                   @id @default(cuid())
+  name           String?
+  email          String?                  @unique
+  emailVerified  DateTime?
+  image          String?
+  password       String?
+  roleId         String?
+  phone          String?
+  blocked        Boolean                  @default(false)
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  blockedAt      DateTime?
+  blockedBy      String?
+  modifiedAt     DateTime?
+  modifiedBy     String?
+  modifiedFields String?
+  club           Club?                    @relation("ClubPresident")
+  clubRequest    ClubRegistrationRequest?
+  notifications  Notification[]
+  player         Player?
+  staff          Staff?
+  role           Role?                    @relation(fields: [roleId], references: [id])
 }
-
 
 model ClubRegistrationRequest {
   id              String   @id @default(cuid())
   userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   clubName        String
-  clubLogo        String?  // Base64 or image path
+  clubLogo        String?
   creationDate    DateTime
   address         String
   stadiumName     String
-  pdfFilename     String?  // Base64 or filename
-  phone           String?  // Phone number
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  pdfFilename     String?
+  phone           String?
+  status          String   @default("PENDING")
   rejectionReason String?
   chosenPlan      String   @default("Club")
   trialSelected   Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Role {
   id          String       @id @default(cuid())
-  name        String       @unique // e.g., "ADMIN", "COACH", "ATHLETE"
+  name        String       @unique
   description String?
-  users       User[]
-  permissions Permission[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  users       User[]
+  permissions Permission[] @relation("PermissionToRole")
 }
 
 model Permission {
   id          String   @id @default(cuid())
-  action      String   @unique // e.g., "users:read", "sessions:create", "analytics:view"
+  action      String   @unique
   description String?
-  roles       Role[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  roles       Role[]   @relation("PermissionToRole")
 }
 
 model Club {
-  id              String   @id @default(cuid())
-  name            String
-  logo            String?
-  creationDate    DateTime
-  address         String
-  stadiumName     String
-  stadiumCapacity String?
-  phone           String?
-  presidentId     String?  @unique
-  president       User?    @relation("ClubPresident", fields: [presidentId], references: [id], onDelete: Cascade)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  players         Player[]
-  staff           Staff[]
-  categories      TeamCategory[]
-  calendarEvents  CalendarEvent[]
-  dailyQuestionnaires DailyQuestionnaire[]
-  polls           Poll[]
-  chatChannels    ChatChannel[]
-
-  // Subscription fields
-  subscriptionPlan    String?   @default("Standard") // e.g. "Standard", "Premium", "Elite"
-  subscriptionStatus  String?   @default("Actif")    // e.g. "Actif", "En attente", "Expiré"
-  subscriptionExpires DateTime?
-  subscriptionPaid    Boolean   @default(true)
-  subscriptionMethod  String?   @default("Gratuit") // e.g. "BARIDIMOB", "SERIAL", "CHEQUE", "Gratuit"
+  id                    String               @id @default(cuid())
+  name                  String
+  logo                  String?
+  creationDate          DateTime
+  address               String
+  stadiumName           String
+  stadiumCapacity       String?
+  phone                 String?
+  presidentId           String?              @unique
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  subscriptionPlan      String?              @default("Standard")
+  subscriptionStatus    String?              @default("Actif")
+  subscriptionExpires   DateTime?
+  subscriptionPaid      Boolean              @default(true)
+  subscriptionMethod    String?              @default("Gratuit")
   questionnaireTemplate Json?
+  calendarEvents        CalendarEvent[]
+  chatChannels          ChatChannel[]
+  president             User?                @relation("ClubPresident", fields: [presidentId], references: [id], onDelete: Cascade)
+  dailyQuestionnaires   DailyQuestionnaire[]
+  players               Player[]
+  polls                 Poll[]
+  staff                 Staff[]
+  categories            TeamCategory[]
 }
 
 model CalendarEvent {
-  id           String   @id @default(cuid())
+  id           String          @id @default(cuid())
   clubId       String
-  club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
   title        String
-  type         String   // "MATCH" | "TRAINING" | "MEETING" | "MEDICAL_EXAM" | "EXCURSION"
-  date         String   // "YYYY-MM-DD"
-  time         String   // "HH:MM"
+  type         String
+  date         String
+  time         String
   location     String
   details      String?
   creatorName  String?
   creatorRole  String?
   assignedTeam String?
-  score        String?  // e.g. "3 - 1" or null
-  status       String   @default("PROGRAMME") // "PROGRAMME", "EN_COURS", "TERMINE", "N_A"
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  score        String?
+  status       String          @default("PROGRAMME")
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  club         Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  gpsData      PlayerGPSData[]
+  telemetry    Telemetry[]
 }
 
 model TeamCategory {
-  id           String   @id @default(cuid())
-  clubId       String
-  club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  name         String
-  league       String
-  coach        String
-  maxPlayers   Int      @map("playersCount") @default(0)
-  staffMembers Staff[]  @relation("StaffCategories")
-  players      Player[]
-  composition  Composition?
+  id                  String               @id @default(cuid())
+  clubId              String
+  name                String
+  league              String
+  coach               String
+  maxPlayers          Int                  @default(0) @map("playersCount")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  composition         Composition?
   dailyQuestionnaires DailyQuestionnaire[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  players             Player[]
+  club                Club                 @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  staffMembers        Staff[]              @relation("StaffCategories")
 }
 
-
 model Staff {
-  id         String         @id @default(cuid())
-  userId     String         @unique
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clubId     String
-  club       Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  title      String?        // e.g., Directeur Sportif, Secrétaire Général
-  categories TeamCategory[] @relation("StaffCategories")
-  createdAt  DateTime       @default(now())
-  updatedAt  DateTime       @updatedAt
-
-  // Medical Record fields
-  bloodGroup      String?
-  allergies       String?
-  lastCheckup     String?
-  clearance       String?         @default("Autorisé")
-  medicalNotes    String[]
-  age             Int?
-  nationality     String?
-  birthDate       String?
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  clubId           String
+  title            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  bloodGroup       String?
+  allergies        String?
+  lastCheckup      String?
+  clearance        String?        @default("Autorisé")
+  medicalNotes     String[]
+  age              Int?
+  nationality      String?
+  birthDate        String?
   medicalTreatment String?
-  medication      String?
+  medication       String?
+  club             Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories       TeamCategory[] @relation("StaffCategories")
 }
 
 model Player {
-  id              String          @id @default(cuid())
-  userId          String          @unique
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clubId          String
-  club            Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  position        String?         // e.g., Attaquant, Gardien
-  number          Int?            // Jersey number
-  teamCategoryId  String?
-  teamCategory    TeamCategory?   @relation(fields: [teamCategoryId], references: [id], onDelete: SetNull)
-  age             Int?
-  height          String?
-  weight          String?
-  foot            String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  physicalIndices PhysicalIndex[]
-  dailyResponses  DailyResponse[]
-  physicalTests   PhysicalTest[]
-
-  // Injury fields
-  isInjured       Boolean         @default(false)
-  injuryType      String?
-  injurySeverity  String?         // "Bénigne" | "Modérée" | "Grave"
-  injuryDuration  String?         // e.g., "3 semaines"
-  injuryDate      DateTime?
-  injuryReturn    DateTime?
-  injuryStatus    String?         // e.g., "Soins & Physiothérapie"
-  injuryProgress  Int             @default(5)
+  id               String          @id @default(cuid())
+  userId           String          @unique
+  clubId           String
+  position         String?
+  number           Int?
+  teamCategoryId   String?
+  age              Int?
+  height           String?
+  weight           String?
+  foot             String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  isInjured        Boolean         @default(false)
+  injuryType       String?
+  injurySeverity   String?
+  injuryDuration   String?
+  injuryDate       DateTime?
+  injuryReturn     DateTime?
+  injuryStatus     String?
+  injuryProgress   Int             @default(5)
   injuryDeclaredBy String?
-
-  // Medical Record fields
-  bloodGroup      String?
-  allergies       String?
-  lastCheckup     String?
-  clearance       String?         @default("Autorisé")
+  bloodGroup       String?
+  allergies        String?
+  lastCheckup      String?
+  clearance        String?         @default("Autorisé")
   medicalNotes     String[]
-  nationality     String?
-  birthDate       String?
+  nationality      String?
+  birthDate        String?
   medicalTreatment String?
-  medication      String?
+  medication       String?
+  dailyResponses   DailyResponse[]
+  physicalIndices  PhysicalIndex[]
+  physicalTests    PhysicalTest[]
+  club             Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  teamCategory     TeamCategory?   @relation(fields: [teamCategoryId], references: [id])
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gpsData          PlayerGPSData[]
+  telemetry        Telemetry[]
+  gpsDevice        GpsDevice?
 }
 
 model PhysicalIndex {
   id              String   @id @default(cuid())
   playerId        String
-  player          Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
   questionnaireId String?
-  sleepHours      Float?   // sommeil: heures (heures de sommeil)
-  sleepQuality Int?     // sommeil: qualité (qualité du sommeil)
-  stress       Int?     // stress index (indice de stress)
-  soreness     Int?     // courbatures index (indice de courbatures/douleurs)
-  fatigue      Int?     // fatigue index (indice de fatigue)
-  rpe          Int?     // RPE (Rate of Perceived Exertion)
-  rpeDuration  Int?     // RPE training duration in minutes
-  heartRate    Int?     // Battements de coeur (fréquence cardiaque en BPM)
-  date         DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  sleepHours      Float?
+  sleepQuality    Int?
+  stress          Int?
+  soreness        Int?
+  fatigue         Int?
+  rpe             Int?
+  rpeDuration     Int?
+  heartRate       Int?
+  date            DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  player          Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 }
 
 model Composition {
   id             String       @id @default(cuid())
   teamCategoryId String       @unique
-  teamCategory   TeamCategory @relation(fields: [teamCategoryId], references: [id], onDelete: Cascade)
-  formation      Json         // e.g. {"defenders": 4, "midfielders": 3, "forwards": 3}
-  slots          Json         // [{ id, type, label, x, y, playerId }]
-  substitutes    Json         // Array of player IDs: ["id1", "id2"]
+  formation      Json
+  slots          Json
+  substitutes    Json
   isCommunicated Boolean      @default(false)
   communicatedAt DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  teamCategory   TeamCategory @relation(fields: [teamCategoryId], references: [id], onDelete: Cascade)
 }
 
 model DailyQuestionnaire {
   id             String          @id @default(cuid())
   clubId         String
-  club           Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
   teamCategoryId String?
-  teamCategory   TeamCategory?   @relation(fields: [teamCategoryId], references: [id], onDelete: SetNull)
-  timeLimit      Int             // in minutes
+  timeLimit      Int
   createdAt      DateTime        @default(now())
   scheduledFor   DateTime        @default(now())
   expiresAt      DateTime
   active         Boolean         @default(true)
   isApplied      Boolean         @default(false)
   questions      Json?
+  club           Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  teamCategory   TeamCategory?   @relation(fields: [teamCategoryId], references: [id])
   responses      DailyResponse[]
 }
 
 model DailyResponse {
   id              String             @id @default(cuid())
   questionnaireId String
-  questionnaire   DailyQuestionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
   playerId        String
-  player          Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
   sleepQuality    Int
   fatigue         Int
   stress          Int
@@ -267,33 +261,35 @@ model DailyResponse {
   heartRate       Int
   answers         Json?
   createdAt       DateTime           @default(now())
+  player          Player             @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  questionnaire   DailyQuestionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
 
   @@unique([questionnaireId, playerId])
 }
 
 model PhysicalTest {
-  id           String   @id @default(cuid())
-  playerId     String
-  player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  vma          Float    // VMA (km/h)
-  vo2Max       Float    // VO2 Max (ml/kg/min)
-  sprint10m    Float    // Sprint 10m (s)
-  sprint30m    Float    // Sprint 30m (s)
-  cmj          Float    // Countermovement Jump (cm)
-  sj           Float    // Squat Jump (cm)
-  illinois     Float    // Illinois Agility Test (s)
-  fat          Float    // Body Fat Percentage (%)
-  date         DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(cuid())
+  playerId  String
+  vma       Float
+  vo2Max    Float
+  sprint10m Float
+  sprint30m Float
+  cmj       Float
+  sj        Float
+  illinois  Float
+  fat       Float
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 }
 
 model SerialCode {
   id           String   @id @default(cuid())
-  code         String   @unique // 16 digits
-  identifier   String   @unique // 6 characters
-  plan         String   // e.g. "1 Équipe", "Club", "Professionnel", "Elite"
-  duration     String   // "MONTHLY" | "YEARLY"
+  code         String   @unique
+  identifier   String   @unique
+  plan         String
+  duration     String
   used         Boolean  @default(false)
   usedByClubId String?
   createdAt    DateTime @default(now())
@@ -304,143 +300,242 @@ model PaymentSubmission {
   id              String   @id @default(cuid())
   clubId          String
   clubName        String
-  plan            String   // selected plan e.g. "1 Équipe", "Club", "Professionnel", "Elite"
-  duration        String   // "MONTHLY" | "YEARLY"
+  plan            String
+  duration        String
   amount          Float
-  method          String   // "BARIDIMOB" | "CHEQUE"
-  attachment      String?  // base64 or path to receipt/check photo
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  rejectionReason String?  // motif de refus
+  method          String
+  attachment      String?
+  status          String   @default("PENDING")
+  rejectionReason String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
 model Poll {
-  id             String       @id @default(cuid())
-  clubId         String
-  club           Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  title          String
-  description    String?
-  type           String       // e.g. "GENERAL", "MATCH", "TRAINING", "EVENT"
-  status         String       @default("ACTIVE") // "ACTIVE", "SCHEDULED", "FINISHED"
-  scheduledFor   DateTime?
-  expiresAt      DateTime
-  creatorId      String
-  creatorName    String
-  creatorRole    String?
-  targetTeams    Json?        // Array of team category IDs, e.g. ["cuid1", "cuid2"] or null for all
-  targetRoles    Json?        // Array of roles, e.g. ["STAFF", "JOUEUR"] or null for all
-  targetUserIds  Json?        // Array of specific user IDs allowed to vote, or null for all targets
-  options        PollOption[]
-  votes          PollVote[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id            String       @id @default(cuid())
+  clubId        String
+  title         String
+  description   String?
+  type          String
+  status        String       @default("ACTIVE")
+  scheduledFor  DateTime?
+  expiresAt     DateTime
+  creatorId     String
+  creatorName   String
+  creatorRole   String?
+  targetTeams   Json?
+  targetRoles   Json?
+  targetUserIds Json?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  club          Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  options       PollOption[]
+  votes         PollVote[]
 }
 
 model PollOption {
   id        String     @id @default(cuid())
   pollId    String
-  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
   text      String
-  votes     PollVote[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes     PollVote[]
 }
 
 model PollVote {
-  id        String     @id @default(cuid())
-  pollId    String
-  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  optionId  String
-  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  userId    String
-  userName  String
+  id         String     @id @default(cuid())
+  pollId     String
+  optionId   String
+  userId     String
+  userName   String
   choiceText String
-  createdAt DateTime   @default(now())
+  createdAt  DateTime   @default(now())
+  option     PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  poll       Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
 
   @@unique([pollId, userId])
 }
 
 model ChatChannel {
-  id           String        @id @default(cuid())
-  clubId       String
-  club         Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  name         String
-  description  String?
-  isPrivate    Boolean       @default(false)
-  isCustom     Boolean       @default(false)
-  canReply     Boolean       @default(true)
-  creatorId    String
-  creatorName  String
-  targetTeams  Json?         // Array of team category IDs (null means all teams or not restricted)
-  targetRoles  Json?         // Array of role names (null means everyone)
-  targetUserIds Json?        // Array of specific user IDs allowed to view
-  messages     ChatMessage[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id            String        @id @default(cuid())
+  clubId        String
+  name          String
+  description   String?
+  isPrivate     Boolean       @default(false)
+  isCustom      Boolean       @default(false)
+  canReply      Boolean       @default(true)
+  creatorId     String
+  creatorName   String
+  targetTeams   Json?
+  targetRoles   Json?
+  targetUserIds Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  club          Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  messages      ChatMessage[]
 }
 
 model ChatMessage {
-  id              String             @id @default(cuid())
-  channelId       String
-  channel         ChatChannel        @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  senderId        String
-  senderName      String
-  senderRole      String?
-  senderClubName  String?
-  senderClubLogo  String?
-  content         String
-  views           ChatMessageView[]
-  createdAt       DateTime           @default(now())
+  id             String            @id @default(cuid())
+  channelId      String
+  senderId       String
+  senderName     String
+  senderRole     String?
+  senderClubName String?
+  senderClubLogo String?
+  content        String
+  createdAt      DateTime          @default(now())
+  channel        ChatChannel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  views          ChatMessageView[]
 }
 
 model ChatMessageView {
-  id          String      @id @default(cuid())
-  messageId   String
-  message     ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  userId      String
-  userName    String
-  userRole    String?
-  viewedAt    DateTime    @default(now())
+  id        String      @id @default(cuid())
+  messageId String
+  userId    String
+  userName  String
+  userRole  String?
+  viewedAt  DateTime    @default(now())
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, userId])
 }
 
 model Announcement {
-  id           String    @id @default(cuid())
-  badgeText    String
-  badgeStyle   String    @default("bg-blue-500/20 border-blue-500/35 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.25)]")
-  icon         String    @default("📢")
-  title        String
-  titleStyle   String    @default("from-emerald-400 to-teal-400")
-  description  String
-  linkText     String    @default("En savoir plus")
-  linkUrl      String    @default("/")
-  mediaType    String    @default("image") // "image" or "video"
-  mediaUrl     String
-  active       Boolean   @default(true)
-  type         String    @default("HOMEPAGE") // "HOMEPAGE" | "PROMOTION" | "SPONSOR"
-  startDate    DateTime?
-  endDate      DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  badgeText   String
+  badgeStyle  String    @default("bg-blue-500/20 border-blue-500/35 text-blue-300 shadow-[0_0_10px_rgba(59,130,246,0.25)]")
+  icon        String    @default("📢")
+  title       String
+  titleStyle  String    @default("from-emerald-400 to-teal-400")
+  description String
+  linkText    String    @default("En savoir plus")
+  linkUrl     String    @default("/")
+  mediaType   String    @default("image")
+  mediaUrl    String
+  active      Boolean   @default(true)
+  type        String    @default("HOMEPAGE")
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model SystemSetting {
-  key          String    @id @unique
-  value        String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  key       String   @id @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
   message   String
-  type      String   @default("INFO") // "COMPOSITION", "SYSTEM", etc.
-  read      Boolean  @default(false)
+  type      String    @default("INFO")
+  read      Boolean   @default(false)
   expiresAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model DeletedAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  email        String
+  phone        String?
+  roleTag      String
+  clubId       String
+  deletedBy    String
+  deletedAt    DateTime @default(now())
+  originalData String   // JSON stringified original account data
+}
+
+model AccountActionLog {
+  id           String   @id @default(cuid())
+  actionType   String
+  targetName   String
+  targetRole   String
+  operatorName String
+  operatorRole String
+  clubId       String
+  createdAt    DateTime @default(now())
+}
+
+model PlayerGPSData {
+  id                    String        @id @default(cuid())
+  playerId              String
+  eventId               String?
+  date                  DateTime
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  // 1. Physical Telemetry
+  distanceTotal         Float         @default(0.0)
+  hsrDistance           Float         @default(0.0)
+  sprintDistance        Float         @default(0.0)
+  accelerations         Int           @default(0)
+  decelerations         Int           @default(0)
+  vMax                  Float         @default(0.0)
+  avgHeartRate          Int           @default(0)
+  peakHeartRate         Int           @default(0)
+  redZoneTime           Int           @default(0)
+
+  // 2. Technical Metrics
+  xG                    Float         @default(0.0)
+  xA                    Float         @default(0.0)
+  progressivePasses     Int           @default(0)
+  successUnderPressure  Float         @default(0.0)
+  duelsWon              Int           @default(0)
+  turnovers             Int           @default(0)
+  recoveries            Int           @default(0)
+
+  // 3. Tactical & Positioning
+  ppda                  Float         @default(0.0)
+  compacity             Float         @default(0.0)
+  reactionTime          Float         @default(0.0)
+  heatmapX              Float         @default(0.0)
+  heatmapY              Float         @default(0.0)
+
+  // 4. Workload & Injury Prevention
+  acwr                  Float         @default(1.0)
+  asymmetry             Float         @default(0.0)
+  neuromuscularFatigue  Float         @default(0.0)
+
+  player                Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  event                 CalendarEvent? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+}
+
+model GpsDevice {
+  id        String   @id
+  playerId  String?  @unique
+  battery   Int      @default(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  player    Player?  @relation(fields: [playerId], references: [id], onDelete: SetNull)
+}
+
+model Telemetry {
+  id        String        @id @default(cuid())
+  playerId  String
+  eventId   String?
+  x         Float
+  y         Float
+  speed     Float         @default(0.0)
+  heartRate Int?
+  timestamp DateTime      @default(now())
+  player    Player        @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  event     CalendarEvent? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model PaymentConfig {
+  id        String   @id @default("default")
+  rib       String   @default("007 99999 0000123456 78")
+  cle       String   @default("78")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

@@ -1,9 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { useState, useEffect } from "react"
+import { signIn, signOut } from "next-auth/react"
+import { useSearchParams } from "next/navigation"
 import { useLanguage } from "@/components/LanguageProvider"
+import { checkAccountStatusBeforeLogin } from "@/app/actions/authCheck"
 
 export default function Login() {
   const { t, language } = useLanguage()
@@ -13,12 +15,82 @@ export default function Login() {
   const [error, setError] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const reason = params.get("reason")
+      if (reason) {
+        signOut({ redirect: false }).then(() => {
+          if (reason === "deleted") {
+            setError(
+              language === "FR"
+                ? "Votre compte a été supprimé par l'administrateur. Veuillez contacter le manager Evo Sports."
+                : language === "EN"
+                  ? "Your account was deleted by the administrator. Please contact the Evo Sports manager."
+                  : "تم حذف حسابك بواسطة المسؤول. يرجى الاتصال بمدير إيفو سبورتس."
+            )
+          } else if (reason === "blocked") {
+            setError(
+              language === "FR"
+                ? "Votre compte a été bloqué. Veuillez contacter le président du club."
+                : language === "EN"
+                  ? "Your account has been blocked. Please contact the club president."
+                  : "تم حظر حسابك. يرجى الاتصال برئيس النادي."
+            )
+          } else if (reason === "modified") {
+            setError(
+              language === "FR"
+                ? "Votre compte a été modifié. Veuillez vous reconnecter pour appliquer les changements."
+                : language === "EN"
+                  ? "Your account was modified. Please log in again to apply changes."
+                  : "تم تعديل حسابك. يرجى تسجيل الدخول مرة أخرى لتطبيق التغييرات."
+            )
+          }
+        })
+      }
+    }
+  }, [language])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
 
     try {
+      // Check if user is blocked or deleted before attempting sign in
+      const statusRes = await checkAccountStatusBeforeLogin(email)
+      if (statusRes.status === "BLOCKED") {
+        const formattedDate = new Date(statusRes.date!).toLocaleString(
+          language === "FR" ? "fr-FR" : "en-US",
+          { dateStyle: "short", timeStyle: "short" }
+        )
+        setError(
+          language === "FR"
+            ? `Votre compte a été bloqué par ${statusRes.operatorName} le ${formattedDate}. Veuillez contacter le président du club.`
+            : language === "EN"
+              ? `Your account has been blocked by ${statusRes.operatorName} on ${formattedDate}. Please contact the club president.`
+              : `تم حظر حسابك بواسطة ${statusRes.operatorName} بتاريخ ${formattedDate}. يرجى الاتصال برئيس النادي.`
+        )
+        setLoading(false)
+        return
+      }
+
+      if (statusRes.status === "DELETED") {
+        const formattedDate = new Date(statusRes.date!).toLocaleString(
+          language === "FR" ? "fr-FR" : "en-US",
+          { dateStyle: "short", timeStyle: "short" }
+        )
+        setError(
+          language === "FR"
+            ? `Votre compte a été supprimé par ${statusRes.operatorName} le ${formattedDate}. Veuillez contacter le manager Evo Sports.`
+            : language === "EN"
+              ? `Your account was deleted by ${statusRes.operatorName} on ${formattedDate}. Please contact the Evo Sports manager.`
+              : `تم حذف حسابك بواسطة ${statusRes.operatorName} بتاريخ ${formattedDate}. يرجى الاتصال بمدير إيفو سبورتس.`
+        )
+        setLoading(false)
+        return
+      }
+
       const res = await signIn("credentials", {
         email,
         password,
@@ -30,8 +102,8 @@ export default function Login() {
           language === "FR"
             ? "Identifiants incorrects. Veuillez réessayer."
             : language === "EN"
-            ? "Incorrect credentials. Please try again."
-            : "بيانات الاعتماد غير صحيحة. يرجى المحاولة مرة أخرى."
+              ? "Incorrect credentials. Please try again."
+              : "بيانات الاعتماد غير صحيحة. يرجى المحاولة مرة أخرى."
         )
         setLoading(false)
         return
@@ -49,8 +121,8 @@ export default function Login() {
         language === "FR"
           ? "Une erreur est survenue lors de la connexion."
           : language === "EN"
-          ? "An error occurred during login."
-          : "حدث خطأ أثناء تسجيل الدخول."
+            ? "An error occurred during login."
+            : "حدث خطأ أثناء تسجيل الدخول."
       )
       setLoading(false)
     }
@@ -67,13 +139,13 @@ export default function Login() {
         <div className="flex flex-col items-center">
           <Link href="/" className="flex items-center gap-2 group mb-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/logo.png" 
-              alt="EVO SPORTS Logo" 
-              className="h-12 w-auto object-contain transition-all duration-300 group-hover:scale-105" 
+            <img
+              src="/logo.png"
+              alt="EVO SPORTS Logo"
+              className="h-12 w-auto object-contain transition-all duration-300 group-hover:scale-105"
             />
           </Link>
-          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white text-center">
+          <h2 className="text-2xl min-[400px]:text-3xl sm:text-4xl font-sport font-black italic uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-400 text-center drop-shadow-sm whitespace-nowrap">
             {t("login_title")}
           </h2>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 text-center">
@@ -204,8 +276,8 @@ export default function Login() {
               {language === "FR"
                 ? "Se connecter avec Google"
                 : language === "EN"
-                ? "Sign in with Google"
-                : "تسجيل الدخول بواسطة Google"}
+                  ? "Sign in with Google"
+                  : "تسجيل الدخول بواسطة Google"}
             </span>
           </button>
 

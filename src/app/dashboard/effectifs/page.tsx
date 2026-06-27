@@ -184,7 +184,28 @@ export default async function EffectifsPage() {
     playersCount: c.players?.length || 0
   }))
 
+  const logs = await db.accountActionLog.findMany({
+    where: { clubId },
+    orderBy: { createdAt: "desc" },
+    take: 30
+  })
+
+  const serializedLogs = logs.map(log => ({
+    id: log.id,
+    actionType: log.actionType,
+    targetName: log.targetName,
+    targetRole: log.targetRole,
+    operatorName: log.operatorName,
+    operatorRole: log.operatorRole,
+    createdAt: log.createdAt.toISOString()
+  }))
+
   return (
-    <EffectifsClient initialPlayers={players} categories={categories} userRole={userRole} />
+    <EffectifsClient 
+      initialPlayers={players} 
+      categories={categories} 
+      userRole={userRole} 
+      initialLogs={serializedLogs}
+    />
   )
 }

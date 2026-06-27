@@ -29,6 +29,7 @@ interface TrainingEvent {
   details?: string
   completed?: boolean
   status?: string
+  creatorName?: string
 }
 
 interface ActivityItem {
@@ -411,74 +412,102 @@ export default function EntrainementClient({
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {trainingsList.map((train) => (
-                <div
-                  key={train.id}
-                  className={`rounded-2xl border p-5 shadow-sm flex flex-col justify-between gap-6 transition-all group relative overflow-hidden ${train.completed
-                      ? "border-zinc-200 bg-zinc-50/50 dark:border-zinc-850 dark:bg-zinc-950/20 grayscale opacity-80"
-                      : "border-zinc-150 bg-white dark:border-zinc-800 dark:bg-zinc-950 hover:border-emerald-500"
-                    }`}
-                >
-                  <div className={`absolute top-0 left-0 bottom-0 w-1 ${train.completed ? "bg-zinc-400" : "bg-emerald-500"}`} />
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-black text-zinc-800 dark:text-zinc-200">
-                        📅 {new Date(train.date).toLocaleDateString("fr-FR", { dateStyle: "long" })}
-                      </span>
-                      <span className="text-[9px] font-black text-zinc-400">⏱ {train.time}</span>
-                      <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${train.completed
-                          ? "bg-zinc-200/50 text-zinc-500 dark:bg-zinc-850"
-                          : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                        }`}>
-                        ⚽ {train.assignedTeam}
-                      </span>
-
-                      {train.completed && (
-                        <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
-                          ✓ Réalisée & Verrouillée
+              {trainingsList.map((train) => {
+                const eventDateTime = new Date(`${train.date}T${train.time}`)
+                const isExpired = train.status === "EXPIRE" || (
+                  !isNaN(eventDateTime.getTime()) &&
+                  (new Date().getTime() - eventDateTime.getTime() > 24 * 60 * 60 * 1000) &&
+                  !train.completed && train.status !== "TERMINE" && train.status !== "EN_COURS"
+                )
+                return (
+                  <div
+                    key={train.id}
+                    className={`rounded-2xl border p-5 shadow-sm flex flex-col justify-between gap-6 transition-all group relative overflow-hidden ${train.completed
+                        ? "border-zinc-200 bg-zinc-50/50 dark:border-zinc-850 dark:bg-zinc-950/20 grayscale opacity-80"
+                        : isExpired
+                        ? "border-red-300 bg-red-50/5 dark:border-red-950/20 dark:bg-red-950/10"
+                        : "border-zinc-150 bg-white dark:border-zinc-800 dark:bg-zinc-950 hover:border-emerald-500"
+                      }`}
+                  >
+                    <div className={`absolute top-0 left-0 bottom-0 w-1 ${train.completed ? "bg-zinc-400" : isExpired ? "bg-red-500" : "bg-emerald-500"}`} />
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-black text-zinc-800 dark:text-zinc-200">
+                          📅 {new Date(train.date).toLocaleDateString("fr-FR", { dateStyle: "long" })}
                         </span>
-                      )}
+                        <span className="text-[9px] font-black text-zinc-400">⏱ {train.time}</span>
+                        <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${train.completed
+                            ? "bg-zinc-200/50 text-zinc-500 dark:bg-zinc-850"
+                            : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                          }`}>
+                          ⚽ {train.assignedTeam}
+                        </span>
+
+                        {train.completed && (
+                          <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
+                            ✓ Réalisée & Verrouillée
+                          </span>
+                        )}
+
+                        {isExpired && (
+                          <span className="bg-red-500/10 text-red-655 border border-red-500/20 rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider animate-pulse">
+                            ⚠️ Expiré (Non commencé)
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <h4 className="text-xs font-black uppercase text-zinc-900 dark:text-white tracking-wide">
+                          {train.title}
+                        </h4>
+                        <p className="text-[10px] text-zinc-500 font-semibold">📍 Lieu : {train.location}</p>
+                        {train.details && (
+                          <p className="text-[10px] text-zinc-400 italic font-semibold leading-relaxed">
+                            💡 Consignes : {train.details}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-black uppercase text-zinc-900 dark:text-white tracking-wide">
-                        {train.title}
-                      </h4>
-                      <p className="text-[10px] text-zinc-500 font-semibold">📍 Lieu : {train.location}</p>
-                      {train.details && (
-                        <p className="text-[10px] text-zinc-400 italic font-semibold leading-relaxed">
-                          💡 Consignes : {train.details}
-                        </p>
-                      )}
-                    </div>
+                    {train.completed ? (
+                      <button
+                        onClick={() => handleConsultSession(train)}
+                        className="w-full rounded-xl bg-zinc-950 hover:bg-zinc-900 text-white font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 text-center"
+                      >
+                        Consulter le Bilan 📊
+                      </button>
+                    ) : (
+                      <div className="flex gap-2">
+                        {!isExpired ? (
+                          <button
+                            onClick={() => handleStartSession(train)}
+                            className="flex-1 rounded-xl bg-gradient-to-b from-zinc-50 to-zinc-200 hover:from-zinc-100 hover:to-zinc-250 border border-zinc-300 text-emerald-800 font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer text-center"
+                          >
+                            Démarrer l&apos;entraînement ⚡
+                          </button>
+                        ) : (
+                          <div className="flex-1 rounded-xl bg-red-500/10 border border-red-500/20 text-red-655 font-black uppercase text-[9px] tracking-wider py-2.5 flex items-center justify-center select-none text-center">
+                            ⚠️ Séance Expirée
+                          </div>
+                        )}
+
+                        {(isExpired
+                          ? ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName)
+                          : ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName) || train.creatorName === userName
+                        ) && (
+                          <button
+                            onClick={() => handleDeleteTraining(train.id, train.title)}
+                            className="px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-650 font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
+                            title="Supprimer la séance"
+                          >
+                            Supprimer ✕
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-
-                  {train.completed ? (
-                    <button
-                      onClick={() => handleConsultSession(train)}
-                      className="w-full rounded-xl bg-zinc-950 hover:bg-zinc-900 text-white font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 text-center"
-                    >
-                      Consulter le Bilan 📊
-                    </button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleStartSession(train)}
-                        className="flex-1 rounded-xl bg-gradient-to-b from-zinc-50 to-zinc-200 hover:from-zinc-100 hover:to-zinc-250 border border-zinc-300 text-emerald-800 font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                      >
-                        Démarrer l&apos;entraînement ⚡
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTraining(train.id, train.title)}
-                        className="px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-650 font-black uppercase text-[10px] tracking-wider py-2.5 shadow-sm active:scale-95 transition-all cursor-pointer dark:bg-red-950/20 dark:text-red-400"
-                        title="Supprimer la séance"
-                      >
-                        Supprimer ✕
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>

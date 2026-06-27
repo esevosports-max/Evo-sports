@@ -33,6 +33,7 @@ export async function POST(req: Request) {
     }
 
     const requestStatus = trialSelected ? "PENDING" : "APPROVED"
+    const finalPlan = trialSelected ? "1 Équipe" : (chosenPlan || "Club")
 
     // Upsert the club request (create or update)
     const request = await db.clubRegistrationRequest.upsert({
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
         phone: phone || null,
         status: requestStatus, // reset status to pending or auto-approved
         rejectionReason: null,
-        chosenPlan: chosenPlan || "Club",
+        chosenPlan: finalPlan,
         trialSelected: trialSelected !== undefined ? trialSelected : false,
       },
       create: {
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
         pdfFilename: pdfFilename || null,
         phone: phone || null,
         status: requestStatus,
-        chosenPlan: chosenPlan || "Club",
+        chosenPlan: finalPlan,
         trialSelected: trialSelected !== undefined ? trialSelected : false,
       },
     })

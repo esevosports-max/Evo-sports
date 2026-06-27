@@ -33,7 +33,7 @@ export async function getMatches() {
 
     let updatedAny = false
 
-    // Check expiration rule (120 minutes)
+    // Check expiration rule (120 minutes for normal N/A, 24 hours for EXPIRE)
     for (const match of activeMatches) {
       // Parse match.date (YYYY-MM-DD) and match.time (HH:MM)
       // E.g. "2026-06-03T07:30:00"
@@ -41,7 +41,16 @@ export async function getMatches() {
       const diffMs = now.getTime() - matchStart.getTime()
       const diffMins = diffMs / (1000 * 60)
 
-      if (diffMins >= 120) {
+      if (diffMs > 24 * 60 * 60 * 1000 && match.status === "PROGRAMME") {
+        await db.calendarEvent.update({
+          where: { id: match.id },
+          data: {
+            status: "EXPIRE",
+            score: "N/A"
+          }
+        })
+        updatedAny = true
+      } else if (diffMins >= 120) {
         await db.calendarEvent.update({
           where: { id: match.id },
           data: {
@@ -103,7 +112,17 @@ export async function startMatch(matchId: string) {
     const diffMs = now.getTime() - matchStart.getTime()
     const diffMins = diffMs / (1000 * 60)
 
-    if (diffMins >= 120) {
+    if (diffMs > 24 * 60 * 60 * 1000) {
+      await db.calendarEvent.update({
+        where: { id: matchId },
+        data: {
+          status: "EXPIRE",
+          score: "N/A"
+        }
+      })
+      revalidatePath("/dashboard/match")
+      throw new Error("Ce match a expiré (plus de 24 heures écoulées sans coup d'envoi).")
+    } else if (diffMins >= 120) {
       // Auto-expire instead
       await db.calendarEvent.update({
         where: { id: matchId },
@@ -149,8 +168,8 @@ export async function recordMatchResult(matchId: string, score: string) {
     }
 
     // If already expired, don't allow modification
-    if (match.status === "N_A") {
-      throw new Error("Ce match est marqué N/A et ne peut plus être modifié.")
+    if (match.status === "N_A" || match.status === "EXPIRE") {
+      throw new Error("Ce match a expiré et ne peut plus être modifié.")
     }
 
     const updated = await db.calendarEvent.update({

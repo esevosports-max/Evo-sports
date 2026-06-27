@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { logAccountAction } from "@/lib/actionLogger"
 
 export async function createStaffMember(data: {
   firstName: string
@@ -55,6 +56,59 @@ export async function createStaffMember(data: {
       throw new Error("Club introuvable")
     }
 
+    // Check subscription plan limits for 1 Équipe
+    const plan = club.subscriptionPlan || "Club"
+    const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
+    
+    if (isOneTeamPlan) {
+      const forbiddenRoles = ["ENTRAINEUR_ADJOINT", "SECRETAIRE_GENERAL", "ENTRAINEUR_GARDIENS", "PREPARATEUR_PHYSIQUE"]
+      if (forbiddenRoles.includes(data.roleTag)) {
+        throw new Error("Votre forfait '1 Équipe' ne permet pas de créer ce type de compte.")
+      }
+
+      if (data.roleTag === "ENTRAINEUR_PRINCIPAL") {
+        const headCoachCount = await db.staff.count({
+          where: {
+            clubId: club.id,
+            user: {
+              role: { name: "ENTRAINEUR_PRINCIPAL" }
+            }
+          }
+        })
+        if (headCoachCount >= 1) {
+          throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Entraîneur Principal.")
+        }
+      }
+
+      if (data.roleTag === "DIRECTEUR_SPORTIF") {
+        const dirSportifCount = await db.staff.count({
+          where: {
+            clubId: club.id,
+            user: {
+              role: { name: "DIRECTEUR_SPORTIF" }
+            }
+          }
+        })
+        if (dirSportifCount >= 1) {
+          throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Directeur Sportif.")
+        }
+      }
+
+      if (data.roleTag === "MEDECIN") {
+        const medecinCount = await db.staff.count({
+          where: {
+            clubId: club.id,
+            user: {
+              role: { name: "MEDECIN" }
+            }
+          }
+        })
+        if (medecinCount >= 1) {
+          throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Médecin du Club.")
+        }
+      }
+    }
+
     // Find the role in the database
     let staffRole = await db.role.findUnique({
       where: { name: data.roleTag }
@@ -102,12 +156,28 @@ export async function createStaffMember(data: {
       }
     }
 
+    // Check if email already in use
+    const emailNormalized = data.email.toLowerCase().trim()
+    const existingUser = await db.user.findUnique({
+      where: { email: emailNormalized }
+    })
+    if (existingUser) {
+      throw new Error("Cette adresse email est déjà utilisée.")
+    }
+
+    const existingDeleted = await db.deletedAccount.findFirst({
+      where: { email: emailNormalized }
+    })
+    if (existingDeleted) {
+      throw new Error("Cette adresse email est déjà utilisée.")
+    }
+
     // Create related User account
     const fullName = `${data.lastName.toUpperCase()} ${data.firstName}`
     const user = await db.user.create({
       data: {
         name: fullName,
-        email: data.email,
+        email: emailNormalized,
         phone: data.phone,
         password: "StaffPassword123", // Default password
         roleId: staffRole?.id || null
@@ -134,6 +204,15 @@ export async function createStaffMember(data: {
       })
     }
 
+    await logAccountAction({
+      actionType: "CREATE",
+      targetName: fullName,
+      targetRole: data.roleTag,
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: club.id
+    })
+
     revalidatePath("/dashboard/staff")
     return { success: true }
   } catch (e: any) {
@@ -156,7 +235,10 @@ export async function deleteStaffMember(staffId: string) {
 
     const staff = await db.staff.findUnique({
       where: { id: staffId },
-      include: { user: { include: { role: true } } }
+      include: {
+        categories: true,
+        user: { include: { role: true } }
+      }
     })
 
     if (!staff) {
@@ -170,9 +252,61 @@ export async function deleteStaffMember(staffId: string) {
       }
     }
 
+    // Save account state for restoration/trash bin before deleting
+    const originalData = JSON.stringify({
+      user: {
+        id: staff.user.id,
+        name: staff.user.name,
+        email: staff.user.email,
+        password: staff.user.password,
+        roleId: staff.user.roleId,
+        phone: staff.user.phone,
+        blocked: staff.user.blocked
+      },
+      staff: {
+        id: staff.id,
+        userId: staff.userId,
+        clubId: staff.clubId,
+        title: staff.title,
+        bloodGroup: staff.bloodGroup,
+        allergies: staff.allergies,
+        lastCheckup: staff.lastCheckup,
+        clearance: staff.clearance,
+        medicalNotes: staff.medicalNotes,
+        age: staff.age,
+        nationality: staff.nationality,
+        birthDate: staff.birthDate,
+        medicalTreatment: staff.medicalTreatment,
+        medication: staff.medication
+      },
+      categories: staff.categories.map((c) => c.id)
+    })
+
+    await db.deletedAccount.create({
+      data: {
+        userId: staff.userId,
+        name: staff.user.name || "Membre du Staff",
+        email: staff.user.email || "",
+        phone: staff.user.phone,
+        roleTag: staff.user.role?.name || "STAFF",
+        clubId: staff.clubId,
+        originalData,
+        deletedBy: session.user.name || session.user.email || "Gestionnaire"
+      }
+    })
+
     // Delete related User which cascades to delete Staff
     await db.user.delete({
       where: { id: staff.userId }
+    })
+
+    await logAccountAction({
+      actionType: "DELETE",
+      targetName: staff.user?.name || "Membre du Staff",
+      targetRole: staff.user?.role?.name || "STAFF",
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: staff.clubId
     })
 
     revalidatePath("/dashboard/staff")
@@ -212,6 +346,68 @@ export async function updateStaffMember(
 
     if (!staff) {
       throw new Error("Membre du staff introuvable")
+    }
+
+    const club = await db.club.findUnique({
+      where: { id: staff.clubId }
+    })
+    if (!club) {
+      throw new Error("Club introuvable")
+    }
+
+    const plan = club.subscriptionPlan || "Club"
+    const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
+    
+    if (isOneTeamPlan) {
+      const forbiddenRoles = ["ENTRAINEUR_ADJOINT", "SECRETAIRE_GENERAL", "ENTRAINEUR_GARDIENS", "PREPARATEUR_PHYSIQUE"]
+      if (forbiddenRoles.includes(data.roleTag)) {
+        throw new Error("Votre forfait '1 Équipe' ne permet pas d'avoir ce rôle dans le staff.")
+      }
+
+      if (data.roleTag === "ENTRAINEUR_PRINCIPAL") {
+        const headCoachCount = await db.staff.count({
+          where: {
+            clubId: club.id,
+            id: { not: staffId },
+            user: {
+              role: { name: "ENTRAINEUR_PRINCIPAL" }
+            }
+          }
+        })
+        if (headCoachCount >= 1) {
+          throw new Error("Votre forfait '1 Équipe' ne permet d'avoir qu'un seul Entraîneur Principal.")
+        }
+      }
+
+      if (data.roleTag === "DIRECTEUR_SPORTIF") {
+        const dirSportifCount = await db.staff.count({
+          where: {
+            clubId: club.id,
+            id: { not: staffId },
+            user: {
+              role: { name: "DIRECTEUR_SPORTIF" }
+            }
+          }
+        })
+        if (dirSportifCount >= 1) {
+          throw new Error("Votre forfait '1 Équipe' ne permet d'avoir qu'un seul Directeur Sportif.")
+        }
+      }
+
+      if (data.roleTag === "MEDECIN") {
+        const medecinCount = await db.staff.count({
+          where: {
+            clubId: club.id,
+            id: { not: staffId },
+            user: {
+              role: { name: "MEDECIN" }
+            }
+          }
+        })
+        if (medecinCount >= 1) {
+          throw new Error("Votre forfait '1 Équipe' ne permet d'avoir qu'un seul Médecin du Club.")
+        }
+      }
     }
 
     if (userRole === "SECRETAIRE_GENERAL") {
@@ -267,14 +463,44 @@ export async function updateStaffMember(
       }
     }
 
+    const emailNormalized = data.email.toLowerCase().trim()
+    const existingUser = await db.user.findFirst({
+      where: {
+        email: emailNormalized,
+        id: { not: staff.userId }
+      }
+    })
+    if (existingUser) {
+      throw new Error("Cette adresse email est déjà utilisée.")
+    }
+
+    const existingDeleted = await db.deletedAccount.findFirst({
+      where: { email: emailNormalized }
+    })
+    if (existingDeleted) {
+      throw new Error("Cette adresse email est déjà utilisée.")
+    }
+
+    const modifiedFieldsList: string[] = []
+    if (staff.user?.name !== data.name) modifiedFieldsList.push("Nom")
+    if (staff.user?.email !== emailNormalized) modifiedFieldsList.push("Email")
+    if (staff.user?.phone !== data.phone) modifiedFieldsList.push("Téléphone")
+    if (staff.user?.role?.name !== data.roleTag) modifiedFieldsList.push("Rôle")
+    if (data.password) modifiedFieldsList.push("Mot de passe")
+    const modifiedFieldsStr = modifiedFieldsList.join(", ") || "Informations du profil"
+
+    const operatorNameWithRole = `${session.user.name || session.user.email || "Utilisateur"} (${userRole || "ADMIN"})`
     await db.user.update({
       where: { id: staff.userId },
       data: {
         name: data.name,
-        email: data.email,
+        email: emailNormalized,
         phone: data.phone,
         ...(data.password ? { password: data.password } : {}),
-        roleId: staffRole?.id || null
+        roleId: staffRole?.id || null,
+        modifiedBy: operatorNameWithRole,
+        modifiedAt: new Date(),
+        modifiedFields: modifiedFieldsStr
       }
     })
 
@@ -286,6 +512,15 @@ export async function updateStaffMember(
           set: data.categoryIds.map(id => ({ id }))
         }
       }
+    })
+
+    await logAccountAction({
+      actionType: "MODIFY",
+      targetName: data.name,
+      targetRole: data.roleTag,
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: staff.clubId
     })
 
     revalidatePath("/dashboard/staff")
@@ -325,12 +560,24 @@ export async function toggleBlockStaffMember(staffId: string) {
     }
 
     const isBlockedNow = !staff.user.blocked
+    const operatorNameWithRole = `${session.user.name || session.user.email || "Utilisateur"} (${userRole || "ADMIN"})`
 
     await db.user.update({
       where: { id: staff.userId },
       data: {
-        blocked: isBlockedNow
+        blocked: isBlockedNow,
+        blockedBy: isBlockedNow ? operatorNameWithRole : null,
+        blockedAt: isBlockedNow ? new Date() : null
       }
+    })
+
+    await logAccountAction({
+      actionType: isBlockedNow ? "BLOCK" : "UNBLOCK",
+      targetName: staff.user?.name || "Membre du Staff",
+      targetRole: staff.user?.role?.name || "STAFF",
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: staff.clubId
     })
 
     revalidatePath("/dashboard/staff")
@@ -338,6 +585,57 @@ export async function toggleBlockStaffMember(staffId: string) {
   } catch (e: any) {
     console.error("Error toggling block for staff member:", e)
     return { success: false, error: e.message || "Erreur lors du blocage" }
+  }
+}
+
+export async function getAccountActionLogs() {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const userRole = session.user.role?.name
+
+    const ALLOWED_ROLES = ["PRESIDENT", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL"]
+    if (!userRole || !ALLOWED_ROLES.includes(userRole)) {
+      throw new Error("Accès refusé")
+    }
+
+    // Find the club ID
+    let club = await db.club.findUnique({
+      where: { presidentId: userId }
+    })
+
+    if (!club) {
+      const staffMember = await db.staff.findUnique({
+        where: { userId },
+        include: { club: true }
+      })
+      if (staffMember) {
+        club = staffMember.club
+      }
+    }
+
+    if (!club && userRole === "MANAGER_EVO_SPORTS") {
+      club = await db.club.findFirst()
+    }
+
+    if (!club) {
+      return { success: true, logs: [] }
+    }
+
+    const logs = await db.accountActionLog.findMany({
+      where: { clubId: club.id },
+      orderBy: { createdAt: "desc" },
+      take: 50
+    })
+
+    return { success: true, logs }
+  } catch (err: any) {
+    console.error("Error fetching logs:", err)
+    return { success: false, error: err.message || "Erreur de chargement des journaux" }
   }
 }
 

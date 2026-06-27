@@ -53,7 +53,7 @@ export default async function ManagerPaiementsPage() {
     createdAt: s.createdAt.toISOString(),
   }))
 
-  // Server Action to update Billing status/plan/name/expiration
+  // Server Action to update Billing status/plan/name/expiration/method
   async function updateClubBillingAction(
     clubId: string,
     data: {
@@ -62,6 +62,7 @@ export default async function ManagerPaiementsPage() {
       subscriptionStatus: string
       subscriptionPaid: boolean
       subscriptionExpires: string | null
+      subscriptionMethod: string | null
     }
   ) {
     "use server"
@@ -73,6 +74,31 @@ export default async function ManagerPaiementsPage() {
         subscriptionStatus: data.subscriptionStatus,
         subscriptionPaid: data.subscriptionPaid,
         subscriptionExpires: data.subscriptionExpires ? new Date(data.subscriptionExpires) : null,
+        subscriptionMethod: data.subscriptionMethod,
+      }
+    })
+  }
+
+  // Server Action to send notification to club president
+  async function sendClubPresidentNotificationAction(
+    clubId: string,
+    title: string,
+    message: string
+  ) {
+    "use server"
+    const club = await db.club.findUnique({
+      where: { id: clubId },
+      select: { presidentId: true }
+    })
+    if (!club || !club.presidentId) {
+      throw new Error("Président de club introuvable.")
+    }
+    await db.notification.create({
+      data: {
+        userId: club.presidentId,
+        title,
+        message,
+        type: "SYSTEM",
       }
     })
   }
@@ -174,6 +200,7 @@ export default async function ManagerPaiementsPage() {
       deleteClubAction={deleteClubAction}
       approvePaymentAction={approvePaymentAction}
       rejectPaymentAction={rejectPaymentAction}
+      sendClubPresidentNotificationAction={sendClubPresidentNotificationAction}
     />
   )
 }

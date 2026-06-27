@@ -17,6 +17,7 @@ export default async function EquipePage() {
   // Fetch Club details based on user role
   let clubData = null
   let clubId: string | null = null
+  let subscriptionPlan = "Club"
 
   try {
     if (roleName === "PRESIDENT") {
@@ -27,6 +28,7 @@ export default async function EquipePage() {
 
       if (club) {
         clubId = club.id
+        subscriptionPlan = club.subscriptionPlan || "Club"
         clubData = {
           name: club.name,
           logo: club.logo,
@@ -42,6 +44,7 @@ export default async function EquipePage() {
           where: { userId }
         })
         if (request) {
+          subscriptionPlan = request.chosenPlan || "Club"
           clubData = {
             name: request.clubName,
             logo: request.clubLogo,
@@ -58,6 +61,7 @@ export default async function EquipePage() {
       const club = await db.club.findFirst()
       if (club) {
         clubId = club.id
+        subscriptionPlan = club.subscriptionPlan || "Club"
         clubData = {
           name: club.name,
           logo: club.logo,
@@ -77,6 +81,7 @@ export default async function EquipePage() {
       if (staffMember && staffMember.club) {
         clubId = staffMember.club.id
         const club = staffMember.club
+        subscriptionPlan = club.subscriptionPlan || "Club"
         clubData = {
           name: club.name,
           logo: club.logo,
@@ -95,6 +100,7 @@ export default async function EquipePage() {
         if (playerMember && playerMember.club) {
           clubId = playerMember.club.id
           const club = playerMember.club
+          subscriptionPlan = club.subscriptionPlan || "Club"
           clubData = {
             name: club.name,
             logo: club.logo,
@@ -274,6 +280,7 @@ export default async function EquipePage() {
       staffRoles={staffRoles}
       totalStaffCount={totalStaffCount}
       canEdit={canEdit}
+      subscriptionPlan={subscriptionPlan}
     />
   )
 }

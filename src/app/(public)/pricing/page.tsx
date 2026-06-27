@@ -106,6 +106,7 @@ export default function Pricing() {
   const handleSelectPlan = (planName: string) => {
     if (typeof window !== "undefined") {
       sessionStorage.setItem("selectedPlan", planName)
+      sessionStorage.setItem("selectedBillingPeriod", billingPeriod)
     }
   }
 
@@ -135,18 +136,24 @@ export default function Pricing() {
             >
               {t("pricing_monthly")}
             </span>
-            <button
+            <div
               onClick={() => setBillingPeriod(billingPeriod === "monthly" ? "yearly" : "monthly")}
-              className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-200 transition-colors duration-200 ease-in-out focus:outline-none dark:bg-zinc-800"
-              role="switch"
-              aria-checked={billingPeriod === "yearly"}
+              className="flex items-center cursor-pointer"
             >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-emerald-500 shadow ring-0 transition duration-200 ease-in-out ${
-                  billingPeriod === "yearly" ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
+              <button
+                type="button"
+                className="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent bg-zinc-200 transition-colors duration-200 ease-in-out focus:outline-none dark:bg-zinc-800 pointer-events-none"
+                role="switch"
+                aria-checked={billingPeriod === "yearly"}
+              >
+                <span
+                  style={{
+                    transform: billingPeriod === "yearly" ? "translateX(20px)" : "translateX(0px)"
+                  }}
+                  className="inline-block h-5 w-5 rounded-full bg-emerald-500 shadow ring-0 transition-transform duration-200 ease-in-out"
+                />
+              </button>
+            </div>
             <span
               className={`text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer ${
                 billingPeriod === "yearly" ? "text-zinc-900 dark:text-white" : "text-zinc-400 dark:text-zinc-650"

@@ -69,6 +69,16 @@ export default function PaymentPage() {
 
   useEffect(() => {
     fetchClubStatus()
+    if (typeof window !== "undefined") {
+      const storedBilling = sessionStorage.getItem("selectedBillingPeriod") as "monthly" | "yearly"
+      if (storedBilling) {
+        setBillingPeriod(storedBilling)
+      }
+      const storedPlan = sessionStorage.getItem("selectedPlan")
+      if (storedPlan) {
+        setSelectedPlan(storedPlan)
+      }
+    }
   }, [])
 
   // File upload reader
@@ -579,12 +589,21 @@ export default function PaymentPage() {
                 <div className="space-y-4 border border-zinc-200/50 dark:border-zinc-850 p-5 rounded-xl bg-zinc-50/30 dark:bg-zinc-950/10">
                   <div className="space-y-2">
                     <p className="text-xs font-black uppercase tracking-widest text-zinc-400">Coordonnées BaridiMob / CCP</p>
-                    <div className="p-3 bg-white dark:bg-zinc-950 border rounded-lg flex items-center justify-between shadow-inner">
-                      <div>
-                        <p className="text-[10px] font-black text-zinc-400 uppercase">RIB EVO SPORTS</p>
-                        <p className="text-sm font-extrabold text-zinc-900 dark:text-white select-all">007 99999 0000123456 78</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="p-3 bg-white dark:bg-zinc-950 border rounded-lg flex items-center justify-between shadow-inner">
+                        <div>
+                          <p className="text-[10px] font-black text-zinc-400 uppercase">RIB EVO SPORTS</p>
+                          <p className="text-sm font-extrabold text-zinc-900 dark:text-white select-all">{clubInfo?.paymentRib || "007 99999 0000123456 78"}</p>
+                        </div>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-600 font-bold px-2 py-0.5 rounded-full">RIB</span>
                       </div>
-                      <span className="text-[10px] bg-emerald-500/10 text-emerald-600 font-bold px-2 py-0.5 rounded-full">CCP</span>
+                      <div className="p-3 bg-white dark:bg-zinc-950 border rounded-lg flex items-center justify-between shadow-inner">
+                        <div>
+                          <p className="text-[10px] font-black text-zinc-400 uppercase">Clé CCP</p>
+                          <p className="text-sm font-extrabold text-zinc-900 dark:text-white select-all">{clubInfo?.paymentCle || "78"}</p>
+                        </div>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-600 font-bold px-2 py-0.5 rounded-full">Clé</span>
+                      </div>
                     </div>
                   </div>
 

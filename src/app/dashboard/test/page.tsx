@@ -11,6 +11,21 @@ export default async function TestPage() {
 
   const userId = session.user.id
   const userRole = session.user.role?.name || "JOUEUR"
+
+  const allowedRoles = [
+    "PRESIDENT",
+    "DIRECTEUR_SPORTIF",
+    "ENTRAINEUR_PRINCIPAL",
+    "ENTRAINEUR_ADJOINT",
+    "PREPARATEUR_PHYSIQUE",
+    "ENTRAINEUR_GARDIENS",
+    "JOUEUR",
+    "MANAGER_EVO_SPORTS"
+  ]
+  if (!allowedRoles.includes(userRole)) {
+    redirect("/dashboard")
+  }
+
   const isStaff = userRole !== "JOUEUR"
 
   let clubId = ""

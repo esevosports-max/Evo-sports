@@ -408,7 +408,13 @@ export const ModelName = {
   ChatMessageView: 'ChatMessageView',
   Announcement: 'Announcement',
   SystemSetting: 'SystemSetting',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  DeletedAccount: 'DeletedAccount',
+  AccountActionLog: 'AccountActionLog',
+  PlayerGPSData: 'PlayerGPSData',
+  GpsDevice: 'GpsDevice',
+  Telemetry: 'Telemetry',
+  PaymentConfig: 'PaymentConfig'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -424,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView" | "announcement" | "systemSetting" | "notification"
+    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView" | "announcement" | "systemSetting" | "notification" | "deletedAccount" | "accountActionLog" | "playerGPSData" | "gpsDevice" | "telemetry" | "paymentConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2278,6 +2284,450 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DeletedAccount: {
+      payload: Prisma.$DeletedAccountPayload<ExtArgs>
+      fields: Prisma.DeletedAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DeletedAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DeletedAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.DeletedAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DeletedAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>
+        }
+        findMany: {
+          args: Prisma.DeletedAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>[]
+        }
+        create: {
+          args: Prisma.DeletedAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>
+        }
+        createMany: {
+          args: Prisma.DeletedAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DeletedAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.DeletedAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>
+        }
+        update: {
+          args: Prisma.DeletedAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.DeletedAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DeletedAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DeletedAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.DeletedAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeletedAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.DeletedAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDeletedAccount>
+        }
+        groupBy: {
+          args: Prisma.DeletedAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeletedAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DeletedAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeletedAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    AccountActionLog: {
+      payload: Prisma.$AccountActionLogPayload<ExtArgs>
+      fields: Prisma.AccountActionLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AccountActionLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AccountActionLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>
+        }
+        findFirst: {
+          args: Prisma.AccountActionLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AccountActionLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>
+        }
+        findMany: {
+          args: Prisma.AccountActionLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>[]
+        }
+        create: {
+          args: Prisma.AccountActionLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>
+        }
+        createMany: {
+          args: Prisma.AccountActionLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AccountActionLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>[]
+        }
+        delete: {
+          args: Prisma.AccountActionLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>
+        }
+        update: {
+          args: Prisma.AccountActionLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.AccountActionLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AccountActionLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AccountActionLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.AccountActionLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountActionLogPayload>
+        }
+        aggregate: {
+          args: Prisma.AccountActionLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAccountActionLog>
+        }
+        groupBy: {
+          args: Prisma.AccountActionLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountActionLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AccountActionLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountActionLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlayerGPSData: {
+      payload: Prisma.$PlayerGPSDataPayload<ExtArgs>
+      fields: Prisma.PlayerGPSDataFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlayerGPSDataFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlayerGPSDataFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>
+        }
+        findFirst: {
+          args: Prisma.PlayerGPSDataFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlayerGPSDataFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>
+        }
+        findMany: {
+          args: Prisma.PlayerGPSDataFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>[]
+        }
+        create: {
+          args: Prisma.PlayerGPSDataCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>
+        }
+        createMany: {
+          args: Prisma.PlayerGPSDataCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlayerGPSDataCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>[]
+        }
+        delete: {
+          args: Prisma.PlayerGPSDataDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>
+        }
+        update: {
+          args: Prisma.PlayerGPSDataUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlayerGPSDataDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlayerGPSDataUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlayerGPSDataUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlayerGPSDataUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlayerGPSDataPayload>
+        }
+        aggregate: {
+          args: Prisma.PlayerGPSDataAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlayerGPSData>
+        }
+        groupBy: {
+          args: Prisma.PlayerGPSDataGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlayerGPSDataGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlayerGPSDataCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlayerGPSDataCountAggregateOutputType> | number
+        }
+      }
+    }
+    GpsDevice: {
+      payload: Prisma.$GpsDevicePayload<ExtArgs>
+      fields: Prisma.GpsDeviceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GpsDeviceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GpsDeviceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>
+        }
+        findFirst: {
+          args: Prisma.GpsDeviceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GpsDeviceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>
+        }
+        findMany: {
+          args: Prisma.GpsDeviceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>[]
+        }
+        create: {
+          args: Prisma.GpsDeviceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>
+        }
+        createMany: {
+          args: Prisma.GpsDeviceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GpsDeviceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>[]
+        }
+        delete: {
+          args: Prisma.GpsDeviceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>
+        }
+        update: {
+          args: Prisma.GpsDeviceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>
+        }
+        deleteMany: {
+          args: Prisma.GpsDeviceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GpsDeviceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GpsDeviceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>[]
+        }
+        upsert: {
+          args: Prisma.GpsDeviceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GpsDevicePayload>
+        }
+        aggregate: {
+          args: Prisma.GpsDeviceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGpsDevice>
+        }
+        groupBy: {
+          args: Prisma.GpsDeviceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GpsDeviceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GpsDeviceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GpsDeviceCountAggregateOutputType> | number
+        }
+      }
+    }
+    Telemetry: {
+      payload: Prisma.$TelemetryPayload<ExtArgs>
+      fields: Prisma.TelemetryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TelemetryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TelemetryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>
+        }
+        findFirst: {
+          args: Prisma.TelemetryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TelemetryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>
+        }
+        findMany: {
+          args: Prisma.TelemetryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>[]
+        }
+        create: {
+          args: Prisma.TelemetryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>
+        }
+        createMany: {
+          args: Prisma.TelemetryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TelemetryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>[]
+        }
+        delete: {
+          args: Prisma.TelemetryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>
+        }
+        update: {
+          args: Prisma.TelemetryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>
+        }
+        deleteMany: {
+          args: Prisma.TelemetryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TelemetryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TelemetryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>[]
+        }
+        upsert: {
+          args: Prisma.TelemetryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryPayload>
+        }
+        aggregate: {
+          args: Prisma.TelemetryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTelemetry>
+        }
+        groupBy: {
+          args: Prisma.TelemetryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelemetryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TelemetryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelemetryCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaymentConfig: {
+      payload: Prisma.$PaymentConfigPayload<ExtArgs>
+      fields: Prisma.PaymentConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaymentConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaymentConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.PaymentConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaymentConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>
+        }
+        findMany: {
+          args: Prisma.PaymentConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>[]
+        }
+        create: {
+          args: Prisma.PaymentConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>
+        }
+        createMany: {
+          args: Prisma.PaymentConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaymentConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.PaymentConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>
+        }
+        update: {
+          args: Prisma.PaymentConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaymentConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaymentConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaymentConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaymentConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.PaymentConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaymentConfig>
+        }
+        groupBy: {
+          args: Prisma.PaymentConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaymentConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentConfigCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2328,7 +2778,12 @@ export const UserScalarFieldEnum = {
   phone: 'phone',
   blocked: 'blocked',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  blockedAt: 'blockedAt',
+  blockedBy: 'blockedBy',
+  modifiedAt: 'modifiedAt',
+  modifiedBy: 'modifiedBy',
+  modifiedFields: 'modifiedFields'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -2752,6 +3207,108 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
+export const DeletedAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  roleTag: 'roleTag',
+  clubId: 'clubId',
+  deletedBy: 'deletedBy',
+  deletedAt: 'deletedAt',
+  originalData: 'originalData'
+} as const
+
+export type DeletedAccountScalarFieldEnum = (typeof DeletedAccountScalarFieldEnum)[keyof typeof DeletedAccountScalarFieldEnum]
+
+
+export const AccountActionLogScalarFieldEnum = {
+  id: 'id',
+  actionType: 'actionType',
+  targetName: 'targetName',
+  targetRole: 'targetRole',
+  operatorName: 'operatorName',
+  operatorRole: 'operatorRole',
+  clubId: 'clubId',
+  createdAt: 'createdAt'
+} as const
+
+export type AccountActionLogScalarFieldEnum = (typeof AccountActionLogScalarFieldEnum)[keyof typeof AccountActionLogScalarFieldEnum]
+
+
+export const PlayerGPSDataScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  eventId: 'eventId',
+  date: 'date',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  distanceTotal: 'distanceTotal',
+  hsrDistance: 'hsrDistance',
+  sprintDistance: 'sprintDistance',
+  accelerations: 'accelerations',
+  decelerations: 'decelerations',
+  vMax: 'vMax',
+  avgHeartRate: 'avgHeartRate',
+  peakHeartRate: 'peakHeartRate',
+  redZoneTime: 'redZoneTime',
+  xG: 'xG',
+  xA: 'xA',
+  progressivePasses: 'progressivePasses',
+  successUnderPressure: 'successUnderPressure',
+  duelsWon: 'duelsWon',
+  turnovers: 'turnovers',
+  recoveries: 'recoveries',
+  ppda: 'ppda',
+  compacity: 'compacity',
+  reactionTime: 'reactionTime',
+  heatmapX: 'heatmapX',
+  heatmapY: 'heatmapY',
+  acwr: 'acwr',
+  asymmetry: 'asymmetry',
+  neuromuscularFatigue: 'neuromuscularFatigue'
+} as const
+
+export type PlayerGPSDataScalarFieldEnum = (typeof PlayerGPSDataScalarFieldEnum)[keyof typeof PlayerGPSDataScalarFieldEnum]
+
+
+export const GpsDeviceScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  battery: 'battery',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GpsDeviceScalarFieldEnum = (typeof GpsDeviceScalarFieldEnum)[keyof typeof GpsDeviceScalarFieldEnum]
+
+
+export const TelemetryScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  eventId: 'eventId',
+  x: 'x',
+  y: 'y',
+  speed: 'speed',
+  heartRate: 'heartRate',
+  timestamp: 'timestamp'
+} as const
+
+export type TelemetryScalarFieldEnum = (typeof TelemetryScalarFieldEnum)[keyof typeof TelemetryScalarFieldEnum]
+
+
+export const PaymentConfigScalarFieldEnum = {
+  id: 'id',
+  rib: 'rib',
+  cle: 'cle',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentConfigScalarFieldEnum = (typeof PaymentConfigScalarFieldEnum)[keyof typeof PaymentConfigScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3017,6 +3574,12 @@ export type GlobalOmitConfig = {
   announcement?: Prisma.AnnouncementOmit
   systemSetting?: Prisma.SystemSettingOmit
   notification?: Prisma.NotificationOmit
+  deletedAccount?: Prisma.DeletedAccountOmit
+  accountActionLog?: Prisma.AccountActionLogOmit
+  playerGPSData?: Prisma.PlayerGPSDataOmit
+  gpsDevice?: Prisma.GpsDeviceOmit
+  telemetry?: Prisma.TelemetryOmit
+  paymentConfig?: Prisma.PaymentConfigOmit
 }
 
 /* Types for Logging */

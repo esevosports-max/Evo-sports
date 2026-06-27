@@ -75,7 +75,13 @@ export const ModelName = {
   ChatMessageView: 'ChatMessageView',
   Announcement: 'Announcement',
   SystemSetting: 'SystemSetting',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  DeletedAccount: 'DeletedAccount',
+  AccountActionLog: 'AccountActionLog',
+  PlayerGPSData: 'PlayerGPSData',
+  GpsDevice: 'GpsDevice',
+  Telemetry: 'Telemetry',
+  PaymentConfig: 'PaymentConfig'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -105,7 +111,12 @@ export const UserScalarFieldEnum = {
   phone: 'phone',
   blocked: 'blocked',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  blockedAt: 'blockedAt',
+  blockedBy: 'blockedBy',
+  modifiedAt: 'modifiedAt',
+  modifiedBy: 'modifiedBy',
+  modifiedFields: 'modifiedFields'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -527,6 +538,108 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const DeletedAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  roleTag: 'roleTag',
+  clubId: 'clubId',
+  deletedBy: 'deletedBy',
+  deletedAt: 'deletedAt',
+  originalData: 'originalData'
+} as const
+
+export type DeletedAccountScalarFieldEnum = (typeof DeletedAccountScalarFieldEnum)[keyof typeof DeletedAccountScalarFieldEnum]
+
+
+export const AccountActionLogScalarFieldEnum = {
+  id: 'id',
+  actionType: 'actionType',
+  targetName: 'targetName',
+  targetRole: 'targetRole',
+  operatorName: 'operatorName',
+  operatorRole: 'operatorRole',
+  clubId: 'clubId',
+  createdAt: 'createdAt'
+} as const
+
+export type AccountActionLogScalarFieldEnum = (typeof AccountActionLogScalarFieldEnum)[keyof typeof AccountActionLogScalarFieldEnum]
+
+
+export const PlayerGPSDataScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  eventId: 'eventId',
+  date: 'date',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  distanceTotal: 'distanceTotal',
+  hsrDistance: 'hsrDistance',
+  sprintDistance: 'sprintDistance',
+  accelerations: 'accelerations',
+  decelerations: 'decelerations',
+  vMax: 'vMax',
+  avgHeartRate: 'avgHeartRate',
+  peakHeartRate: 'peakHeartRate',
+  redZoneTime: 'redZoneTime',
+  xG: 'xG',
+  xA: 'xA',
+  progressivePasses: 'progressivePasses',
+  successUnderPressure: 'successUnderPressure',
+  duelsWon: 'duelsWon',
+  turnovers: 'turnovers',
+  recoveries: 'recoveries',
+  ppda: 'ppda',
+  compacity: 'compacity',
+  reactionTime: 'reactionTime',
+  heatmapX: 'heatmapX',
+  heatmapY: 'heatmapY',
+  acwr: 'acwr',
+  asymmetry: 'asymmetry',
+  neuromuscularFatigue: 'neuromuscularFatigue'
+} as const
+
+export type PlayerGPSDataScalarFieldEnum = (typeof PlayerGPSDataScalarFieldEnum)[keyof typeof PlayerGPSDataScalarFieldEnum]
+
+
+export const GpsDeviceScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  battery: 'battery',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GpsDeviceScalarFieldEnum = (typeof GpsDeviceScalarFieldEnum)[keyof typeof GpsDeviceScalarFieldEnum]
+
+
+export const TelemetryScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  eventId: 'eventId',
+  x: 'x',
+  y: 'y',
+  speed: 'speed',
+  heartRate: 'heartRate',
+  timestamp: 'timestamp'
+} as const
+
+export type TelemetryScalarFieldEnum = (typeof TelemetryScalarFieldEnum)[keyof typeof TelemetryScalarFieldEnum]
+
+
+export const PaymentConfigScalarFieldEnum = {
+  id: 'id',
+  rib: 'rib',
+  cle: 'cle',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PaymentConfigScalarFieldEnum = (typeof PaymentConfigScalarFieldEnum)[keyof typeof PaymentConfigScalarFieldEnum]
 
 
 export const SortOrder = {

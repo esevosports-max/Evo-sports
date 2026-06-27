@@ -14,12 +14,25 @@ export async function POST(req: Request) {
       )
     }
 
-    // Check if user already exists
+    const emailNormalized = email.toLowerCase().trim()
+    // Check if user already exists in active accounts
     const existingUser = await db.user.findUnique({
-      where: { email },
+      where: { email: emailNormalized },
     })
 
     if (existingUser) {
+      return NextResponse.json(
+        { error: "Cet email est déjà utilisé." },
+        { status: 400 }
+      )
+    }
+
+    // Check if email belongs to a deleted account in trash
+    const existingDeleted = await db.deletedAccount.findFirst({
+      where: { email: emailNormalized },
+    })
+
+    if (existingDeleted) {
       return NextResponse.json(
         { error: "Cet email est déjà utilisé." },
         { status: 400 }

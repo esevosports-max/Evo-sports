@@ -113,7 +113,29 @@ export default async function StaffPage() {
     name: c.name
   }))
 
+  const logs = await db.accountActionLog.findMany({
+    where: { clubId },
+    orderBy: { createdAt: "desc" },
+    take: 30
+  })
+
+  const serializedLogs = logs.map(log => ({
+    id: log.id,
+    actionType: log.actionType,
+    targetName: log.targetName,
+    targetRole: log.targetRole,
+    operatorName: log.operatorName,
+    operatorRole: log.operatorRole,
+    createdAt: log.createdAt.toISOString()
+  }))
+
   return (
-    <StaffClient initialStaff={staff} categories={categories} currentUserRole={userRole} />
+    <StaffClient 
+      initialStaff={staff} 
+      categories={categories} 
+      currentUserRole={userRole} 
+      subscriptionPlan={club.subscriptionPlan || "Club"} 
+      initialLogs={serializedLogs}
+    />
   )
 }

@@ -263,6 +263,8 @@ export type CalendarEventWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"CalendarEvent"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CalendarEvent"> | Date | string
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
+  gpsData?: Prisma.PlayerGPSDataListRelationFilter
+  telemetry?: Prisma.TelemetryListRelationFilter
 }
 
 export type CalendarEventOrderByWithRelationInput = {
@@ -282,6 +284,8 @@ export type CalendarEventOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   club?: Prisma.ClubOrderByWithRelationInput
+  gpsData?: Prisma.PlayerGPSDataOrderByRelationAggregateInput
+  telemetry?: Prisma.TelemetryOrderByRelationAggregateInput
 }
 
 export type CalendarEventWhereUniqueInput = Prisma.AtLeast<{
@@ -304,6 +308,8 @@ export type CalendarEventWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"CalendarEvent"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CalendarEvent"> | Date | string
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
+  gpsData?: Prisma.PlayerGPSDataListRelationFilter
+  telemetry?: Prisma.TelemetryListRelationFilter
 }, "id">
 
 export type CalendarEventOrderByWithAggregationInput = {
@@ -364,6 +370,8 @@ export type CalendarEventCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   club: Prisma.ClubCreateNestedOneWithoutCalendarEventsInput
+  gpsData?: Prisma.PlayerGPSDataCreateNestedManyWithoutEventInput
+  telemetry?: Prisma.TelemetryCreateNestedManyWithoutEventInput
 }
 
 export type CalendarEventUncheckedCreateInput = {
@@ -382,6 +390,8 @@ export type CalendarEventUncheckedCreateInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutEventInput
+  telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type CalendarEventUpdateInput = {
@@ -400,6 +410,8 @@ export type CalendarEventUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   club?: Prisma.ClubUpdateOneRequiredWithoutCalendarEventsNestedInput
+  gpsData?: Prisma.PlayerGPSDataUpdateManyWithoutEventNestedInput
+  telemetry?: Prisma.TelemetryUpdateManyWithoutEventNestedInput
 }
 
 export type CalendarEventUncheckedUpdateInput = {
@@ -418,6 +430,8 @@ export type CalendarEventUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutEventNestedInput
+  telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type CalendarEventCreateManyInput = {
@@ -537,6 +551,11 @@ export type CalendarEventMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type CalendarEventNullableScalarRelationFilter = {
+  is?: Prisma.CalendarEventWhereInput | null
+  isNot?: Prisma.CalendarEventWhereInput | null
+}
+
 export type CalendarEventCreateNestedManyWithoutClubInput = {
   create?: Prisma.XOR<Prisma.CalendarEventCreateWithoutClubInput, Prisma.CalendarEventUncheckedCreateWithoutClubInput> | Prisma.CalendarEventCreateWithoutClubInput[] | Prisma.CalendarEventUncheckedCreateWithoutClubInput[]
   connectOrCreate?: Prisma.CalendarEventCreateOrConnectWithoutClubInput | Prisma.CalendarEventCreateOrConnectWithoutClubInput[]
@@ -579,6 +598,38 @@ export type CalendarEventUncheckedUpdateManyWithoutClubNestedInput = {
   deleteMany?: Prisma.CalendarEventScalarWhereInput | Prisma.CalendarEventScalarWhereInput[]
 }
 
+export type CalendarEventCreateNestedOneWithoutGpsDataInput = {
+  create?: Prisma.XOR<Prisma.CalendarEventCreateWithoutGpsDataInput, Prisma.CalendarEventUncheckedCreateWithoutGpsDataInput>
+  connectOrCreate?: Prisma.CalendarEventCreateOrConnectWithoutGpsDataInput
+  connect?: Prisma.CalendarEventWhereUniqueInput
+}
+
+export type CalendarEventUpdateOneWithoutGpsDataNestedInput = {
+  create?: Prisma.XOR<Prisma.CalendarEventCreateWithoutGpsDataInput, Prisma.CalendarEventUncheckedCreateWithoutGpsDataInput>
+  connectOrCreate?: Prisma.CalendarEventCreateOrConnectWithoutGpsDataInput
+  upsert?: Prisma.CalendarEventUpsertWithoutGpsDataInput
+  disconnect?: Prisma.CalendarEventWhereInput | boolean
+  delete?: Prisma.CalendarEventWhereInput | boolean
+  connect?: Prisma.CalendarEventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CalendarEventUpdateToOneWithWhereWithoutGpsDataInput, Prisma.CalendarEventUpdateWithoutGpsDataInput>, Prisma.CalendarEventUncheckedUpdateWithoutGpsDataInput>
+}
+
+export type CalendarEventCreateNestedOneWithoutTelemetryInput = {
+  create?: Prisma.XOR<Prisma.CalendarEventCreateWithoutTelemetryInput, Prisma.CalendarEventUncheckedCreateWithoutTelemetryInput>
+  connectOrCreate?: Prisma.CalendarEventCreateOrConnectWithoutTelemetryInput
+  connect?: Prisma.CalendarEventWhereUniqueInput
+}
+
+export type CalendarEventUpdateOneWithoutTelemetryNestedInput = {
+  create?: Prisma.XOR<Prisma.CalendarEventCreateWithoutTelemetryInput, Prisma.CalendarEventUncheckedCreateWithoutTelemetryInput>
+  connectOrCreate?: Prisma.CalendarEventCreateOrConnectWithoutTelemetryInput
+  upsert?: Prisma.CalendarEventUpsertWithoutTelemetryInput
+  disconnect?: Prisma.CalendarEventWhereInput | boolean
+  delete?: Prisma.CalendarEventWhereInput | boolean
+  connect?: Prisma.CalendarEventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CalendarEventUpdateToOneWithWhereWithoutTelemetryInput, Prisma.CalendarEventUpdateWithoutTelemetryInput>, Prisma.CalendarEventUncheckedUpdateWithoutTelemetryInput>
+}
+
 export type CalendarEventCreateWithoutClubInput = {
   id?: string
   title: string
@@ -594,6 +645,8 @@ export type CalendarEventCreateWithoutClubInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  gpsData?: Prisma.PlayerGPSDataCreateNestedManyWithoutEventInput
+  telemetry?: Prisma.TelemetryCreateNestedManyWithoutEventInput
 }
 
 export type CalendarEventUncheckedCreateWithoutClubInput = {
@@ -611,6 +664,8 @@ export type CalendarEventUncheckedCreateWithoutClubInput = {
   status?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutEventInput
+  telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type CalendarEventCreateOrConnectWithoutClubInput = {
@@ -660,6 +715,190 @@ export type CalendarEventScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"CalendarEvent"> | Date | string
 }
 
+export type CalendarEventCreateWithoutGpsDataInput = {
+  id?: string
+  title: string
+  type: string
+  date: string
+  time: string
+  location: string
+  details?: string | null
+  creatorName?: string | null
+  creatorRole?: string | null
+  assignedTeam?: string | null
+  score?: string | null
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  club: Prisma.ClubCreateNestedOneWithoutCalendarEventsInput
+  telemetry?: Prisma.TelemetryCreateNestedManyWithoutEventInput
+}
+
+export type CalendarEventUncheckedCreateWithoutGpsDataInput = {
+  id?: string
+  clubId: string
+  title: string
+  type: string
+  date: string
+  time: string
+  location: string
+  details?: string | null
+  creatorName?: string | null
+  creatorRole?: string | null
+  assignedTeam?: string | null
+  score?: string | null
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type CalendarEventCreateOrConnectWithoutGpsDataInput = {
+  where: Prisma.CalendarEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.CalendarEventCreateWithoutGpsDataInput, Prisma.CalendarEventUncheckedCreateWithoutGpsDataInput>
+}
+
+export type CalendarEventUpsertWithoutGpsDataInput = {
+  update: Prisma.XOR<Prisma.CalendarEventUpdateWithoutGpsDataInput, Prisma.CalendarEventUncheckedUpdateWithoutGpsDataInput>
+  create: Prisma.XOR<Prisma.CalendarEventCreateWithoutGpsDataInput, Prisma.CalendarEventUncheckedCreateWithoutGpsDataInput>
+  where?: Prisma.CalendarEventWhereInput
+}
+
+export type CalendarEventUpdateToOneWithWhereWithoutGpsDataInput = {
+  where?: Prisma.CalendarEventWhereInput
+  data: Prisma.XOR<Prisma.CalendarEventUpdateWithoutGpsDataInput, Prisma.CalendarEventUncheckedUpdateWithoutGpsDataInput>
+}
+
+export type CalendarEventUpdateWithoutGpsDataInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  time?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedTeam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  score?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  club?: Prisma.ClubUpdateOneRequiredWithoutCalendarEventsNestedInput
+  telemetry?: Prisma.TelemetryUpdateManyWithoutEventNestedInput
+}
+
+export type CalendarEventUncheckedUpdateWithoutGpsDataInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clubId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  time?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedTeam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  score?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutEventNestedInput
+}
+
+export type CalendarEventCreateWithoutTelemetryInput = {
+  id?: string
+  title: string
+  type: string
+  date: string
+  time: string
+  location: string
+  details?: string | null
+  creatorName?: string | null
+  creatorRole?: string | null
+  assignedTeam?: string | null
+  score?: string | null
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  club: Prisma.ClubCreateNestedOneWithoutCalendarEventsInput
+  gpsData?: Prisma.PlayerGPSDataCreateNestedManyWithoutEventInput
+}
+
+export type CalendarEventUncheckedCreateWithoutTelemetryInput = {
+  id?: string
+  clubId: string
+  title: string
+  type: string
+  date: string
+  time: string
+  location: string
+  details?: string | null
+  creatorName?: string | null
+  creatorRole?: string | null
+  assignedTeam?: string | null
+  score?: string | null
+  status?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type CalendarEventCreateOrConnectWithoutTelemetryInput = {
+  where: Prisma.CalendarEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.CalendarEventCreateWithoutTelemetryInput, Prisma.CalendarEventUncheckedCreateWithoutTelemetryInput>
+}
+
+export type CalendarEventUpsertWithoutTelemetryInput = {
+  update: Prisma.XOR<Prisma.CalendarEventUpdateWithoutTelemetryInput, Prisma.CalendarEventUncheckedUpdateWithoutTelemetryInput>
+  create: Prisma.XOR<Prisma.CalendarEventCreateWithoutTelemetryInput, Prisma.CalendarEventUncheckedCreateWithoutTelemetryInput>
+  where?: Prisma.CalendarEventWhereInput
+}
+
+export type CalendarEventUpdateToOneWithWhereWithoutTelemetryInput = {
+  where?: Prisma.CalendarEventWhereInput
+  data: Prisma.XOR<Prisma.CalendarEventUpdateWithoutTelemetryInput, Prisma.CalendarEventUncheckedUpdateWithoutTelemetryInput>
+}
+
+export type CalendarEventUpdateWithoutTelemetryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  time?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedTeam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  score?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  club?: Prisma.ClubUpdateOneRequiredWithoutCalendarEventsNestedInput
+  gpsData?: Prisma.PlayerGPSDataUpdateManyWithoutEventNestedInput
+}
+
+export type CalendarEventUncheckedUpdateWithoutTelemetryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clubId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.StringFieldUpdateOperationsInput | string
+  time?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  details?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creatorRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedTeam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  score?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutEventNestedInput
+}
+
 export type CalendarEventCreateManyClubInput = {
   id?: string
   title: string
@@ -692,6 +931,8 @@ export type CalendarEventUpdateWithoutClubInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gpsData?: Prisma.PlayerGPSDataUpdateManyWithoutEventNestedInput
+  telemetry?: Prisma.TelemetryUpdateManyWithoutEventNestedInput
 }
 
 export type CalendarEventUncheckedUpdateWithoutClubInput = {
@@ -709,6 +950,8 @@ export type CalendarEventUncheckedUpdateWithoutClubInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutEventNestedInput
+  telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type CalendarEventUncheckedUpdateManyWithoutClubInput = {
@@ -729,6 +972,44 @@ export type CalendarEventUncheckedUpdateManyWithoutClubInput = {
 }
 
 
+/**
+ * Count Type CalendarEventCountOutputType
+ */
+
+export type CalendarEventCountOutputType = {
+  gpsData: number
+  telemetry: number
+}
+
+export type CalendarEventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  gpsData?: boolean | CalendarEventCountOutputTypeCountGpsDataArgs
+  telemetry?: boolean | CalendarEventCountOutputTypeCountTelemetryArgs
+}
+
+/**
+ * CalendarEventCountOutputType without action
+ */
+export type CalendarEventCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CalendarEventCountOutputType
+   */
+  select?: Prisma.CalendarEventCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CalendarEventCountOutputType without action
+ */
+export type CalendarEventCountOutputTypeCountGpsDataArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PlayerGPSDataWhereInput
+}
+
+/**
+ * CalendarEventCountOutputType without action
+ */
+export type CalendarEventCountOutputTypeCountTelemetryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TelemetryWhereInput
+}
+
 
 export type CalendarEventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -747,6 +1028,9 @@ export type CalendarEventSelect<ExtArgs extends runtime.Types.Extensions.Interna
   createdAt?: boolean
   updatedAt?: boolean
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  gpsData?: boolean | Prisma.CalendarEvent$gpsDataArgs<ExtArgs>
+  telemetry?: boolean | Prisma.CalendarEvent$telemetryArgs<ExtArgs>
+  _count?: boolean | Prisma.CalendarEventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["calendarEvent"]>
 
 export type CalendarEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -808,6 +1092,9 @@ export type CalendarEventSelectScalar = {
 export type CalendarEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clubId" | "title" | "type" | "date" | "time" | "location" | "details" | "creatorName" | "creatorRole" | "assignedTeam" | "score" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["calendarEvent"]>
 export type CalendarEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  gpsData?: boolean | Prisma.CalendarEvent$gpsDataArgs<ExtArgs>
+  telemetry?: boolean | Prisma.CalendarEvent$telemetryArgs<ExtArgs>
+  _count?: boolean | Prisma.CalendarEventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CalendarEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
@@ -820,6 +1107,8 @@ export type $CalendarEventPayload<ExtArgs extends runtime.Types.Extensions.Inter
   name: "CalendarEvent"
   objects: {
     club: Prisma.$ClubPayload<ExtArgs>
+    gpsData: Prisma.$PlayerGPSDataPayload<ExtArgs>[]
+    telemetry: Prisma.$TelemetryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1232,6 +1521,8 @@ readonly fields: CalendarEventFieldRefs;
 export interface Prisma__CalendarEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   club<T extends Prisma.ClubDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClubDefaultArgs<ExtArgs>>): Prisma.Prisma__ClubClient<runtime.Types.Result.GetResult<Prisma.$ClubPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  gpsData<T extends Prisma.CalendarEvent$gpsDataArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CalendarEvent$gpsDataArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlayerGPSDataPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  telemetry<T extends Prisma.CalendarEvent$telemetryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CalendarEvent$telemetryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelemetryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1674,6 +1965,54 @@ export type CalendarEventDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many CalendarEvents to delete.
    */
   limit?: number
+}
+
+/**
+ * CalendarEvent.gpsData
+ */
+export type CalendarEvent$gpsDataArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PlayerGPSData
+   */
+  select?: Prisma.PlayerGPSDataSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PlayerGPSData
+   */
+  omit?: Prisma.PlayerGPSDataOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlayerGPSDataInclude<ExtArgs> | null
+  where?: Prisma.PlayerGPSDataWhereInput
+  orderBy?: Prisma.PlayerGPSDataOrderByWithRelationInput | Prisma.PlayerGPSDataOrderByWithRelationInput[]
+  cursor?: Prisma.PlayerGPSDataWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlayerGPSDataScalarFieldEnum | Prisma.PlayerGPSDataScalarFieldEnum[]
+}
+
+/**
+ * CalendarEvent.telemetry
+ */
+export type CalendarEvent$telemetryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Telemetry
+   */
+  select?: Prisma.TelemetrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Telemetry
+   */
+  omit?: Prisma.TelemetryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelemetryInclude<ExtArgs> | null
+  where?: Prisma.TelemetryWhereInput
+  orderBy?: Prisma.TelemetryOrderByWithRelationInput | Prisma.TelemetryOrderByWithRelationInput[]
+  cursor?: Prisma.TelemetryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TelemetryScalarFieldEnum | Prisma.TelemetryScalarFieldEnum[]
 }
 
 /**

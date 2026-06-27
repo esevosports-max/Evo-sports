@@ -269,8 +269,26 @@ export default function DynamicNavbar({
                 </button>
               </div>
 
+              {/* User Profile Info */}
+              {user && (
+                <div className="mt-4 p-3 bg-zinc-50 border border-zinc-150 rounded-2xl flex items-center gap-3 text-left w-full">
+                  <div className="h-9 w-9 rounded-xl flex items-center justify-center font-black text-sm uppercase tracking-wider bg-zinc-900 text-white shrink-0">
+                    {(user.name || "U").substring(0, 1).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-black text-zinc-800 truncate">{user.name || "—"}</p>
+                    <p className="text-[10px] text-zinc-450 truncate font-semibold mt-0.5">{user.email || "—"}</p>
+                    {user.role?.name && (
+                      <span className="inline-flex rounded px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider mt-1 bg-emerald-500/10 text-emerald-600">
+                        {user.role.name.replace(/_/g, " ")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+ 
               {/* Navigation Links (top) */}
-              <nav className="mt-6 flex-1 overflow-y-auto pr-1 space-y-4 max-h-[calc(100vh-190px)] custom-scrollbar">
+              <nav className="mt-4 flex-1 overflow-y-auto pr-1 space-y-4 max-h-[calc(100vh-270px)] custom-scrollbar">
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">{t("nav_public")}</p>
                   <div className="space-y-1.5">
@@ -305,6 +323,7 @@ export default function DynamicNavbar({
                             { href: "/dashboard/manager/demandes", label: t("db_reg_requests"), icon: "📥" },
                             { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️" },
                             { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳" },
+                            { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️" },
                           ]
                         : [
                             { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠" },
@@ -320,6 +339,7 @@ export default function DynamicNavbar({
                             { href: "/dashboard/medical/blessures", label: t("feat_injuries_title"), icon: "🩹", requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR"] },
                             { href: "/dashboard/medical/dossier-medical", label: t("feat_medical_title"), icon: "📁", requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"] },
                             { href: "/dashboard/test", label: t("feat_tests_title"), icon: "🧪", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
+                            { href: "/dashboard/gps", label: t("feat_gps_title"), icon: "🛰️", requiredRoles: ["PRESIDENT", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "MANAGER_EVO_SPORTS"] },
                             { href: "/dashboard/quotidienne", label: t("feat_welfare_title"), icon: "📝", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR", "MANAGER_EVO_SPORTS"] },
                           ]
 

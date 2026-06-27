@@ -9,6 +9,7 @@ declare module "next-auth" {
         name: string
         permissions: string[]
       }
+      iat?: number
     } & import("next-auth").DefaultSession["user"]
   }
 
@@ -38,6 +39,7 @@ export const authConfig = {
       if (session.user && token) {
         session.user.id = token.id as string
         session.user.role = token.role as { name: string; permissions: string[] }
+        session.user.iat = token.iat as number
       }
       return session
     }

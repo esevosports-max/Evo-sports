@@ -23,7 +23,7 @@ interface SidebarProps {
 export default function DashboardSidebarClient({ user, club, signOutAction }: SidebarProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const isManager = user.roleName === "MANAGER_EVO_SPORTS"
 
@@ -37,6 +37,7 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
         { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️", description: t("desc_clubs") },
         { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳", description: t("desc_payments") },
         { href: "/dashboard/manager/annonces", label: t("db_announcements"), icon: "📢", description: t("desc_announcements") },
+        { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️", description: language === "EN" ? "Restore or purge deleted user accounts" : language === "AR" ? "استعادة أو مسح حسابات المستخدمين المحذوفة" : "Restaurer ou purger des comptes utilisateurs supprimés" },
       ]
     : [
         { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠", description: t("desc_dashboard") },
@@ -100,6 +101,13 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
           icon: "🧪", 
           description: t("desc_tests"),
           requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"]
+        },
+        { 
+          href: "/dashboard/gps", 
+          label: t("feat_gps_title"), 
+          icon: "🛰️", 
+          description: t("feat_gps_desc"),
+          requiredRoles: ["PRESIDENT", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "MANAGER_EVO_SPORTS"]
         },
         { 
           href: "/dashboard/quotidienne", 

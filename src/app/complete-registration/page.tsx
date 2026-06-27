@@ -12,6 +12,7 @@ export default function CompleteRegistration() {
   const [stadiumName, setStadiumName] = useState("")
   const [phone, setPhone] = useState("")
   const [chosenPlan, setChosenPlan] = useState("Club")
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly")
   
   const [logoBase64, setLogoBase64] = useState<string | null>(null)
   const [logoName, setLogoName] = useState("")
@@ -33,6 +34,10 @@ export default function CompleteRegistration() {
           const storedPlan = sessionStorage.getItem("selectedPlan")
           if (storedPlan) {
             setChosenPlan(storedPlan)
+          }
+          const storedBilling = sessionStorage.getItem("selectedBillingPeriod") as "monthly" | "yearly"
+          if (storedBilling) {
+            setBillingPeriod(storedBilling)
           }
         }
         const res = await fetch("/api/club-request")
@@ -162,7 +167,7 @@ export default function CompleteRegistration() {
           stadiumName,
           pdfFilename: pdfBase64,
           phone,
-          chosenPlan,
+          chosenPlan: trial ? "1 Équipe" : chosenPlan,
           trialSelected: trial,
         }),
       })
@@ -173,6 +178,10 @@ export default function CompleteRegistration() {
       }
 
       setSuccess(true)
+      if (!trial && typeof window !== "undefined") {
+        sessionStorage.setItem("selectedPlan", chosenPlan)
+        sessionStorage.setItem("selectedBillingPeriod", billingPeriod)
+      }
       setTimeout(() => {
         if (trial) {
           window.location.href = "/waiting-validation"
@@ -369,10 +378,42 @@ export default function CompleteRegistration() {
               </div>
 
               {/* Offer Selection */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">
-                  {t("comp_offer")}
-                </label>
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
+                    {t("comp_offer")}
+                  </label>
+                  
+                  {/* Monthly / Yearly Toggle Switch */}
+                  <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-200/50 dark:border-zinc-800/80 w-fit">
+                    <button
+                      type="button"
+                      onClick={() => setBillingPeriod("monthly")}
+                      className={`px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all cursor-pointer ${
+                        billingPeriod === "monthly"
+                          ? "bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                          : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-650"
+                      }`}
+                    >
+                      {language === "FR" ? "Mensuel" : language === "EN" ? "Monthly" : "شهري"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBillingPeriod("yearly")}
+                      className={`px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
+                        billingPeriod === "yearly"
+                          ? "bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                          : "text-zinc-400 dark:text-zinc-500 hover:text-zinc-650"
+                      }`}
+                    >
+                      {language === "FR" ? "Annuel" : language === "EN" ? "Yearly" : "سنوي"}
+                      <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-950/50 px-1 py-0.5 text-[8px] font-black text-emerald-800 dark:text-emerald-400 normal-case tracking-normal">
+                        -20%
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
                 <select
                   value={chosenPlan}
                   onChange={(e) => setChosenPlan(e.target.value)}
@@ -380,19 +421,19 @@ export default function CompleteRegistration() {
                 >
                   <option value="1 Équipe">
                     {language === "FR" ? "1 Équipe" : language === "EN" ? "1 Team" : "فريق واحد"}{" "}
-                    (10 000 DA/{language === "FR" ? "mois" : language === "EN" ? "month" : "شهر"})
+                    ({billingPeriod === "monthly" ? "10 000 DA/mois" : "100 000 DA/an"})
                   </option>
                   <option value="Club">
                     {language === "FR" ? "Club" : language === "EN" ? "Club" : "نادي"}{" "}
-                    (15 000 DA/{language === "FR" ? "mois" : language === "EN" ? "month" : "شهر"})
+                    ({billingPeriod === "monthly" ? "15 000 DA/mois" : "144 000 DA/an"})
                   </option>
                   <option value="Professionnel">
                     {language === "FR" ? "Professionnel" : language === "EN" ? "Professional" : "احترافي"}{" "}
-                    (20 000 DA/{language === "FR" ? "mois" : language === "EN" ? "month" : "شهر"})
+                    ({billingPeriod === "monthly" ? "20 000 DA/mois" : "192 000 DA/an"})
                   </option>
                   <option value="Elite">
                     Elite{" "}
-                    (25 000 DA/{language === "FR" ? "mois" : language === "EN" ? "month" : "شهر"})
+                    ({billingPeriod === "monthly" ? "25 000 DA/mois" : "240 000 DA/an"})
                   </option>
                 </select>
               </div>

@@ -10,7 +10,7 @@ interface Match {
   stadiumName: string
   date: string // YYYY-MM-DD
   time: string // HH:MM
-  status: "PROGRAMME" | "EN_COURS" | "TERMINE" | "N_A"
+  status: "PROGRAMME" | "EN_COURS" | "TERMINE" | "N_A" | "EXPIRE"
   score?: string | null
   assignedTeam?: string | null
 }
@@ -167,8 +167,8 @@ export default function MatchClient({ initialMatches, roleName, clubName }: Matc
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {matches.map((match) => {
-              // Grayscale flag for terminated or N_A status
-              const isGrayscale = match.status === "TERMINE" || match.status === "N_A"
+              // Grayscale flag for terminated, expired or N_A status
+              const isGrayscale = match.status === "TERMINE" || match.status === "N_A" || match.status === "EXPIRE"
 
               // Time logic to see if match has started
               const matchStart = new Date(`${match.date}T${match.time}:00`)
@@ -263,11 +263,11 @@ export default function MatchClient({ initialMatches, roleName, clubName }: Matc
                       </div>
                     )}
 
-                    {/* N_A STATUS */}
-                    {match.status === "N_A" && (
+                    {/* EXPIRE / N_A STATUS */}
+                    {(match.status === "N_A" || match.status === "EXPIRE") && (
                       <div className="text-center md:text-right space-y-2">
-                        <span className="text-[10px] font-black uppercase text-zinc-400 bg-zinc-250 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
-                          ❌ Expiré / N/A
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-red-500 bg-red-500/10 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+                          ⚠️ Expiré (Non commencé)
                         </span>
                         <div className="text-2xl font-black text-zinc-400 dark:text-zinc-500 tracking-wider bg-zinc-100 dark:bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-200/50">
                           N/A

@@ -37,6 +37,7 @@ interface EquipeClientProps {
   staffRoles: StaffRoleGroup[]
   totalStaffCount: number
   canEdit: boolean
+  subscriptionPlan?: string
 }
 
 export default function EquipeClient({
@@ -44,8 +45,11 @@ export default function EquipeClient({
   categories,
   staffRoles,
   totalStaffCount,
-  canEdit
+  canEdit,
+  subscriptionPlan = "Club"
 }: EquipeClientProps) {
+  const isOneTeamPlan = subscriptionPlan === "1 Équipe" || subscriptionPlan === "1 equipe" || subscriptionPlan === "Standard"
+  const reachedTeamLimit = isOneTeamPlan && categories.length >= 1
   const [clubInfo, setClubInfo] = useState<ClubInfo>({
     name: club.name || "EVO FC",
     logo: club.logo,
@@ -91,7 +95,7 @@ export default function EquipeClient({
         name: fullName,
         league: newCatLeague || "Division Libre",
         coach: "À attribuer",
-        maxPlayers: Math.min(Number(newCatMaxPlayers) || 0, 22)
+        maxPlayers: Math.min(Number(newCatMaxPlayers) || 0, 30)
       })
 
       if (res.success) {
@@ -790,12 +794,18 @@ export default function EquipeClient({
                   Configurez et gérez les catégories sportives de votre club.
                 </p>
               </div>
-              <button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="rounded-xl border border-zinc-350 bg-zinc-200 hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 px-5 py-2.5 text-xs text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-wider shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-2"
-              >
-                Créer une équipe ➕
-              </button>
+              {reachedTeamLimit ? (
+                <div className="text-[10px] text-amber-600 bg-amber-500/10 dark:bg-amber-955/20 border border-amber-500/20 px-4 py-2.5 rounded-xl font-bold uppercase tracking-wider">
+                  ⚠️ Forfait '1 Équipe' limité à une seule équipe.
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="rounded-xl border border-zinc-350 bg-zinc-200 hover:bg-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 px-5 py-2.5 text-xs text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-wider shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+                >
+                  Créer une équipe ➕
+                </button>
+              )}
             </div>
           )}
 
@@ -872,19 +882,19 @@ export default function EquipeClient({
 
                   <div>
                     <label className="block text-[9px] font-black text-zinc-500 uppercase mb-1">
-                      Effectif Max (Limité à 22)
+                      Effectif Max (Limité à 30)
                     </label>
                     <input
                       type="number"
                       required
                       min={1}
-                      max={22}
+                      max={30}
                       value={newCatMaxPlayers}
-                      onChange={(e) => setNewCatMaxPlayers(Math.min(Number(e.target.value) || 0, 22))}
+                      onChange={(e) => setNewCatMaxPlayers(Math.min(Number(e.target.value) || 0, 30))}
                       className="w-full rounded-xl border border-zinc-205 bg-white px-3 py-2 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
                     />
                     <p className="text-[8px] text-zinc-400 font-medium mt-1">
-                      ⚠️ Limité à 22 joueurs maximum selon les conditions de votre forfait.
+                      ⚠️ Limité à 30 joueurs maximum selon les conditions de votre forfait.
                     </p>
                   </div>
 

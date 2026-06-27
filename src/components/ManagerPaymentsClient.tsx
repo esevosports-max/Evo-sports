@@ -39,12 +39,18 @@ interface ManagerPaymentsProps {
       subscriptionStatus: string
       subscriptionPaid: boolean
       subscriptionExpires: string | null
+      subscriptionMethod: string | null
     }
   ) => Promise<void>
   blockClubAction: (clubId: string, block: boolean) => Promise<void>
   deleteClubAction: (clubId: string) => Promise<void>
   approvePaymentAction: (submissionId: string) => Promise<void>
   rejectPaymentAction: (submissionId: string, reason: string) => Promise<void>
+  sendClubPresidentNotificationAction: (
+    clubId: string,
+    title: string,
+    message: string
+  ) => Promise<void>
 }
 
 const paymentsDict: Record<string, Record<string, string>> = {
@@ -154,7 +160,16 @@ const paymentsDict: Record<string, Record<string, string>> = {
     sumTitle: "Structures / Clubs",
     sumSubmissions: "Demandes de Paiement",
     onDevis: "Sur devis",
-    createdOn: "Créé le {date}"
+    createdOn: "Créé le {date}",
+    labelDaysRemaining: "Jours restants",
+    labelNotificationTitle: "Sujet de la notification",
+    labelNotificationMessage: "Message de la notification",
+    notificationSectionTitle: "Notifier le Président",
+    notificationDefaultTitle: "Alerte de facturation - EVO SPORTS",
+    notificationDefaultMessage: "Bonjour, votre abonnement club pour la formule {plan} a été mis à jour. Il vous reste {days} jours d'accès. Merci de votre confiance.",
+    btnSendNotification: "🔔 Envoyer la notification",
+    notificationSending: "Envoi en cours...",
+    notificationSentSuccess: "Notification envoyée avec succès au président !"
   },
   EN: {
     pageTitle: "Payments & Club Subscriptions",
@@ -262,7 +277,16 @@ const paymentsDict: Record<string, Record<string, string>> = {
     sumTitle: "Structures / Clubs",
     sumSubmissions: "Payment Requests",
     onDevis: "On quote",
-    createdOn: "Created on {date}"
+    createdOn: "Created on {date}",
+    labelDaysRemaining: "Days remaining",
+    labelNotificationTitle: "Notification Subject",
+    labelNotificationMessage: "Notification Message",
+    notificationSectionTitle: "Notify President",
+    notificationDefaultTitle: "Billing Notification - EVO SPORTS",
+    notificationDefaultMessage: "Hello, your club subscription for the {plan} plan has been updated. You have {days} days of access remaining. Thank you for your trust.",
+    btnSendNotification: "🔔 Send Notification",
+    notificationSending: "Sending...",
+    notificationSentSuccess: "Notification successfully sent to president!"
   },
   AR: {
     pageTitle: "المدفوعات واشتراكات الأندية",
@@ -370,7 +394,16 @@ const paymentsDict: Record<string, Record<string, string>> = {
     sumTitle: "الهياكل / الأندية",
     sumSubmissions: "طلبات الدفع",
     onDevis: "حسب الطلب",
-    createdOn: "أنشئ في {date}"
+    createdOn: "أنشئ في {date}",
+    labelDaysRemaining: "الأيام المتبقية",
+    labelNotificationTitle: "عنوان الإشعار",
+    labelNotificationMessage: "نص الإشعار",
+    notificationSectionTitle: "إرسال إشعار لرئيس النادي",
+    notificationDefaultTitle: "تنبيه الفوترة - EVO SPORTS",
+    notificationDefaultMessage: "مرحبًا، تم تحديث اشتراك ناديكم لباقة {plan}. متبقي لديكم {days} يوم من الوصول. نشكركم على ثقتكم.",
+    btnSendNotification: "🔔 إرسال الإشعار",
+    notificationSending: "جاري الإرسال...",
+    notificationSentSuccess: "تم إرسال الإشعار بنجاح إلى رئيس النادي!"
   }
 }
 
@@ -439,6 +472,7 @@ export default function ManagerPaymentsClient({
   deleteClubAction,
   approvePaymentAction,
   rejectPaymentAction,
+  sendClubPresidentNotificationAction,
 }: ManagerPaymentsProps) {
   const { language } = useLanguage()
   const tLoc = paymentsDict[language] || paymentsDict["FR"]
@@ -490,6 +524,63 @@ export default function ManagerPaymentsClient({
   const [editCycle, setEditCycle] = useState<"Mensuel" | "Annuel">("Mensuel")
   const [editStatus, setEditStatus] = useState("Actif")
   const [editExpiry, setEditExpiry] = useState("")
+  const [editDaysRemaining, setEditDaysRemaining] = useState<number>(0)
+  const [editMethod, setEditMethod] = useState<string>("BARIDIMOB")
+
+  // Edit Modal Internal Navigation & Notification compose States
+  const [editModalTab, setEditModalTab] = useState<"billing" | "notification">("billing")
+  const [notificationTitle, setNotificationTitle] = useState("")
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [isSendingNotification, setIsSendingNotification] = useState(false)
+  const [notificationSuccess, setNotificationSuccess] = useState(false)
+  const [notificationError, setNotificationError] = useState<string | null>(null)
+
+  const updateNotificationMsgOnPlanChange = (plan: string, cycle: string, days: number) => {
+    const planName = cycle === "Annuel" ? `${plan} (Annuel)` : plan
+    const daysStr = String(days)
+    const defaultTitle = tLoc.notificationDefaultTitle || "Alerte de facturation - EVO SPORTS"
+    const defaultMsgTemplate = tLoc.notificationDefaultMessage || "Bonjour, votre abonnement club pour la formule {plan} a été mis à jour. Il vous reste {days} jours d'accès. Merci de votre confiance."
+    
+    setNotificationTitle(defaultTitle)
+    setNotificationMessage(
+      defaultMsgTemplate
+        .replace("{plan}", planName)
+        .replace("{days}", daysStr)
+    )
+  }
+
+  const handleDaysRemainingChange = (days: number) => {
+    const positiveDays = Math.max(0, days)
+    setEditDaysRemaining(positiveDays)
+    
+    const newExpiryDate = new Date()
+    newExpiryDate.setDate(newExpiryDate.getDate() + positiveDays)
+    
+    const yyyy = newExpiryDate.getFullYear()
+    const mm = String(newExpiryDate.getMonth() + 1).padStart(2, '0')
+    const dd = String(newExpiryDate.getDate()).padStart(2, '0')
+    setEditExpiry(`${yyyy}-${mm}-${dd}`)
+    
+    updateNotificationMsgOnPlanChange(editPlan, editCycle, positiveDays)
+  }
+
+  const handleExpiryDateChange = (dateStr: string) => {
+    setEditExpiry(dateStr)
+    if (dateStr) {
+      const expiry = new Date(dateStr)
+      const today = new Date()
+      expiry.setHours(0, 0, 0, 0)
+      today.setHours(0, 0, 0, 0)
+      
+      const diffTime = expiry.getTime() - today.getTime()
+      const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
+      setEditDaysRemaining(diffDays)
+      updateNotificationMsgOnPlanChange(editPlan, editCycle, diffDays)
+    } else {
+      setEditDaysRemaining(0)
+      updateNotificationMsgOnPlanChange(editPlan, editCycle, 0)
+    }
+  }
 
   // Calculate remaining days helper
   const getRemainingTimeDetails = (expiresStr: string | null, isPaid: boolean, status: string | null) => {
@@ -589,6 +680,8 @@ export default function ManagerPaymentsClient({
     }
 
     setEditStatus(club.subscriptionStatus ?? "Actif")
+    
+    let days = 0
     if (club.subscriptionExpires) {
       // Format to YYYY-MM-DD for input type="date"
       const date = new Date(club.subscriptionExpires)
@@ -596,9 +689,26 @@ export default function ManagerPaymentsClient({
       const mm = String(date.getMonth() + 1).padStart(2, '0')
       const dd = String(date.getDate()).padStart(2, '0')
       setEditExpiry(`${yyyy}-${mm}-${dd}`)
+
+      const today = new Date()
+      date.setHours(0, 0, 0, 0)
+      today.setHours(0, 0, 0, 0)
+      const diffTime = date.getTime() - today.getTime()
+      days = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
     } else {
       setEditExpiry("")
     }
+
+    setEditDaysRemaining(days)
+    setEditMethod(club.subscriptionMethod || "BARIDIMOB")
+
+    // Reset notification state and prefill title/message
+    setEditModalTab("billing")
+    setNotificationSuccess(false)
+    setNotificationError(null)
+
+    const cycleVal = isAnnuel ? "Annuel" : "Mensuel"
+    updateNotificationMsgOnPlanChange(planName, cycleVal, days)
   }
 
   // Handle Action: Save edited club
@@ -630,6 +740,7 @@ export default function ManagerPaymentsClient({
           subscriptionStatus: editStatus,
           subscriptionPaid: finalPaid,
           subscriptionExpires: finalExpiry,
+          subscriptionMethod: editIsPaid ? editMethod : "Gratuit",
         })
         
         // Update local state
@@ -643,6 +754,7 @@ export default function ManagerPaymentsClient({
                   subscriptionStatus: editStatus,
                   subscriptionPaid: finalPaid,
                   subscriptionExpires: finalExpiry,
+                  subscriptionMethod: editIsPaid ? editMethod : "Gratuit",
                 }
               : c
           )
@@ -653,6 +765,28 @@ export default function ManagerPaymentsClient({
         alert(tLoc.errUpdate)
       }
     })
+  }
+
+  const handleSendNotification = async () => {
+    if (!editingClub) return
+    if (!notificationTitle.trim() || !notificationMessage.trim()) {
+      setNotificationError(language === "AR" ? "يرجى تعبئة جميع الحقول." : language === "EN" ? "Please fill in all fields." : "Veuillez remplir tous les champs.")
+      return
+    }
+
+    setIsSendingNotification(true)
+    setNotificationSuccess(false)
+    setNotificationError(null)
+
+    try {
+      await sendClubPresidentNotificationAction(editingClub.id, notificationTitle, notificationMessage)
+      setNotificationSuccess(true)
+    } catch (err: any) {
+      console.error(err)
+      setNotificationError(err.message || "Erreur lors de l'envoi.")
+    } finally {
+      setIsSendingNotification(false)
+    }
   }
 
   const handleApproveSubmission = (sub: SubmissionItem) => {
@@ -1280,130 +1414,274 @@ export default function ManagerPaymentsClient({
       {/* Editing Modal */}
       {editingClub && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-2xl p-6 shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-200">
             <div className="border-b dark:border-zinc-800 pb-3 flex justify-between items-center">
-              <h3 className="text-sm font-black uppercase tracking-wider text-zinc-855 dark:text-white">
-                {tLoc.editClubTitle.replace("{name}", editingClub.name)}
+              <h3 className="text-sm font-black uppercase tracking-wider text-zinc-850 dark:text-white">
+                {tLoc.modalEditTitle.replace("{name}", editingClub.name)}
               </h3>
               <button 
                 onClick={() => setEditingClub(null)} 
-                className="text-zinc-400 hover:text-zinc-655 cursor-pointer"
+                className="text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer"
+                title={tLoc.btnCancel}
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-4 text-xs font-semibold">
-              {/* Name field */}
-              <div className="space-y-1.5">
-                <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelClubName}</label>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                />
+            <div className="flex flex-col md:flex-row gap-6 text-xs font-semibold">
+              
+              {/* Left Column: Vertical Navigation Bar */}
+              <div className="flex flex-row md:flex-col md:w-44 shrink-0 gap-1 border-b md:border-b-0 md:border-r pb-4 md:pb-0 md:pr-4 border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setEditModalTab("billing")}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-bold transition-all text-left cursor-pointer w-full ${
+                    editModalTab === "billing"
+                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-850"
+                  }`}
+                >
+                  <span className="text-sm">💳</span>
+                  <span>
+                    {language === "AR" ? "الاشتراك" : language === "EN" ? "Subscription" : "Abonnement"}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEditModalTab("notification")}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-bold transition-all text-left cursor-pointer w-full ${
+                    editModalTab === "notification"
+                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/10"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-855"
+                  }`}
+                >
+                  <span className="text-sm">🔔</span>
+                  <span>
+                    {language === "AR" ? "الإشعارات" : language === "EN" ? "Notification" : "Notification"}
+                  </span>
+                </button>
               </div>
 
-              {/* Offer Type: Paid / Free */}
-              <div className="space-y-1.5">
-                <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelOfferType}</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
-                    <input
-                      type="radio"
-                      checked={editIsPaid === true}
-                      onChange={() => setEditIsPaid(true)}
-                      className="accent-emerald-600"
-                    />
-                    {tLoc.paid}
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
-                    <input
-                      type="radio"
-                      checked={editIsPaid === false}
-                      onChange={() => setEditIsPaid(false)}
-                      className="accent-emerald-600"
-                    />
-                    {tLoc.free}
-                  </label>
-                </div>
-              </div>
+              {/* Right Column: Tab Contents */}
+              <div className="flex-1 min-h-[300px]">
+                {editModalTab === "billing" && (
+                  <div className="space-y-4 animate-in fade-in duration-200">
+                    <h4 className="text-xs font-bold text-zinc-900 dark:text-white uppercase border-b pb-1 dark:border-zinc-800">
+                      {language === "AR" ? "إعدادات الاشتراك" : language === "EN" ? "Subscription Settings" : "Paramètres d'Abonnement"}
+                    </h4>
 
-              {/* If Paid, select Formula/Plan */}
-              {editIsPaid && (
-                <>
-                  <div className="space-y-1.5">
-                    <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelPlan}</label>
-                    <select
-                      value={editPlan}
-                      onChange={(e) => setEditPlan(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                    >
-                      <option value="1 Équipe">{plansMap["1 Équipe"] || "1 Équipe"}</option>
-                      <option value="Club">{plansMap["Club"] || "Club"}</option>
-                      <option value="Professionnel">{plansMap["Professionnel"] || "Professionnel"}</option>
-                      <option value="Elite">{plansMap["Elite"] || "Elite"}</option>
-                    </select>
-                  </div>
+                    {/* Name field */}
+                    <div className="space-y-1.5">
+                      <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelClubName}</label>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                      />
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelCycle}</label>
-                    <div className="flex gap-4">
-                      <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
-                        <input
-                          type="radio"
-                          name="editCycle"
-                          checked={editCycle === "Mensuel"}
-                          onChange={() => setEditCycle("Mensuel")}
-                          className="accent-emerald-600"
-                        />
-                        {language === "AR" ? "شهرية" : language === "EN" ? "Monthly" : "Mensuelle"}
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
-                        <input
-                          type="radio"
-                          name="editCycle"
-                          checked={editCycle === "Annuel"}
-                          onChange={() => setEditCycle("Annuel")}
-                          className="accent-emerald-600"
-                        />
-                        {language === "AR" ? "سنوية" : language === "EN" ? "Yearly" : "Annuelle"}
-                      </label>
+                    {/* Offer Type: Paid / Free */}
+                    <div className="space-y-1.5">
+                      <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelOfferType}</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
+                          <input
+                            type="radio"
+                            checked={editIsPaid === true}
+                            onChange={() => {
+                              setEditIsPaid(true);
+                              updateNotificationMsgOnPlanChange(editPlan, editCycle, editDaysRemaining);
+                            }}
+                            className="accent-emerald-600"
+                          />
+                          {tLoc.paid}
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
+                          <input
+                            type="radio"
+                            checked={editIsPaid === false}
+                            onChange={() => {
+                              setEditIsPaid(false);
+                              updateNotificationMsgOnPlanChange(editPlan, editCycle, 0);
+                            }}
+                            className="accent-emerald-600"
+                          />
+                          {tLoc.free}
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* If Paid, select Formula/Plan & Cycle & Method & Days & Expiry */}
+                    {editIsPaid && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelPlanForm}</label>
+                            <select
+                              value={editPlan}
+                              onChange={(e) => {
+                                setEditPlan(e.target.value);
+                                updateNotificationMsgOnPlanChange(e.target.value, editCycle, editDaysRemaining);
+                              }}
+                              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                            >
+                              <option value="1 Équipe">{plansMap["1 Équipe"] || "1 Équipe"}</option>
+                              <option value="Club">{plansMap["Club"] || "Club"}</option>
+                              <option value="Professionnel">{plansMap["Professionnel"] || "Professionnel"}</option>
+                              <option value="Elite">{plansMap["Elite"] || "Elite"}</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelBillingCycle}</label>
+                            <div className="flex gap-4 h-8 items-center">
+                              <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
+                                <input
+                                  type="radio"
+                                  name="editCycle"
+                                  checked={editCycle === "Mensuel"}
+                                  onChange={() => {
+                                    setEditCycle("Mensuel");
+                                    updateNotificationMsgOnPlanChange(editPlan, "Mensuel", editDaysRemaining);
+                                  }}
+                                  className="accent-emerald-600"
+                                />
+                                {language === "AR" ? "شهرية" : language === "EN" ? "Monthly" : "Mensuelle"}
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer font-bold text-zinc-700 dark:text-zinc-350">
+                                <input
+                                  type="radio"
+                                  name="editCycle"
+                                  checked={editCycle === "Annuel"}
+                                  onChange={() => {
+                                    setEditCycle("Annuel");
+                                    updateNotificationMsgOnPlanChange(editPlan, "Annuel", editDaysRemaining);
+                                  }}
+                                  className="accent-emerald-600"
+                                />
+                                {language === "AR" ? "سنوية" : language === "EN" ? "Yearly" : "Annuelle"}
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Payment Method field */}
+                        <div className="space-y-1.5">
+                          <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelPaymentMethod}</label>
+                          <select
+                            value={editMethod}
+                            onChange={(e) => setEditMethod(e.target.value)}
+                            className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                          >
+                            <option value="BARIDIMOB">BaridiMob</option>
+                            <option value="SERIAL">{language === "AR" ? "رمز تسلسلي" : language === "EN" ? "Serial Code" : "Code Série"}</option>
+                            <option value="CHEQUE">{language === "AR" ? "صك" : language === "EN" ? "Cheque" : "Chèque"}</option>
+                            <option value="Gratuit">{language === "AR" ? "مجاني" : language === "EN" ? "Free" : "Gratuit"}</option>
+                          </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          {/* Days Remaining Input */}
+                          <div className="space-y-1.5">
+                            <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelDaysRemaining}</label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={editDaysRemaining}
+                              onChange={(e) => handleDaysRemainingChange(Number(e.target.value))}
+                              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                            />
+                          </div>
+
+                          {/* Expiration date picker */}
+                          <div className="space-y-1.5">
+                            <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelExpiryDate}</label>
+                            <input
+                              type="date"
+                              value={editExpiry}
+                              onChange={(e) => handleExpiryDateChange(e.target.value)}
+                              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Administrative Status */}
+                    <div className="space-y-1.5">
+                      <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelAdminStatus}</label>
+                      <select
+                        value={editStatus}
+                        onChange={(e) => setEditStatus(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                      >
+                        <option value="Actif">{statusMap["Actif"] || "Actif"}</option>
+                        <option value="Expiré">{statusMap["Expiré"] || "Expiré"}</option>
+                        <option value="Bloqué">{statusMap["Bloqué"] || "Bloqué"}</option>
+                      </select>
                     </div>
                   </div>
-                </>
-              )}
+                )}
 
-              {/* Administrative Status */}
-              <div className="space-y-1.5">
-                <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelStatus}</label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                >
-                  <option value="Actif">{statusMap["Actif"] || "Actif"}</option>
-                  <option value="Expiré">{statusMap["Expiré"] || "Expiré"}</option>
-                  <option value="Bloqué">{statusMap["Bloqué"] || "Bloqué"}</option>
-                </select>
+                {editModalTab === "notification" && (
+                  <div className="space-y-4 animate-in fade-in duration-200 flex flex-col justify-between h-full min-h-[300px]">
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold text-zinc-900 dark:text-white uppercase border-b pb-1 dark:border-zinc-800 flex items-center gap-1.5">
+                        <span>🔔</span> {tLoc.notificationSectionTitle}
+                      </h4>
+
+                      {/* Notification Title */}
+                      <div className="space-y-1.5">
+                        <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelNotificationTitle}</label>
+                        <input
+                          type="text"
+                          value={notificationTitle}
+                          onChange={(e) => setNotificationTitle(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                        />
+                      </div>
+
+                      {/* Notification Message */}
+                      <div className="space-y-1.5">
+                        <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelNotificationMessage}</label>
+                        <textarea
+                          value={notificationMessage}
+                          onChange={(e) => setNotificationMessage(e.target.value)}
+                          className="w-full h-32 rounded-xl border border-zinc-200 bg-white p-3 text-xs outline-none focus:border-emerald-500 font-medium dark:border-zinc-800 dark:bg-zinc-950 dark:text-white resize-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t dark:border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={handleSendNotification}
+                        disabled={isSendingNotification}
+                        className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-wider shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {isSendingNotification ? tLoc.notificationSending : tLoc.btnSendNotification}
+                      </button>
+
+                      {notificationSuccess && (
+                        <p className="mt-2 text-emerald-600 dark:text-emerald-400 font-bold text-center text-[10px] animate-pulse">
+                          {tLoc.notificationSentSuccess}
+                        </p>
+                      )}
+                      {notificationError && (
+                        <p className="mt-2 text-red-655 dark:text-red-400 font-bold text-center text-[10px]">
+                          ⚠️ {notificationError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* If Paid, select Expiry Date */}
-              {editIsPaid && (
-                <div className="space-y-1.5">
-                  <label className="text-zinc-500 font-bold uppercase text-[9px]">{tLoc.labelExpiryDate}</label>
-                  <input
-                    type="date"
-                    value={editExpiry}
-                    onChange={(e) => setEditExpiry(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-emerald-500 font-bold dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                  />
-                </div>
-              )}
             </div>
 
-            <div className="pt-2 flex gap-3">
+            <div className="pt-2 flex gap-3 border-t dark:border-zinc-800">
               <button
                 type="button"
                 onClick={() => setEditingClub(null)}
@@ -1417,7 +1695,7 @@ export default function ManagerPaymentsClient({
                 disabled={isPending}
                 className="flex-1 py-2.5 rounded-xl bg-gradient-to-b from-emerald-500 to-teal-600 text-white font-black uppercase text-[10px] tracking-wider shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50"
               >
-                {isPending ? tLoc.saving : tLoc.btnApply}
+                {isPending ? tLoc.btnSaving : tLoc.btnApply}
               </button>
             </div>
 
@@ -1667,7 +1945,9 @@ export default function ManagerPaymentsClient({
                     : 'bg-gradient-to-b from-emerald-500 to-teal-600 shadow-emerald-500/20'
                 }`}
               >
-                {tLoc.btnConfirm}
+                {confirmModal.isDanger 
+                  ? (language === "AR" ? "نعم" : language === "EN" ? "Yes" : "Oui") 
+                  : (language === "AR" ? "تأكيد" : language === "EN" ? "Confirm" : "Confirmer")}
               </button>
             </div>
           </div>

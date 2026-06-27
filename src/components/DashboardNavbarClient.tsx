@@ -97,6 +97,7 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
         { href: "/dashboard/manager/demandes", label: t("db_reg_requests"), icon: "📥", description: t("desc_requests") },
         { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️", description: t("desc_clubs") },
         { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳", description: t("desc_payments") },
+        { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️", description: language === "EN" ? "Restore or purge deleted user accounts" : language === "AR" ? "استعادة أو مسح حسابات المستخدمين المحذوفة" : "Restaurer ou purger des comptes utilisateurs supprimés" },
       ]
     : isPlayer
     ? [
@@ -172,6 +173,13 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
           icon: "🧪", 
           description: t("desc_tests"),
           requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"]
+        },
+        { 
+          href: "/dashboard/gps", 
+          label: t("feat_gps_title"), 
+          icon: "🛰️", 
+          description: t("feat_gps_desc"),
+          requiredRoles: ["PRESIDENT", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "MANAGER_EVO_SPORTS"]
         },
         { 
           href: "/dashboard/quotidienne", 
@@ -384,13 +392,12 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
         </div>
       </div>
 
-      {/* Hamburger Dropdown Menu (Midnight Blue Transparent) */}
       <div 
         className={`
-          absolute transition-all duration-300 ease-in-out z-40 overflow-hidden
+          absolute transition-all duration-300 ease-in-out z-40 overflow-y-auto
           ${isScrolled
             ? "top-full left-0 right-0 mt-2.5 rounded-3xl border border-white/10 shadow-2xl"
-            : "left-0 w-full border-b border-white/10 shadow-2xl"
+            : "top-full left-0 w-full border-b border-white/10 shadow-2xl"
           }
           ${isOpen 
             ? "max-h-[calc(100vh-6rem)] opacity-100 py-6 visible bg-[#0B1528]/95 backdrop-blur-xl" 
@@ -398,9 +405,11 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
           }
         `}
       >
-        <div className="open-drawer-container px-4">
+        <div className={`open-drawer-container px-4 ${isScrolled ? "" : "max-w-7xl mx-auto sm:px-6 lg:px-8"}`}>
           <p className="text-[10px] font-black uppercase tracking-widest text-white/30 px-3 pb-3 border-b border-white/5">
-            {t("db_nav_club")}
+            {isManager 
+              ? (language === "EN" ? "Evo Sports Site Navigation" : language === "AR" ? "تصفح موقع إيفو سبورتس" : "Navigation du site Evo sports")
+              : t("db_nav_club")}
           </p>
           
           {/* Main Grid for Dropdown Menu Items */}
@@ -444,12 +453,15 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
           {/* Dropdown Footer: User Profile info (Mobile) & Sign Out */}
           <div className="mt-4 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             
-            {/* User details on smaller viewports */}
-            <div className="flex items-center gap-3 px-3 py-2 rounded-2xl bg-white/5 border border-white/5 sm:bg-transparent sm:border-transparent sm:px-0 sm:py-0">
+            {/* User details on all viewports */}
+            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 min-w-0">
+              <div className={`h-9 w-9 rounded-xl flex items-center justify-center font-black text-sm uppercase tracking-wider bg-gradient-to-r text-white ${user.roleGradient}`}>
+                {user.name.substring(0, 1).toUpperCase()}
+              </div>
               <div className="min-w-0">
                 <p className="text-xs font-black text-white">{user.name}</p>
                 <p className="text-[10px] text-white/50 truncate font-semibold mt-0.5">{user.email}</p>
-                <span className={`inline-flex rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider mt-1 md:hidden bg-gradient-to-r text-white ${user.roleGradient}`}>
+                <span className={`inline-flex rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider mt-1 bg-gradient-to-r text-white ${user.roleGradient}`}>
                   {user.roleLabel}
                 </span>
               </div>

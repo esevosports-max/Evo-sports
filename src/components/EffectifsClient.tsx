@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createPlayer, deletePlayer, updatePlayer as updatePlayerAction, toggleBlockPlayer, convoquerPlayersAction, getSentConvocationsAction, deleteConvocationAction } from "@/app/dashboard/effectifs/actions"
+import { useLanguage } from "@/components/LanguageProvider"
 
 interface Category {
   id: string
@@ -58,10 +59,24 @@ interface EffectifsClientProps {
   initialPlayers: Player[]
   categories: Category[]
   userRole?: string
+  initialLogs?: any[]
 }
 
-export default function EffectifsClient({ initialPlayers, categories, userRole }: EffectifsClientProps) {
+export default function EffectifsClient({ initialPlayers, categories, userRole, initialLogs = [] }: EffectifsClientProps) {
+  const { language } = useLanguage()
   const isPlayer = userRole === "JOUEUR"
+
+  const rolesLabelMap: Record<string, string> = {
+    PRESIDENT: language === "EN" ? "Club President" : language === "AR" ? "رئيس النادي" : "Président de Club",
+    DIRECTEUR_SPORTIF: language === "EN" ? "Sporting Director" : language === "AR" ? "المدير الرياضي" : "Directeur Sportif",
+    SECRETAIRE_GENERAL: language === "EN" ? "General Secretary" : language === "AR" ? "الأمين العام" : "Secrétaire Général",
+    ENTRAINEUR_PRINCIPAL: language === "EN" ? "Head Coach" : language === "AR" ? "المدرب الرئيسي" : "Entraîneur Principal",
+    ENTRAINEUR_ADJOINT: language === "EN" ? "Assistant Coach" : language === "AR" ? "مساعد مدرب" : "Entraîneur Adjoint",
+    PREPARATEUR_PHYSIQUE: language === "EN" ? "Fitness Trainer" : language === "AR" ? "المعد البدني" : "Préparateur Physique",
+    ENTRAINEUR_GARDIENS: language === "EN" ? "Goalkeeping Coach" : language === "AR" ? "مدرب الحراس" : "Entraîneur des Gardiens",
+    MEDECIN: language === "EN" ? "Club Doctor" : language === "AR" ? "طبيب النادي" : "Médecin du Club",
+    JOUEUR: language === "EN" ? "Player" : language === "AR" ? "لاعب" : "Joueur"
+  }
   const restrictedRoles = [
     "ENTRAINEUR_PRINCIPAL",
     "ENTRAINEUR_ADJOINT",
@@ -1280,6 +1295,84 @@ export default function EffectifsClient({ initialPlayers, categories, userRole }
                 {isPending ? "Modification..." : "Modifier Joueur 💾"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {initialLogs && initialLogs.length > 0 && (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+          <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-3">
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-1.5">
+                🛡️ {language === "EN" ? "Security & Account Logs" : language === "AR" ? "سجل الحسابات والأمان" : "Journal de Sécurité & Actions sur les Comptes"}
+              </h3>
+              <p className="text-[10px] text-zinc-400 font-semibold mt-0.5">
+                {language === "EN" ? "Audit trail of all create, block, delete, and modify actions on club accounts." : language === "AR" ? "سجل تدقيق لجميع عمليات الإنشاء والحظر والحذف والتعديل على حسابات النادي." : "Historique de toutes les actions de création, blocage, suppression et modification des comptes du club."}
+              </p>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b border-zinc-150/65 dark:border-zinc-800 text-[10px] font-black uppercase text-zinc-400 tracking-wider">
+                  <th className="py-2 px-3">{language === "EN" ? "Date & Time" : language === "AR" ? "التاريخ والوقت" : "Date & Heure"}</th>
+                  <th className="py-2 px-3">{language === "EN" ? "Action" : language === "AR" ? "الإجراء" : "Action"}</th>
+                  <th className="py-2 px-3">{language === "EN" ? "Target Account" : language === "AR" ? "الحساب المستهدف" : "Compte Ciblé"}</th>
+                  <th className="py-2 px-3">{language === "EN" ? "Performed By" : language === "AR" ? "بواسطة" : "Exécuté Par"}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                {initialLogs.map((log) => {
+                  const dateStr = new Date(log.createdAt).toLocaleDateString(language === "EN" ? "en-US" : "fr-FR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                  })
+                  
+                  let actionBadge = ""
+                  let actionText = ""
+                  
+                  if (log.actionType === "CREATE") {
+                    actionBadge = "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                    actionText = language === "EN" ? "Created" : language === "AR" ? "تم الإنشاء" : "Créé"
+                  } else if (log.actionType === "BLOCK") {
+                    actionBadge = "bg-red-500/10 text-red-600 border border-red-500/20"
+                    actionText = language === "EN" ? "Blocked" : language === "AR" ? "تم الحظر" : "Bloqué"
+                  } else if (log.actionType === "UNBLOCK") {
+                    actionBadge = "bg-teal-500/10 text-teal-600 border border-teal-500/20"
+                    actionText = language === "EN" ? "Unblocked" : language === "AR" ? "إلغاء الحظر" : "Débloqué"
+                  } else if (log.actionType === "DELETE") {
+                    actionBadge = "bg-zinc-500/10 text-zinc-650 border border-zinc-500/20 dark:text-zinc-400"
+                    actionText = language === "EN" ? "Deleted" : language === "AR" ? "تم الحذف" : "Supprimé"
+                  } else if (log.actionType === "MODIFY") {
+                    actionBadge = "bg-blue-500/10 text-blue-600 border border-blue-500/20"
+                    actionText = language === "EN" ? "Modified" : language === "AR" ? "تم التعديل" : "Modifié"
+                  }
+
+                  return (
+                    <tr key={log.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-950/5 transition-colors">
+                      <td className="py-2.5 px-3 font-mono text-[10px] text-zinc-450">{dateStr}</td>
+                      <td className="py-2.5 px-3">
+                        <span className={`inline-flex rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${actionBadge}`}>
+                          {actionText}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="font-black text-zinc-900 dark:text-white uppercase">{log.targetName}</span>{" "}
+                        <span className="text-[9px] text-zinc-450 font-bold uppercase">({rolesLabelMap[log.targetRole] || log.targetRole})</span>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className="font-bold text-zinc-800 dark:text-zinc-200">{log.operatorName}</span>{" "}
+                        <span className="text-[9px] text-zinc-450 font-bold uppercase">({rolesLabelMap[log.operatorRole] || log.operatorRole})</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

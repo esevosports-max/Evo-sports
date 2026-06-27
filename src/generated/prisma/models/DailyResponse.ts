@@ -268,8 +268,8 @@ export type DailyResponseWhereInput = {
   heartRate?: Prisma.IntFilter<"DailyResponse"> | number
   answers?: Prisma.JsonNullableFilter<"DailyResponse">
   createdAt?: Prisma.DateTimeFilter<"DailyResponse"> | Date | string
-  questionnaire?: Prisma.XOR<Prisma.DailyQuestionnaireScalarRelationFilter, Prisma.DailyQuestionnaireWhereInput>
   player?: Prisma.XOR<Prisma.PlayerScalarRelationFilter, Prisma.PlayerWhereInput>
+  questionnaire?: Prisma.XOR<Prisma.DailyQuestionnaireScalarRelationFilter, Prisma.DailyQuestionnaireWhereInput>
 }
 
 export type DailyResponseOrderByWithRelationInput = {
@@ -283,8 +283,8 @@ export type DailyResponseOrderByWithRelationInput = {
   heartRate?: Prisma.SortOrder
   answers?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  questionnaire?: Prisma.DailyQuestionnaireOrderByWithRelationInput
   player?: Prisma.PlayerOrderByWithRelationInput
+  questionnaire?: Prisma.DailyQuestionnaireOrderByWithRelationInput
 }
 
 export type DailyResponseWhereUniqueInput = Prisma.AtLeast<{
@@ -302,8 +302,8 @@ export type DailyResponseWhereUniqueInput = Prisma.AtLeast<{
   heartRate?: Prisma.IntFilter<"DailyResponse"> | number
   answers?: Prisma.JsonNullableFilter<"DailyResponse">
   createdAt?: Prisma.DateTimeFilter<"DailyResponse"> | Date | string
-  questionnaire?: Prisma.XOR<Prisma.DailyQuestionnaireScalarRelationFilter, Prisma.DailyQuestionnaireWhereInput>
   player?: Prisma.XOR<Prisma.PlayerScalarRelationFilter, Prisma.PlayerWhereInput>
+  questionnaire?: Prisma.XOR<Prisma.DailyQuestionnaireScalarRelationFilter, Prisma.DailyQuestionnaireWhereInput>
 }, "id" | "questionnaireId_playerId">
 
 export type DailyResponseOrderByWithAggregationInput = {
@@ -349,8 +349,8 @@ export type DailyResponseCreateInput = {
   heartRate: number
   answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
-  questionnaire: Prisma.DailyQuestionnaireCreateNestedOneWithoutResponsesInput
   player: Prisma.PlayerCreateNestedOneWithoutDailyResponsesInput
+  questionnaire: Prisma.DailyQuestionnaireCreateNestedOneWithoutResponsesInput
 }
 
 export type DailyResponseUncheckedCreateInput = {
@@ -375,8 +375,8 @@ export type DailyResponseUpdateInput = {
   heartRate?: Prisma.IntFieldUpdateOperationsInput | number
   answers?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  questionnaire?: Prisma.DailyQuestionnaireUpdateOneRequiredWithoutResponsesNestedInput
   player?: Prisma.PlayerUpdateOneRequiredWithoutDailyResponsesNestedInput
+  questionnaire?: Prisma.DailyQuestionnaireUpdateOneRequiredWithoutResponsesNestedInput
 }
 
 export type DailyResponseUncheckedUpdateInput = {
@@ -806,8 +806,8 @@ export type DailyResponseSelect<ExtArgs extends runtime.Types.Extensions.Interna
   heartRate?: boolean
   answers?: boolean
   createdAt?: boolean
-  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
+  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dailyResponse"]>
 
 export type DailyResponseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -821,8 +821,8 @@ export type DailyResponseSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   heartRate?: boolean
   answers?: boolean
   createdAt?: boolean
-  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
+  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dailyResponse"]>
 
 export type DailyResponseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -836,8 +836,8 @@ export type DailyResponseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   heartRate?: boolean
   answers?: boolean
   createdAt?: boolean
-  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
+  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dailyResponse"]>
 
 export type DailyResponseSelectScalar = {
@@ -855,23 +855,23 @@ export type DailyResponseSelectScalar = {
 
 export type DailyResponseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "questionnaireId" | "playerId" | "sleepQuality" | "fatigue" | "stress" | "soreness" | "heartRate" | "answers" | "createdAt", ExtArgs["result"]["dailyResponse"]>
 export type DailyResponseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
+  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
 }
 export type DailyResponseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
+  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
 }
 export type DailyResponseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
+  questionnaire?: boolean | Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>
 }
 
 export type $DailyResponsePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DailyResponse"
   objects: {
-    questionnaire: Prisma.$DailyQuestionnairePayload<ExtArgs>
     player: Prisma.$PlayerPayload<ExtArgs>
+    questionnaire: Prisma.$DailyQuestionnairePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1278,8 +1278,8 @@ readonly fields: DailyResponseFieldRefs;
  */
 export interface Prisma__DailyResponseClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  questionnaire<T extends Prisma.DailyQuestionnaireDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>>): Prisma.Prisma__DailyQuestionnaireClient<runtime.Types.Result.GetResult<Prisma.$DailyQuestionnairePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   player<T extends Prisma.PlayerDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlayerDefaultArgs<ExtArgs>>): Prisma.Prisma__PlayerClient<runtime.Types.Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  questionnaire<T extends Prisma.DailyQuestionnaireDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DailyQuestionnaireDefaultArgs<ExtArgs>>): Prisma.Prisma__DailyQuestionnaireClient<runtime.Types.Result.GetResult<Prisma.$DailyQuestionnairePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

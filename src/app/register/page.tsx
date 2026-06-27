@@ -22,8 +22,8 @@ export default function Register() {
         language === "FR"
           ? "Les mots de passe ne correspondent pas !"
           : language === "EN"
-          ? "Passwords do not match!"
-          : "كلمات المرور غير متطابقة!"
+            ? "Passwords do not match!"
+            : "كلمات المرور غير متطابقة!"
       )
       return
     }
@@ -36,8 +36,8 @@ export default function Register() {
         language === "FR"
           ? "Le mot de passe doit contenir au moins une lettre et au moins un chiffre."
           : language === "EN"
-          ? "Password must contain at least one letter and one number."
-          : "يجب أن تحتوي كلمة المرور على حرف واحد ورقم واحد على الأقل."
+            ? "Password must contain at least one letter and one number."
+            : "يجب أن تحتوي كلمة المرور على حرف واحد ورقم واحد على الأقل."
       )
       return
     }
@@ -77,15 +77,15 @@ export default function Register() {
           language === "FR"
             ? "Connexion automatique échouée."
             : language === "EN"
-            ? "Automatic sign in failed."
-            : "فشل تسجيل الدخول التلقائي."
+              ? "Automatic sign in failed."
+              : "فشل تسجيل الدخول التلقائي."
         )
       } else {
         setError(
           msg ||
-            (language === "FR"
-              ? "Une erreur est survenue."
-              : language === "EN"
+          (language === "FR"
+            ? "Une erreur est survenue."
+            : language === "EN"
               ? "An error occurred."
               : "حدث خطأ ما.")
         )
@@ -105,13 +105,13 @@ export default function Register() {
         <div className="flex flex-col items-center">
           <Link href="/" className="flex items-center gap-2 group mb-6">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/logo.png" 
-              alt="EVO SPORTS Logo" 
-              className="h-12 w-auto object-contain transition-all duration-300 group-hover:scale-105" 
+            <img
+              src="/logo.png"
+              alt="EVO SPORTS Logo"
+              className="h-12 w-auto object-contain transition-all duration-300 group-hover:scale-105"
             />
           </Link>
-          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white text-center">
+          <h2 className="text-2xl min-[400px]:text-3xl sm:text-4xl font-sport font-black italic uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-green-400 text-center drop-shadow-sm whitespace-nowrap">
             {t("register_title")}
           </h2>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 text-center">
@@ -286,8 +286,8 @@ export default function Register() {
               {language === "FR"
                 ? "S'inscrire avec Google"
                 : language === "EN"
-                ? "Sign up with Google"
-                : "التسجيل بواسطة Google"}
+                  ? "Sign up with Google"
+                  : "التسجيل بواسطة Google"}
             </span>
           </button>
 

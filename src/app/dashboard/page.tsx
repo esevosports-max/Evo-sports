@@ -7,6 +7,7 @@ import DashboardSummaryClient from "@/components/DashboardSummaryClient"
 import PlayerDashboardClient from "@/components/PlayerDashboardClient"
 import CoachDashboardClient from "@/components/CoachDashboardClient"
 import { getPolls } from "@/app/dashboard/sondage/actions"
+import AccountModificationAlert from "@/components/AccountModificationAlert"
 
 export default async function Dashboard() {
   const session = await auth()
@@ -19,6 +20,19 @@ export default async function Dashboard() {
   const user = session.user
   const roleName = user.role?.name || "No Role assigned"
   const userPermissions = user.role?.permissions || []
+
+  // Fetch modification tracking directly from User
+  const dbUser = await db.user.findUnique({
+    where: { id: user.id },
+    select: { modifiedBy: true, modifiedAt: true, modifiedFields: true }
+  })
+
+  const lastModifyLog = dbUser?.modifiedBy && dbUser?.modifiedAt ? {
+    id: dbUser.modifiedAt.getTime().toString(),
+    operatorName: dbUser.modifiedBy,
+    createdAt: dbUser.modifiedAt,
+    modifiedFields: dbUser.modifiedFields
+  } : null
 
   // Check registration status for Presidents
   if (roleName === "PRESIDENT") {
@@ -246,43 +260,53 @@ export default async function Dashboard() {
     }
 
     return (
-      <PlayerDashboardClient
-        playerProfile={{
-          id: playerProfile.id,
-          name: playerProfile.user?.name || user.name || "Joueur",
-          position: playerProfile.position,
-          number: playerProfile.number,
-          teamCategoryName
-        }}
-        todayEvents={todayEvents.map(evt => ({
-          id: evt.id,
-          title: evt.title,
-          type: evt.type,
-          time: evt.time,
-          location: evt.location,
-          details: evt.details,
-          status: evt.status
-        }))}
-        pendingQuestionnaires={pendingQuestionnaires.map(q => ({
-          id: q.id,
-          expiresAt: q.expiresAt.toISOString()
-        }))}
-        latestPhysicalTest={latestPhysicalTest ? {
-          vma: latestPhysicalTest.vma,
-          vo2Max: latestPhysicalTest.vo2Max,
-          sprint10m: latestPhysicalTest.sprint10m,
-          sprint30m: latestPhysicalTest.sprint30m,
-          cmj: latestPhysicalTest.cmj,
-          sj: latestPhysicalTest.sj,
-          illinois: latestPhysicalTest.illinois,
-          fat: latestPhysicalTest.fat,
-          date: latestPhysicalTest.date.toISOString()
-        } : null}
-        unreadMessages={unreadMessagesList}
-        activePolls={activePolls}
-        composition={compositionData}
-        categoryPlayers={categoryPlayersData}
-      />
+      <div className="space-y-6">
+        {lastModifyLog && (
+          <AccountModificationAlert
+            logId={lastModifyLog.id}
+            operatorName={lastModifyLog.operatorName}
+            date={lastModifyLog.createdAt.toISOString()}
+            fields={lastModifyLog.modifiedFields}
+          />
+        )}
+        <PlayerDashboardClient
+          playerProfile={{
+            id: playerProfile.id,
+            name: playerProfile.user?.name || user.name || "Joueur",
+            position: playerProfile.position,
+            number: playerProfile.number,
+            teamCategoryName
+          }}
+          todayEvents={todayEvents.map(evt => ({
+            id: evt.id,
+            title: evt.title,
+            type: evt.type,
+            time: evt.time,
+            location: evt.location,
+            details: evt.details,
+            status: evt.status
+          }))}
+          pendingQuestionnaires={pendingQuestionnaires.map(q => ({
+            id: q.id,
+            expiresAt: q.expiresAt.toISOString()
+          }))}
+          latestPhysicalTest={latestPhysicalTest ? {
+            vma: latestPhysicalTest.vma,
+            vo2Max: latestPhysicalTest.vo2Max,
+            sprint10m: latestPhysicalTest.sprint10m,
+            sprint30m: latestPhysicalTest.sprint30m,
+            cmj: latestPhysicalTest.cmj,
+            sj: latestPhysicalTest.sj,
+            illinois: latestPhysicalTest.illinois,
+            fat: latestPhysicalTest.fat,
+            date: latestPhysicalTest.date.toISOString()
+          } : null}
+          unreadMessages={unreadMessagesList}
+          activePolls={activePolls}
+          composition={compositionData}
+          categoryPlayers={categoryPlayersData}
+        />
+      </div>
     )
   }
 
@@ -405,90 +429,100 @@ export default async function Dashboard() {
     })
 
     return (
-      <CoachDashboardClient
-        roleName={roleName}
-        clubLogo={staffProfile.club?.logo || null}
-        categories={staffProfile.categories.map(c => ({
-          id: c.id,
-          name: c.name,
-          league: c.league,
-          coach: c.coach,
-          maxPlayers: c.maxPlayers
-        }))}
-        players={players.map(p => ({
-          id: p.id,
-          name: p.user?.name || "Joueur sans nom",
-          email: p.user?.email || "",
-          position: p.position || "Non spécifié",
-          number: p.number,
-          age: p.age,
-          height: p.height,
-          weight: p.weight,
-          foot: p.foot,
-          isInjured: p.isInjured,
-          injuryType: p.injuryType,
-          injurySeverity: p.injurySeverity,
-          injuryDuration: p.injuryDuration,
-          injuryDate: p.injuryDate ? p.injuryDate.toISOString() : null,
-          injuryReturn: p.injuryReturn ? p.injuryReturn.toISOString() : null,
-          injuryStatus: p.injuryStatus,
-          injuryProgress: p.injuryProgress
-        }))}
-        matches={matches.map(m => ({
-          id: m.id,
-          title: m.title,
-          location: m.location,
-          stadiumName: m.location === "Domicile" ? "Terrain EVO" : m.location,
-          date: m.date,
-          time: m.time,
-          status: m.status,
-          score: m.score,
-          assignedTeam: m.assignedTeam
-        }))}
-        trainings={trainings.map(t => ({
-          id: t.id,
-          title: t.title,
-          date: t.date,
-          time: t.time,
-          location: t.location,
-          details: t.details,
-          status: t.status,
-          assignedTeam: t.assignedTeam
-        }))}
-        dailyQuestionnaires={dailyQuestionnaires.map(q => ({
-          id: q.id,
-          teamCategoryName: q.teamCategory?.name || "Tous",
-          scheduledFor: q.scheduledFor.toISOString(),
-          expiresAt: q.expiresAt.toISOString(),
-          active: q.active,
-          responsesCount: q.responses.length
-        }))}
-        polls={polls.map(p => ({
-          id: p.id,
-          title: p.title,
-          status: p.status,
-          expiresAt: p.expiresAt.toISOString(),
-          totalVotes: p.votes.length,
-          options: p.options.map(o => ({
-            id: o.id,
-            text: o.text,
-            votesCount: p.votes.filter(v => v.optionId === o.id).length
-          }))
-        }))}
-        physicalTests={physicalTests.map(pt => ({
-          id: pt.id,
-          playerName: pt.player.user?.name || "Joueur",
-          vma: pt.vma,
-          vo2Max: pt.vo2Max,
-          sprint10m: pt.sprint10m,
-          sprint30m: pt.sprint30m,
-          cmj: pt.cmj,
-          sj: pt.sj,
-          illinois: pt.illinois,
-          fat: pt.fat,
-          date: pt.date.toISOString()
-        }))}
-      />
+      <div className="space-y-6">
+        {lastModifyLog && (
+          <AccountModificationAlert
+            logId={lastModifyLog.id}
+            operatorName={lastModifyLog.operatorName}
+            date={lastModifyLog.createdAt.toISOString()}
+            fields={lastModifyLog.modifiedFields}
+          />
+        )}
+        <CoachDashboardClient
+          roleName={roleName}
+          clubLogo={staffProfile.club?.logo || null}
+          categories={staffProfile.categories.map(c => ({
+            id: c.id,
+            name: c.name,
+            league: c.league,
+            coach: c.coach,
+            maxPlayers: c.maxPlayers
+          }))}
+          players={players.map(p => ({
+            id: p.id,
+            name: p.user?.name || "Joueur sans nom",
+            email: p.user?.email || "",
+            position: p.position || "Non spécifié",
+            number: p.number,
+            age: p.age,
+            height: p.height,
+            weight: p.weight,
+            foot: p.foot,
+            isInjured: p.isInjured,
+            injuryType: p.injuryType,
+            injurySeverity: p.injurySeverity,
+            injuryDuration: p.injuryDuration,
+            injuryDate: p.injuryDate ? p.injuryDate.toISOString() : null,
+            injuryReturn: p.injuryReturn ? p.injuryReturn.toISOString() : null,
+            injuryStatus: p.injuryStatus,
+            injuryProgress: p.injuryProgress
+          }))}
+          matches={matches.map(m => ({
+            id: m.id,
+            title: m.title,
+            location: m.location,
+            stadiumName: m.location === "Domicile" ? "Terrain EVO" : m.location,
+            date: m.date,
+            time: m.time,
+            status: m.status,
+            score: m.score,
+            assignedTeam: m.assignedTeam
+          }))}
+          trainings={trainings.map(t => ({
+            id: t.id,
+            title: t.title,
+            date: t.date,
+            time: t.time,
+            location: t.location,
+            details: t.details,
+            status: t.status,
+            assignedTeam: t.assignedTeam
+          }))}
+          dailyQuestionnaires={dailyQuestionnaires.map(q => ({
+            id: q.id,
+            teamCategoryName: q.teamCategory?.name || "Tous",
+            scheduledFor: q.scheduledFor.toISOString(),
+            expiresAt: q.expiresAt.toISOString(),
+            active: q.active,
+            responsesCount: q.responses.length
+          }))}
+          polls={polls.map(p => ({
+            id: p.id,
+            title: p.title,
+            status: p.status,
+            expiresAt: p.expiresAt.toISOString(),
+            totalVotes: p.votes.length,
+            options: p.options.map(o => ({
+              id: o.id,
+              text: o.text,
+              votesCount: p.votes.filter(v => v.optionId === o.id).length
+            }))
+          }))}
+          physicalTests={physicalTests.map(pt => ({
+            id: pt.id,
+            playerName: pt.player.user?.name || "Joueur",
+            vma: pt.vma,
+            vo2Max: pt.vo2Max,
+            sprint10m: pt.sprint10m,
+            sprint30m: pt.sprint30m,
+            cmj: pt.cmj,
+            sj: pt.sj,
+            illinois: pt.illinois,
+            fat: pt.fat,
+            date: pt.date.toISOString()
+          }))}
+        />
+      </div>
     )
   }
 
@@ -584,6 +618,14 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      {lastModifyLog && (
+        <AccountModificationAlert
+          logId={lastModifyLog.id}
+          operatorName={lastModifyLog.operatorName}
+          date={lastModifyLog.createdAt.toISOString()}
+          fields={lastModifyLog.modifiedFields}
+        />
+      )}
       {roleName === "MANAGER_EVO_SPORTS" ? (
         <div className="rounded-2xl border border-zinc-200/50 bg-white p-8 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900">
           <ManagerRequestsList initialRequests={JSON.parse(JSON.stringify(initialRequests))} />
@@ -596,6 +638,7 @@ export default async function Dashboard() {
           permissionsCount={userPermissions.length}
           subscription={subscriptionData}
           metrics={metricsData}
+          roleName={roleName}
         />
       )}
     </div>

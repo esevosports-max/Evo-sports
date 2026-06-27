@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { logAccountAction } from "@/lib/actionLogger"
 
 export async function createPlayer(data: {
   name: string
@@ -109,6 +110,14 @@ export async function createPlayer(data: {
       throw new Error("Cette adresse email est déjà utilisée.")
     }
 
+    const existingDeleted = await db.deletedAccount.findFirst({
+      where: { email: emailNormalized }
+    })
+
+    if (existingDeleted) {
+      throw new Error("Cette adresse email est déjà utilisée.")
+    }
+
     const playerUser = await db.user.create({
       data: {
         name: data.name,
@@ -133,8 +142,14 @@ export async function createPlayer(data: {
       }
     })
 
-    // Also seed some physical indices for stats
-    // We will do this if needed, but just the player is fine for now
+    await logAccountAction({
+      actionType: "CREATE",
+      targetName: data.name,
+      targetRole: "JOUEUR",
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: club.id
+    })
 
     revalidatePath("/dashboard/effectifs")
     return { success: true }
@@ -158,16 +173,81 @@ export async function deletePlayer(playerId: string) {
 
     const player = await db.player.findUnique({
       where: { id: playerId },
-      include: { user: true }
+      include: { user: { include: { role: true } } }
     })
 
     if (!player) {
       throw new Error("Joueur introuvable")
     }
 
+    // Save account state for restoration/trash bin before deleting
+    const originalData = JSON.stringify({
+      user: {
+        id: player.user.id,
+        name: player.user.name,
+        email: player.user.email,
+        password: player.user.password,
+        roleId: player.user.roleId,
+        phone: player.user.phone,
+        blocked: player.user.blocked
+      },
+      player: {
+        id: player.id,
+        userId: player.userId,
+        clubId: player.clubId,
+        position: player.position,
+        number: player.number,
+        teamCategoryId: player.teamCategoryId,
+        age: player.age,
+        height: player.height,
+        weight: player.weight,
+        foot: player.foot,
+        isInjured: player.isInjured,
+        injuryType: player.injuryType,
+        injurySeverity: player.injurySeverity,
+        injuryDuration: player.injuryDuration,
+        injuryDate: player.injuryDate,
+        injuryReturn: player.injuryReturn,
+        injuryStatus: player.injuryStatus,
+        injuryProgress: player.injuryProgress,
+        injuryDeclaredBy: player.injuryDeclaredBy,
+        bloodGroup: player.bloodGroup,
+        allergies: player.allergies,
+        lastCheckup: player.lastCheckup,
+        clearance: player.clearance,
+        medicalNotes: player.medicalNotes,
+        nationality: player.nationality,
+        birthDate: player.birthDate,
+        medicalTreatment: player.medicalTreatment,
+        medication: player.medication
+      }
+    })
+
+    await db.deletedAccount.create({
+      data: {
+        userId: player.userId,
+        name: player.user.name || "Joueur",
+        email: player.user.email || "",
+        phone: player.user.phone,
+        roleTag: "JOUEUR",
+        clubId: player.clubId,
+        originalData,
+        deletedBy: session.user.name || session.user.email || "Gestionnaire"
+      }
+    })
+
     // Delete the Player (Cascade will handle some, but let's delete User directly which cascades to Player)
     await db.user.delete({
       where: { id: player.userId }
+    })
+
+    await logAccountAction({
+      actionType: "DELETE",
+      targetName: player.user?.name || "Joueur",
+      targetRole: "JOUEUR",
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: player.clubId
     })
 
     revalidatePath("/dashboard/effectifs")
@@ -242,10 +322,31 @@ export async function updatePlayer(data: {
       throw new Error("Cette adresse email est déjà utilisée par un autre compte.")
     }
 
+    const existingDeleted = await db.deletedAccount.findFirst({
+      where: { email: emailNormalized }
+    })
+
+    if (existingDeleted) {
+      throw new Error("Cette adresse email est déjà utilisée.")
+    }
+
+    const modifiedFieldsList: string[] = []
+    if (player.user?.name !== data.name) modifiedFieldsList.push("Nom")
+    if (player.user?.email !== emailNormalized) modifiedFieldsList.push("Email")
+    if (player.position !== data.position) modifiedFieldsList.push("Poste")
+    if (player.number !== data.number) modifiedFieldsList.push("Numéro")
+    if (player.teamCategoryId !== data.teamCategoryId) modifiedFieldsList.push("Équipe")
+    if (data.password && data.password.trim() !== "") modifiedFieldsList.push("Mot de passe")
+    const modifiedFieldsStr = modifiedFieldsList.join(", ") || "Informations du profil"
+
     // Update User record
+    const operatorNameWithRole = `${session.user.name || session.user.email || "Utilisateur"} (${userRole || "ADMIN"})`
     const userUpdateData: any = {
       name: data.name,
       email: emailNormalized,
+      modifiedBy: operatorNameWithRole,
+      modifiedAt: new Date(),
+      modifiedFields: modifiedFieldsStr
     }
     if (data.password && data.password.trim() !== "") {
       userUpdateData.password = data.password
@@ -268,6 +369,15 @@ export async function updatePlayer(data: {
         weight: data.weight,
         foot: data.foot
       }
+    })
+
+    await logAccountAction({
+      actionType: "MODIFY",
+      targetName: data.name,
+      targetRole: "JOUEUR",
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: player.clubId
     })
 
     revalidatePath("/dashboard/effectifs")
@@ -300,12 +410,25 @@ export async function toggleBlockPlayer(playerId: string) {
       throw new Error("Joueur ou compte utilisateur introuvable")
     }
 
+    const wasBlocked = player.user.blocked
+    const operatorNameWithRole = `${session.user.name || session.user.email || "Utilisateur"} (${userRole || "ADMIN"})`
     // Toggle blocked status
     await db.user.update({
       where: { id: player.userId },
       data: {
-        blocked: !player.user.blocked
+        blocked: !wasBlocked,
+        blockedBy: !wasBlocked ? operatorNameWithRole : null,
+        blockedAt: !wasBlocked ? new Date() : null
       }
+    })
+
+    await logAccountAction({
+      actionType: !wasBlocked ? "BLOCK" : "UNBLOCK",
+      targetName: player.user?.name || "Joueur",
+      targetRole: "JOUEUR",
+      operatorName: session.user.name || session.user.email || "Utilisateur",
+      operatorRole: userRole || "ADMIN",
+      clubId: player.clubId
     })
 
     revalidatePath("/dashboard/effectifs")

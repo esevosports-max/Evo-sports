@@ -12,6 +12,7 @@ interface SummaryClientProps {
   roleLabel: string
   currentGradient: string
   permissionsCount: number
+  roleName: string
   subscription?: {
     plan: string
     status: string
@@ -31,6 +32,7 @@ interface SummaryClientProps {
 export default function DashboardSummaryClient({
   subscription,
   metrics,
+  roleName,
 }: SummaryClientProps) {
   const [activeTab, setActiveTab] = useState<"sport" | "medical" | "club">("sport")
   const { t, language } = useLanguage()
@@ -219,23 +221,41 @@ export default function DashboardSummaryClient({
       </div>
 
       {/* Quick Access Actions Links */}
-      <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h4 className="text-xs font-black uppercase text-zinc-900 tracking-wider flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            {t("db_shortcuts_title")}
-          </h4>
-          <p className="text-[11px] text-zinc-500 font-semibold mt-1">{t("db_shortcuts_desc")}</p>
+      {roleName !== "SECRETAIRE_GENERAL" && (
+        <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h4 className="text-xs font-black uppercase text-zinc-900 tracking-wider flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              {t("db_shortcuts_title")}
+            </h4>
+            <p className="text-[11px] text-zinc-500 font-semibold mt-1">{t("db_shortcuts_desc")}</p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            {roleName === "PRESIDENT" ? (
+              <>
+                <Link href="/dashboard/messagerie" className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-black text-[10px] uppercase tracking-wider px-3.5 py-2.5 transition-colors">
+                  💬 {t("db_shortcut_msg")}
+                </Link>
+                <Link href="/dashboard/sondage" className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-black text-[10px] uppercase tracking-wider px-3.5 py-2.5 transition-colors">
+                  📊 {t("db_shortcut_polls")}
+                </Link>
+                <Link href="/dashboard/planning" className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-black text-[10px] uppercase tracking-wider px-3.5 py-2.5 transition-colors">
+                  📅 {t("db_shortcut_planning")}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard/messagerie" className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-black text-[10px] uppercase tracking-wider px-3.5 py-2.5 transition-colors">
+                  💬 {t("db_shortcut_msg")}
+                </Link>
+                <Link href="/dashboard/quotidienne" className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-black text-[10px] uppercase tracking-wider px-3.5 py-2.5 transition-colors">
+                  📝 {t("db_shortcut_wellness")}
+                </Link>
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2 shrink-0">
-          <Link href="/dashboard/messagerie" className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-black text-[10px] uppercase tracking-wider px-3.5 py-2.5 transition-colors">
-            💬 {t("db_shortcut_msg")}
-          </Link>
-          <Link href="/dashboard/quotidienne" className="rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 font-black text-[10px] uppercase tracking-wider px-3.5 py-2.5 transition-colors">
-            📝 {t("db_shortcut_wellness")}
-          </Link>
-        </div>
-      </div>
+      )}
 
     </div>
   )

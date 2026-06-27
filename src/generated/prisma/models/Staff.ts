@@ -300,8 +300,8 @@ export type StaffWhereInput = {
   birthDate?: Prisma.StringNullableFilter<"Staff"> | string | null
   medicalTreatment?: Prisma.StringNullableFilter<"Staff"> | string | null
   medication?: Prisma.StringNullableFilter<"Staff"> | string | null
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   categories?: Prisma.TeamCategoryListRelationFilter
 }
 
@@ -322,8 +322,8 @@ export type StaffOrderByWithRelationInput = {
   birthDate?: Prisma.SortOrderInput | Prisma.SortOrder
   medicalTreatment?: Prisma.SortOrderInput | Prisma.SortOrder
   medication?: Prisma.SortOrderInput | Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   club?: Prisma.ClubOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
   categories?: Prisma.TeamCategoryOrderByRelationAggregateInput
 }
 
@@ -347,8 +347,8 @@ export type StaffWhereUniqueInput = Prisma.AtLeast<{
   birthDate?: Prisma.StringNullableFilter<"Staff"> | string | null
   medicalTreatment?: Prisma.StringNullableFilter<"Staff"> | string | null
   medication?: Prisma.StringNullableFilter<"Staff"> | string | null
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   categories?: Prisma.TeamCategoryListRelationFilter
 }, "id" | "userId">
 
@@ -413,8 +413,8 @@ export type StaffCreateInput = {
   birthDate?: string | null
   medicalTreatment?: string | null
   medication?: string | null
-  user: Prisma.UserCreateNestedOneWithoutStaffInput
   club: Prisma.ClubCreateNestedOneWithoutStaffInput
+  user: Prisma.UserCreateNestedOneWithoutStaffInput
   categories?: Prisma.TeamCategoryCreateNestedManyWithoutStaffMembersInput
 }
 
@@ -453,8 +453,8 @@ export type StaffUpdateInput = {
   birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  user?: Prisma.UserUpdateOneRequiredWithoutStaffNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutStaffNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutStaffNestedInput
   categories?: Prisma.TeamCategoryUpdateManyWithoutStaffMembersNestedInput
 }
 
@@ -941,8 +941,8 @@ export type StaffCreateWithoutCategoriesInput = {
   birthDate?: string | null
   medicalTreatment?: string | null
   medication?: string | null
-  user: Prisma.UserCreateNestedOneWithoutStaffInput
   club: Prisma.ClubCreateNestedOneWithoutStaffInput
+  user: Prisma.UserCreateNestedOneWithoutStaffInput
 }
 
 export type StaffUncheckedCreateWithoutCategoriesInput = {
@@ -1074,8 +1074,8 @@ export type StaffUpdateWithoutCategoriesInput = {
   birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  user?: Prisma.UserUpdateOneRequiredWithoutStaffNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutStaffNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutStaffNestedInput
 }
 
 export type StaffUncheckedUpdateWithoutCategoriesInput = {
@@ -1164,8 +1164,8 @@ export type StaffSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   birthDate?: boolean
   medicalTreatment?: boolean
   medication?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   categories?: boolean | Prisma.Staff$categoriesArgs<ExtArgs>
   _count?: boolean | Prisma.StaffCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staff"]>
@@ -1187,8 +1187,8 @@ export type StaffSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   birthDate?: boolean
   medicalTreatment?: boolean
   medication?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staff"]>
 
 export type StaffSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1208,8 +1208,8 @@ export type StaffSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   birthDate?: boolean
   medicalTreatment?: boolean
   medication?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staff"]>
 
 export type StaffSelectScalar = {
@@ -1233,25 +1233,25 @@ export type StaffSelectScalar = {
 
 export type StaffOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "clubId" | "title" | "createdAt" | "updatedAt" | "bloodGroup" | "allergies" | "lastCheckup" | "clearance" | "medicalNotes" | "age" | "nationality" | "birthDate" | "medicalTreatment" | "medication", ExtArgs["result"]["staff"]>
 export type StaffInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   categories?: boolean | Prisma.Staff$categoriesArgs<ExtArgs>
   _count?: boolean | Prisma.StaffCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StaffIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type StaffIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $StaffPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Staff"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     club: Prisma.$ClubPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
     categories: Prisma.$TeamCategoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1665,8 +1665,8 @@ readonly fields: StaffFieldRefs;
  */
 export interface Prisma__StaffClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   club<T extends Prisma.ClubDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClubDefaultArgs<ExtArgs>>): Prisma.Prisma__ClubClient<runtime.Types.Result.GetResult<Prisma.$ClubPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   categories<T extends Prisma.Staff$categoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Staff$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TeamCategoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.

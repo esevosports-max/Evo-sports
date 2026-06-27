@@ -240,11 +240,11 @@ export type TeamCategoryWhereInput = {
   maxPlayers?: Prisma.IntFilter<"TeamCategory"> | number
   createdAt?: Prisma.DateTimeFilter<"TeamCategory"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TeamCategory"> | Date | string
-  club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
-  staffMembers?: Prisma.StaffListRelationFilter
-  players?: Prisma.PlayerListRelationFilter
   composition?: Prisma.XOR<Prisma.CompositionNullableScalarRelationFilter, Prisma.CompositionWhereInput> | null
   dailyQuestionnaires?: Prisma.DailyQuestionnaireListRelationFilter
+  players?: Prisma.PlayerListRelationFilter
+  club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
+  staffMembers?: Prisma.StaffListRelationFilter
 }
 
 export type TeamCategoryOrderByWithRelationInput = {
@@ -256,11 +256,11 @@ export type TeamCategoryOrderByWithRelationInput = {
   maxPlayers?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  club?: Prisma.ClubOrderByWithRelationInput
-  staffMembers?: Prisma.StaffOrderByRelationAggregateInput
-  players?: Prisma.PlayerOrderByRelationAggregateInput
   composition?: Prisma.CompositionOrderByWithRelationInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireOrderByRelationAggregateInput
+  players?: Prisma.PlayerOrderByRelationAggregateInput
+  club?: Prisma.ClubOrderByWithRelationInput
+  staffMembers?: Prisma.StaffOrderByRelationAggregateInput
 }
 
 export type TeamCategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -275,11 +275,11 @@ export type TeamCategoryWhereUniqueInput = Prisma.AtLeast<{
   maxPlayers?: Prisma.IntFilter<"TeamCategory"> | number
   createdAt?: Prisma.DateTimeFilter<"TeamCategory"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TeamCategory"> | Date | string
-  club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
-  staffMembers?: Prisma.StaffListRelationFilter
-  players?: Prisma.PlayerListRelationFilter
   composition?: Prisma.XOR<Prisma.CompositionNullableScalarRelationFilter, Prisma.CompositionWhereInput> | null
   dailyQuestionnaires?: Prisma.DailyQuestionnaireListRelationFilter
+  players?: Prisma.PlayerListRelationFilter
+  club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
+  staffMembers?: Prisma.StaffListRelationFilter
 }, "id">
 
 export type TeamCategoryOrderByWithAggregationInput = {
@@ -320,11 +320,11 @@ export type TeamCategoryCreateInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
-  staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
   composition?: Prisma.CompositionCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
+  club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
+  staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryUncheckedCreateInput = {
@@ -336,10 +336,10 @@ export type TeamCategoryUncheckedCreateInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
   composition?: Prisma.CompositionUncheckedCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
+  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryUpdateInput = {
@@ -350,11 +350,11 @@ export type TeamCategoryUpdateInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
-  staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
   composition?: Prisma.CompositionUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
+  club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
+  staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateInput = {
@@ -366,10 +366,10 @@ export type TeamCategoryUncheckedUpdateInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
   composition?: Prisma.CompositionUncheckedUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryCreateManyInput = {
@@ -607,10 +607,10 @@ export type TeamCategoryCreateWithoutClubInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
   composition?: Prisma.CompositionCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
+  staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryUncheckedCreateWithoutClubInput = {
@@ -621,10 +621,10 @@ export type TeamCategoryUncheckedCreateWithoutClubInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
   composition?: Prisma.CompositionUncheckedCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
+  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryCreateOrConnectWithoutClubInput = {
@@ -675,10 +675,10 @@ export type TeamCategoryCreateWithoutStaffMembersInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
-  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
   composition?: Prisma.CompositionCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
+  club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
 }
 
 export type TeamCategoryUncheckedCreateWithoutStaffMembersInput = {
@@ -690,9 +690,9 @@ export type TeamCategoryUncheckedCreateWithoutStaffMembersInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
   composition?: Prisma.CompositionUncheckedCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
 }
 
 export type TeamCategoryCreateOrConnectWithoutStaffMembersInput = {
@@ -724,10 +724,10 @@ export type TeamCategoryCreateWithoutPlayersInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
-  staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
   composition?: Prisma.CompositionCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireCreateNestedManyWithoutTeamCategoryInput
+  club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
+  staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryUncheckedCreateWithoutPlayersInput = {
@@ -739,9 +739,9 @@ export type TeamCategoryUncheckedCreateWithoutPlayersInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
   composition?: Prisma.CompositionUncheckedCreateNestedOneWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedCreateNestedManyWithoutTeamCategoryInput
+  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryCreateOrConnectWithoutPlayersInput = {
@@ -768,10 +768,10 @@ export type TeamCategoryUpdateWithoutPlayersInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
-  staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
   composition?: Prisma.CompositionUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUpdateManyWithoutTeamCategoryNestedInput
+  club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
+  staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateWithoutPlayersInput = {
@@ -783,9 +783,9 @@ export type TeamCategoryUncheckedUpdateWithoutPlayersInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
   composition?: Prisma.CompositionUncheckedUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryCreateWithoutCompositionInput = {
@@ -796,10 +796,10 @@ export type TeamCategoryCreateWithoutCompositionInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  dailyQuestionnaires?: Prisma.DailyQuestionnaireCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
   club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
   staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
-  dailyQuestionnaires?: Prisma.DailyQuestionnaireCreateNestedManyWithoutTeamCategoryInput
 }
 
 export type TeamCategoryUncheckedCreateWithoutCompositionInput = {
@@ -811,9 +811,9 @@ export type TeamCategoryUncheckedCreateWithoutCompositionInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedCreateNestedManyWithoutTeamCategoryInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
+  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryCreateOrConnectWithoutCompositionInput = {
@@ -840,10 +840,10 @@ export type TeamCategoryUpdateWithoutCompositionInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dailyQuestionnaires?: Prisma.DailyQuestionnaireUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
   staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
-  dailyQuestionnaires?: Prisma.DailyQuestionnaireUpdateManyWithoutTeamCategoryNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateWithoutCompositionInput = {
@@ -855,9 +855,9 @@ export type TeamCategoryUncheckedUpdateWithoutCompositionInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryCreateWithoutDailyQuestionnairesInput = {
@@ -868,10 +868,10 @@ export type TeamCategoryCreateWithoutDailyQuestionnairesInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  composition?: Prisma.CompositionCreateNestedOneWithoutTeamCategoryInput
+  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
   club: Prisma.ClubCreateNestedOneWithoutCategoriesInput
   staffMembers?: Prisma.StaffCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerCreateNestedManyWithoutTeamCategoryInput
-  composition?: Prisma.CompositionCreateNestedOneWithoutTeamCategoryInput
 }
 
 export type TeamCategoryUncheckedCreateWithoutDailyQuestionnairesInput = {
@@ -883,9 +883,9 @@ export type TeamCategoryUncheckedCreateWithoutDailyQuestionnairesInput = {
   maxPlayers?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
-  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
   composition?: Prisma.CompositionUncheckedCreateNestedOneWithoutTeamCategoryInput
+  players?: Prisma.PlayerUncheckedCreateNestedManyWithoutTeamCategoryInput
+  staffMembers?: Prisma.StaffUncheckedCreateNestedManyWithoutCategoriesInput
 }
 
 export type TeamCategoryCreateOrConnectWithoutDailyQuestionnairesInput = {
@@ -912,10 +912,10 @@ export type TeamCategoryUpdateWithoutDailyQuestionnairesInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  composition?: Prisma.CompositionUpdateOneWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
   staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
-  composition?: Prisma.CompositionUpdateOneWithoutTeamCategoryNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateWithoutDailyQuestionnairesInput = {
@@ -927,9 +927,9 @@ export type TeamCategoryUncheckedUpdateWithoutDailyQuestionnairesInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
   composition?: Prisma.CompositionUncheckedUpdateOneWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryCreateManyClubInput = {
@@ -950,10 +950,10 @@ export type TeamCategoryUpdateWithoutClubInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
   composition?: Prisma.CompositionUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
+  staffMembers?: Prisma.StaffUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateWithoutClubInput = {
@@ -964,10 +964,10 @@ export type TeamCategoryUncheckedUpdateWithoutClubInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
   composition?: Prisma.CompositionUncheckedUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  staffMembers?: Prisma.StaffUncheckedUpdateManyWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateManyWithoutClubInput = {
@@ -988,10 +988,10 @@ export type TeamCategoryUpdateWithoutStaffMembersInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
-  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
   composition?: Prisma.CompositionUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUpdateManyWithoutTeamCategoryNestedInput
+  club?: Prisma.ClubUpdateOneRequiredWithoutCategoriesNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateWithoutStaffMembersInput = {
@@ -1003,9 +1003,9 @@ export type TeamCategoryUncheckedUpdateWithoutStaffMembersInput = {
   maxPlayers?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
   composition?: Prisma.CompositionUncheckedUpdateOneWithoutTeamCategoryNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedUpdateManyWithoutTeamCategoryNestedInput
+  players?: Prisma.PlayerUncheckedUpdateManyWithoutTeamCategoryNestedInput
 }
 
 export type TeamCategoryUncheckedUpdateManyWithoutStaffMembersInput = {
@@ -1025,15 +1025,15 @@ export type TeamCategoryUncheckedUpdateManyWithoutStaffMembersInput = {
  */
 
 export type TeamCategoryCountOutputType = {
-  staffMembers: number
-  players: number
   dailyQuestionnaires: number
+  players: number
+  staffMembers: number
 }
 
 export type TeamCategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  staffMembers?: boolean | TeamCategoryCountOutputTypeCountStaffMembersArgs
-  players?: boolean | TeamCategoryCountOutputTypeCountPlayersArgs
   dailyQuestionnaires?: boolean | TeamCategoryCountOutputTypeCountDailyQuestionnairesArgs
+  players?: boolean | TeamCategoryCountOutputTypeCountPlayersArgs
+  staffMembers?: boolean | TeamCategoryCountOutputTypeCountStaffMembersArgs
 }
 
 /**
@@ -1049,8 +1049,8 @@ export type TeamCategoryCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types
 /**
  * TeamCategoryCountOutputType without action
  */
-export type TeamCategoryCountOutputTypeCountStaffMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.StaffWhereInput
+export type TeamCategoryCountOutputTypeCountDailyQuestionnairesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DailyQuestionnaireWhereInput
 }
 
 /**
@@ -1063,8 +1063,8 @@ export type TeamCategoryCountOutputTypeCountPlayersArgs<ExtArgs extends runtime.
 /**
  * TeamCategoryCountOutputType without action
  */
-export type TeamCategoryCountOutputTypeCountDailyQuestionnairesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.DailyQuestionnaireWhereInput
+export type TeamCategoryCountOutputTypeCountStaffMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StaffWhereInput
 }
 
 
@@ -1077,11 +1077,11 @@ export type TeamCategorySelect<ExtArgs extends runtime.Types.Extensions.Internal
   maxPlayers?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
-  staffMembers?: boolean | Prisma.TeamCategory$staffMembersArgs<ExtArgs>
-  players?: boolean | Prisma.TeamCategory$playersArgs<ExtArgs>
   composition?: boolean | Prisma.TeamCategory$compositionArgs<ExtArgs>
   dailyQuestionnaires?: boolean | Prisma.TeamCategory$dailyQuestionnairesArgs<ExtArgs>
+  players?: boolean | Prisma.TeamCategory$playersArgs<ExtArgs>
+  club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  staffMembers?: boolean | Prisma.TeamCategory$staffMembersArgs<ExtArgs>
   _count?: boolean | Prisma.TeamCategoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["teamCategory"]>
 
@@ -1122,11 +1122,11 @@ export type TeamCategorySelectScalar = {
 
 export type TeamCategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clubId" | "name" | "league" | "coach" | "maxPlayers" | "createdAt" | "updatedAt", ExtArgs["result"]["teamCategory"]>
 export type TeamCategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
-  staffMembers?: boolean | Prisma.TeamCategory$staffMembersArgs<ExtArgs>
-  players?: boolean | Prisma.TeamCategory$playersArgs<ExtArgs>
   composition?: boolean | Prisma.TeamCategory$compositionArgs<ExtArgs>
   dailyQuestionnaires?: boolean | Prisma.TeamCategory$dailyQuestionnairesArgs<ExtArgs>
+  players?: boolean | Prisma.TeamCategory$playersArgs<ExtArgs>
+  club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
+  staffMembers?: boolean | Prisma.TeamCategory$staffMembersArgs<ExtArgs>
   _count?: boolean | Prisma.TeamCategoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TeamCategoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1139,11 +1139,11 @@ export type TeamCategoryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types
 export type $TeamCategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TeamCategory"
   objects: {
-    club: Prisma.$ClubPayload<ExtArgs>
-    staffMembers: Prisma.$StaffPayload<ExtArgs>[]
-    players: Prisma.$PlayerPayload<ExtArgs>[]
     composition: Prisma.$CompositionPayload<ExtArgs> | null
     dailyQuestionnaires: Prisma.$DailyQuestionnairePayload<ExtArgs>[]
+    players: Prisma.$PlayerPayload<ExtArgs>[]
+    club: Prisma.$ClubPayload<ExtArgs>
+    staffMembers: Prisma.$StaffPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1548,11 +1548,11 @@ readonly fields: TeamCategoryFieldRefs;
  */
 export interface Prisma__TeamCategoryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  club<T extends Prisma.ClubDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClubDefaultArgs<ExtArgs>>): Prisma.Prisma__ClubClient<runtime.Types.Result.GetResult<Prisma.$ClubPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  staffMembers<T extends Prisma.TeamCategory$staffMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamCategory$staffMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  players<T extends Prisma.TeamCategory$playersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamCategory$playersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   composition<T extends Prisma.TeamCategory$compositionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamCategory$compositionArgs<ExtArgs>>): Prisma.Prisma__CompositionClient<runtime.Types.Result.GetResult<Prisma.$CompositionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   dailyQuestionnaires<T extends Prisma.TeamCategory$dailyQuestionnairesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamCategory$dailyQuestionnairesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyQuestionnairePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  players<T extends Prisma.TeamCategory$playersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamCategory$playersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  club<T extends Prisma.ClubDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClubDefaultArgs<ExtArgs>>): Prisma.Prisma__ClubClient<runtime.Types.Result.GetResult<Prisma.$ClubPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  staffMembers<T extends Prisma.TeamCategory$staffMembersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TeamCategory$staffMembersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1991,54 +1991,6 @@ export type TeamCategoryDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
- * TeamCategory.staffMembers
- */
-export type TeamCategory$staffMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Staff
-   */
-  select?: Prisma.StaffSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Staff
-   */
-  omit?: Prisma.StaffOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.StaffInclude<ExtArgs> | null
-  where?: Prisma.StaffWhereInput
-  orderBy?: Prisma.StaffOrderByWithRelationInput | Prisma.StaffOrderByWithRelationInput[]
-  cursor?: Prisma.StaffWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.StaffScalarFieldEnum | Prisma.StaffScalarFieldEnum[]
-}
-
-/**
- * TeamCategory.players
- */
-export type TeamCategory$playersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Player
-   */
-  select?: Prisma.PlayerSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Player
-   */
-  omit?: Prisma.PlayerOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PlayerInclude<ExtArgs> | null
-  where?: Prisma.PlayerWhereInput
-  orderBy?: Prisma.PlayerOrderByWithRelationInput | Prisma.PlayerOrderByWithRelationInput[]
-  cursor?: Prisma.PlayerWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.PlayerScalarFieldEnum | Prisma.PlayerScalarFieldEnum[]
-}
-
-/**
  * TeamCategory.composition
  */
 export type TeamCategory$compositionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2079,6 +2031,54 @@ export type TeamCategory$dailyQuestionnairesArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.DailyQuestionnaireScalarFieldEnum | Prisma.DailyQuestionnaireScalarFieldEnum[]
+}
+
+/**
+ * TeamCategory.players
+ */
+export type TeamCategory$playersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Player
+   */
+  select?: Prisma.PlayerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Player
+   */
+  omit?: Prisma.PlayerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlayerInclude<ExtArgs> | null
+  where?: Prisma.PlayerWhereInput
+  orderBy?: Prisma.PlayerOrderByWithRelationInput | Prisma.PlayerOrderByWithRelationInput[]
+  cursor?: Prisma.PlayerWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PlayerScalarFieldEnum | Prisma.PlayerScalarFieldEnum[]
+}
+
+/**
+ * TeamCategory.staffMembers
+ */
+export type TeamCategory$staffMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Staff
+   */
+  select?: Prisma.StaffSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Staff
+   */
+  omit?: Prisma.StaffOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffInclude<ExtArgs> | null
+  where?: Prisma.StaffWhereInput
+  orderBy?: Prisma.StaffOrderByWithRelationInput | Prisma.StaffOrderByWithRelationInput[]
+  cursor?: Prisma.StaffWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StaffScalarFieldEnum | Prisma.StaffScalarFieldEnum[]
 }
 
 /**

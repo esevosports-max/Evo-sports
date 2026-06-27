@@ -11,6 +11,20 @@ export default async function QuotidiennePage() {
 
   const userId = session.user.id
   const userRole = session.user.role?.name || "JOUEUR"
+
+  const allowedRoles = [
+    "PRESIDENT",
+    "DIRECTEUR_SPORTIF",
+    "ENTRAINEUR_PRINCIPAL",
+    "ENTRAINEUR_ADJOINT",
+    "PREPARATEUR_PHYSIQUE",
+    "JOUEUR",
+    "MANAGER_EVO_SPORTS"
+  ]
+  if (!allowedRoles.includes(userRole)) {
+    redirect("/dashboard")
+  }
+
   const isStaff = userRole !== "JOUEUR"
 
   // 1. Fetch club details

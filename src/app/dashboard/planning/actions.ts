@@ -90,6 +90,32 @@ export async function getEvents() {
       ]
     })
 
+    const now = new Date()
+    let updatedAny = false
+
+    for (const event of events) {
+      if ((event.type === "MATCH" || event.type === "TRAINING") && event.status === "PROGRAMME") {
+        const eventStart = new Date(`${event.date}T${event.time}:00`)
+        if (!isNaN(eventStart.getTime())) {
+          const diffMs = now.getTime() - eventStart.getTime()
+          if (diffMs > 24 * 60 * 60 * 1000) {
+            await db.calendarEvent.update({
+              where: { id: event.id },
+              data: { status: "EXPIRE" }
+            })
+            event.status = "EXPIRE"
+            updatedAny = true
+          }
+        }
+      }
+    }
+
+    if (updatedAny) {
+      revalidatePath("/dashboard/planning")
+      revalidatePath("/dashboard/match")
+      revalidatePath("/dashboard/entrainement")
+    }
+
     return { success: true, events: JSON.parse(JSON.stringify(events)) }
   } catch (error: any) {
     console.error("Error fetching/seeding calendar events:", error)
@@ -180,11 +206,29 @@ export async function deleteEvent(id: string) {
       throw new Error("Événement introuvable")
     }
 
-    const isPresidentOrManager = ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName)
-    const isCreator = event.creatorName === userName
+    // Check if event is expired (more than 24 hours past scheduled date and time and not started/completed)
+    let isExpired = event.status === "EXPIRE"
+    if (!isExpired && (event.type === "MATCH" || event.type === "TRAINING") && event.status === "PROGRAMME") {
+      const eventStart = new Date(`${event.date}T${event.time}:00`)
+      if (!isNaN(eventStart.getTime())) {
+        const diffMs = Date.now() - eventStart.getTime()
+        if (diffMs > 24 * 60 * 60 * 1000) {
+          isExpired = true
+        }
+      }
+    }
 
-    if (!isPresidentOrManager && !isCreator) {
-      throw new Error("Vous n'êtes pas autorisé à supprimer cet événement.")
+    if (isExpired) {
+      if (roleName !== "PRESIDENT" && roleName !== "MANAGER_EVO_SPORTS") {
+        throw new Error("Cet événement a expiré. Seul le Président du club peut le supprimer.")
+      }
+    } else {
+      const isPresidentOrManager = ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName)
+      const isCreator = event.creatorName === userName
+
+      if (!isPresidentOrManager && !isCreator) {
+        throw new Error("Vous n'êtes pas autorisé à supprimer cet événement.")
+      }
     }
 
     await db.calendarEvent.delete({
@@ -193,6 +237,7 @@ export async function deleteEvent(id: string) {
 
     revalidatePath("/dashboard/planning")
     revalidatePath("/dashboard/match")
+    revalidatePath("/dashboard/entrainement")
 
     return { success: true }
   } catch (error: any) {

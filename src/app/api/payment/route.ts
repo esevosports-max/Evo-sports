@@ -169,6 +169,20 @@ export async function GET() {
       orderBy: { createdAt: "desc" }
     })
 
+    // Retrieve or seed payment config from the dedicated PaymentConfig table
+    let paymentConfig = await db.paymentConfig.findUnique({
+      where: { id: "default" }
+    })
+    if (!paymentConfig) {
+      paymentConfig = await db.paymentConfig.create({
+        data: {
+          id: "default",
+          rib: "007 99999 0000123456 78",
+          cle: "78"
+        }
+      })
+    }
+
     return NextResponse.json({
       clubId: club.id,
       clubName: club.name,
@@ -177,7 +191,9 @@ export async function GET() {
       subscriptionExpires: club.subscriptionExpires,
       subscriptionPaid: club.subscriptionPaid,
       latestSubmission,
-      userRole: roleName
+      userRole: roleName,
+      paymentRib: paymentConfig.rib,
+      paymentCle: paymentConfig.cle
     })
   } catch (error: any) {
     console.error("GET Payment API Error:", error)

@@ -18,6 +18,27 @@ export default async function DashboardLayout({
   }
 
   const user = session.user
+
+  // Check if the user is deleted, blocked or modified during this active session
+  const dbUser = await db.user.findUnique({
+    where: { id: user.id },
+    select: { blocked: true, modifiedAt: true }
+  })
+
+  if (!dbUser) {
+    redirect("/login?reason=deleted")
+  }
+
+  if (dbUser.blocked) {
+    redirect("/login?reason=blocked")
+  }
+
+  if (dbUser.modifiedAt && session.user.iat) {
+    const sessionTime = (session.user.iat * 1000) + 5000 // 5s grace period
+    if (dbUser.modifiedAt.getTime() > sessionTime) {
+      redirect("/login?reason=modified")
+    }
+  }
   const roleName = user.role?.name || "No Role assigned"
   const roleLabel = ROLE_LABELS[roleName as keyof typeof ROLE_LABELS] || roleName
 
