@@ -1126,23 +1126,36 @@ export default function ManagerPaymentsClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-zinc-200 dark:border-zinc-800 gap-4">
+      <style>{`
+        @keyframes midnightBlueGlow {
+          0%, 100% {
+            box-shadow: 0 0 10px rgba(11, 21, 40, 0.7), 0 0 4px rgba(16, 28, 54, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 20px rgba(11, 21, 40, 0.95), 0 0 10px rgba(16, 28, 54, 0.6);
+          }
+        }
+        .midnight-blue-glow {
+          animation: midnightBlueGlow 2.5s infinite ease-in-out;
+        }
+      `}</style>
+      <div className="flex pb-2 border-b border-zinc-200 dark:border-zinc-800 gap-4">
         <button
           onClick={() => setActiveTab("CLUBS")}
-          className={`pb-3 px-6 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
+          className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer border ${
             activeTab === "CLUBS"
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-zinc-400 hover:text-zinc-605"
+              ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white border-emerald-400/20 midnight-blue-glow"
+              : "bg-zinc-100 hover:bg-zinc-200 text-zinc-550 dark:bg-zinc-800/80 dark:hover:bg-zinc-700/80 dark:text-zinc-400 border-transparent"
           }`}
         >
           {tLoc.tabClubs}
         </button>
         <button
           onClick={() => setActiveTab("SUBMISSIONS")}
-          className={`pb-3 px-6 text-xs font-black uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${
+          className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 active:scale-95 cursor-pointer flex items-center gap-2 border ${
             activeTab === "SUBMISSIONS"
-              ? "border-emerald-500 text-emerald-600 dark:text-emerald-400"
-              : "border-transparent text-zinc-400 hover:text-zinc-655"
+              ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white border-emerald-400/20 midnight-blue-glow"
+              : "bg-zinc-100 hover:bg-zinc-200 text-zinc-550 dark:bg-zinc-800/80 dark:hover:bg-zinc-700/80 dark:text-zinc-400 border-transparent"
           }`}
         >
           {tLoc.tabSubmissions}
