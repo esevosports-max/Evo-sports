@@ -263,7 +263,7 @@ export default function ManagerAnnouncementsClient({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-zinc-100 dark:border-zinc-800 pb-6">
         <div>
           <h1 className="text-2xl font-black italic uppercase tracking-wider text-zinc-900 dark:text-white">
-            📢 Gestion des Annonces Système
+            Gestion des Annonces Système
           </h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
             Programmez, créez et pilotez la diffusion des annonces sur l'espace d'accueil public de la plateforme.
