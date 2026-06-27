@@ -1401,13 +1401,6 @@ export default function ManagerPaymentsClient({
                             🔒 {isBlocked ? tLoc.btnUnblock : tLoc.btnBlock}
                           </button>
 
-                          {/* Supprimer */}
-                          <button
-                            onClick={() => handleConfirmDelete(club)}
-                            className="rounded-lg bg-red-600 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-red-700 active:scale-95 transition-all cursor-pointer"
-                          >
-                            {tLoc.btnDelete}
-                          </button>
                         </div>
                       </td>
                     </tr>
