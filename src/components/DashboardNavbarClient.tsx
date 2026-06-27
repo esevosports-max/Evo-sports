@@ -18,10 +18,11 @@ interface NavbarProps {
     name: string
     logo: string | null
   }
+  isRestricted?: boolean
   signOutAction: () => Promise<void>
 }
 
-export default function DashboardNavbarClient({ user, club, signOutAction }: NavbarProps) {
+export default function DashboardNavbarClient({ user, club, isRestricted = false, signOutAction }: NavbarProps) {
   const pathname = usePathname()
   const { t, language, setLanguage } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
@@ -189,6 +190,10 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
           requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR", "MANAGER_EVO_SPORTS"]
         },
       ]
+
+  const visibleMenuItems = (isRestricted && user.roleName === "PRESIDENT")
+    ? menuItems.filter(item => item.href === "/dashboard/paiement")
+    : menuItems
 
   const isRoleAuthorized = (allowed?: string[]) => {
     if (!allowed) return true
@@ -417,7 +422,7 @@ export default function DashboardNavbarClient({ user, club, signOutAction }: Nav
             grid gap-3 py-6 max-h-[calc(100vh-14rem)] overflow-y-auto custom-scrollbar
             ${isScrolled ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"}
           `}>
-            {menuItems
+            {visibleMenuItems
               .filter((item) => isRoleAuthorized(item.requiredRoles))
               .map((item) => {
                 const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))

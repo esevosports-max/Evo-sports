@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { useLanguage } from "@/components/LanguageProvider"
 
 interface ClubItem {
@@ -435,17 +435,20 @@ const STATUS_LABELS: Record<string, Record<string, string>> = {
   FR: {
     "Actif": "Actif",
     "Expiré": "Expiré",
-    "Bloqué": "Bloqué"
+    "Bloqué": "Bloqué",
+    "Essai": "Essai"
   },
   EN: {
     "Actif": "Active",
     "Expiré": "Expired",
-    "Bloqué": "Blocked"
+    "Bloqué": "Blocked",
+    "Essai": "Trial"
   },
   AR: {
     "Actif": "نشط",
     "Expiré": "منتهي",
-    "Bloqué": "محظور"
+    "Bloqué": "محظور",
+    "Essai": "تجريبي"
   }
 }
 
@@ -462,6 +465,100 @@ const CYCLE_LABELS: Record<string, Record<string, string>> = {
     "Mensuel": "شهري",
     "Annuel": "سنوي"
   }
+}
+
+function SubscriptionCountdown({
+  expiresAt,
+  isPaid,
+  status,
+  language,
+  tLoc
+}: {
+  expiresAt: string | null
+  isPaid: boolean
+  status: string | null
+  language: string
+  tLoc: any
+}) {
+  const [timeLeft, setTimeLeft] = useState("")
+  const [colorClass, setColorClass] = useState("text-zinc-400 bg-zinc-50")
+
+  useEffect(() => {
+    if (status === "Bloqué") {
+      setTimeLeft(tLoc.suspended || "Suspendu")
+      setColorClass("text-zinc-500 bg-zinc-100 dark:bg-zinc-800/80")
+      return
+    }
+
+    if (!expiresAt) {
+      setTimeLeft(tLoc.undefined || "Non défini")
+      setColorClass("text-zinc-400 bg-zinc-50")
+      return
+    }
+
+    const target = new Date(expiresAt).getTime()
+
+    const updateTime = () => {
+      const now = Date.now()
+      const diff = target - now
+
+      if (diff <= 0) {
+        const formattedDate = new Date(expiresAt).toLocaleDateString(
+          language === "AR" ? "ar-EG" : language === "EN" ? "en-US" : "fr-FR",
+          { day: "numeric", month: "short", year: "numeric" }
+        )
+        const text = (tLoc.expiredSince || "Expiré (depuis le {date})").replace("{date}", formattedDate)
+        setTimeLeft(text)
+        setColorClass("text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-950/20")
+        return
+      }
+
+      const seconds = Math.floor((diff / 1000) % 60)
+      const minutes = Math.floor((diff / (1000 * 60)) % 60)
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
+      const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 365)
+      const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365))
+
+      let text = ""
+      if (language === "AR") {
+        const parts = []
+        if (years > 0) parts.push(`${years} سنة`)
+        if (days > 0) parts.push(`${days} يوم`)
+        parts.push(`${hours} سا`, `${minutes} د`, `${seconds} ث`)
+        text = parts.join(" ")
+      } else if (language === "EN") {
+        const parts = []
+        if (years > 0) parts.push(`${years}y`)
+        if (days > 0) parts.push(`${days}d`)
+        parts.push(`${hours}h`, `${minutes}m`, `${seconds}s`)
+        text = parts.join(" ")
+      } else {
+        const parts = []
+        if (years > 0) parts.push(`${years}a`)
+        if (days > 0) parts.push(`${days}j`)
+        parts.push(`${hours}h`, `${minutes}m`, `${seconds}s`)
+        text = parts.join(" ")
+      }
+
+      setTimeLeft(text)
+      const totalDays = Math.ceil(diff / (1000 * 60 * 60 * 24))
+      if (totalDays <= 1) {
+        setColorClass("text-amber-700 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/20 font-bold")
+      } else {
+        setColorClass("text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/20")
+      }
+    }
+
+    updateTime()
+    const interval = setInterval(updateTime, 1000)
+    return () => clearInterval(interval)
+  }, [expiresAt, isPaid, status, language, tLoc])
+
+  return (
+    <span className={`inline-flex rounded-lg px-2.5 py-1 text-[10px] font-bold transition-all ${colorClass}`}>
+      {timeLeft}
+    </span>
+  )
 }
 
 export default function ManagerPaymentsClient({
@@ -1190,12 +1287,9 @@ export default function ManagerPaymentsClient({
                 </tr>
               ) : (
                 filteredClubs.map((club) => {
-                  const remTime = getRemainingTimeDetails(
-                    club.subscriptionExpires ?? null,
-                    club.subscriptionPaid ?? true,
-                    club.subscriptionStatus ?? null
-                  )
                   const isBlocked = club.subscriptionStatus === "Bloqué"
+                  const isExpired = club.subscriptionExpires && new Date(club.subscriptionExpires) < new Date()
+                  const displayStatus = isBlocked ? "Bloqué" : (isExpired ? "Expiré" : (club.subscriptionStatus ?? "Actif"))
                   
                   return (
                      <tr key={club.id} className="group hover:bg-zinc-50/50 transition-colors">
@@ -1263,21 +1357,25 @@ export default function ManagerPaymentsClient({
                       {/* Status */}
                       <td className="py-4 pr-4">
                         <span className={`inline-flex rounded-lg px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
-                          isBlocked 
+                          displayStatus === "Bloqué"
                             ? "bg-red-950 text-red-300 border border-red-900" 
-                            : club.subscriptionStatus === "Expiré" 
+                            : displayStatus === "Expiré"
                             ? "bg-red-500/10 text-red-600 dark:text-red-400" 
                             : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                         }`}>
-                          {isBlocked ? tLoc.statusBlocked : statusMap[club.subscriptionStatus ?? "Actif"] || club.subscriptionStatus}
+                          {statusMap[displayStatus] || displayStatus}
                         </span>
                       </td>
 
                       {/* Time Remaining */}
                       <td className="py-4 pr-4">
-                        <span className={`inline-flex rounded-lg px-2.5 py-1 text-[10px] font-bold ${remTime.colorClass}`}>
-                          {remTime.text}
-                        </span>
+                        <SubscriptionCountdown 
+                          expiresAt={club.subscriptionExpires ?? null}
+                          isPaid={club.subscriptionPaid ?? true}
+                          status={club.subscriptionStatus ?? null}
+                          language={language}
+                          tLoc={tLoc}
+                        />
                       </td>
 
                       {/* Action buttons */}

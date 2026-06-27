@@ -160,6 +160,7 @@ export default async function DashboardLayout({
           name: clubName,
           logo: clubLogo,
         }}
+        isRestricted={isRestricted}
         signOutAction={async () => {
           "use server"
           await signOut({ redirectTo: "/login" })
