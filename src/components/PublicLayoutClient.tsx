@@ -14,7 +14,7 @@ interface MediaItem {
 const HERO_PUB_MEDIA: MediaItem[] = [
   {
     type: "image",
-    url: "/stadium-run.png",
+    url: "/stadium-athletes.png",
   },
 ]
 
@@ -57,7 +57,7 @@ export default function PublicLayoutClient({
               className="absolute inset-0 h-full w-full object-cover object-center"
             />
           )}
-          
+
           {/* Visual gradient overlay matching brand midnight blue color */}
           <div className="absolute inset-0 bg-[#0B1528]/45" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0B1528]/85 via-[#0B1528]/10 to-white dark:to-zinc-950" />
