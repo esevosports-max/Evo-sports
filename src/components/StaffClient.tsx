@@ -235,6 +235,42 @@ export default function StaffClient({
   const tLoc = pageDict[language] || pageDict["FR"]
   const rolesLabelMap = ROLE_LABELS_DICT[language] || ROLE_LABELS_DICT["FR"]
 
+  const getCreateSubtitle = () => {
+    if (currentUserRole === "DIRECTEUR_SPORTIF") {
+      return language === "EN" 
+        ? "Register a new official under the Sporting Director's authority" 
+        : language === "AR" 
+          ? "تسجيل إطار جديد تحت سلطة المدير الرياضي" 
+          : "Enregistrez un nouveau cadre sous l'autorité du Directeur Sportif"
+    }
+    if (currentUserRole === "SECRETAIRE_GENERAL") {
+      return language === "EN" 
+        ? "Register a new official under the General Secretary's authority" 
+        : language === "AR" 
+          ? "تسجيل إطار جديد تحت سلطة الأمين العام" 
+          : "Enregistrez un nouveau cadre sous l'autorité du Secrétaire Général"
+    }
+    return tLoc.createSubtitle
+  }
+
+  const getFieldRoleLabel = () => {
+    if (currentUserRole === "DIRECTEUR_SPORTIF") {
+      return language === "EN" 
+        ? "1. Function / Role (Under the Sporting Director's authority)" 
+        : language === "AR" 
+          ? "1. الوظيفة / الدور (تحت سلطة المدير الرياضي)" 
+          : "1. Fonction / Rôle (Sous l'autorité du Directeur Sportif)"
+    }
+    if (currentUserRole === "SECRETAIRE_GENERAL") {
+      return language === "EN" 
+        ? "1. Function / Role (Under the General Secretary's authority)" 
+        : language === "AR" 
+          ? "1. الوظيفة / الدور (تحت سلطة الأمين العام)" 
+          : "1. Fonction / Rôle (Sous l'autorité du Secrétaire Général)"
+    }
+    return tLoc.fieldRole
+  }
+
   const isOneTeamPlan = subscriptionPlan === "1 Équipe" || subscriptionPlan === "1 equipe" || subscriptionPlan === "Standard"
 
   const restrictedRoles = [
@@ -310,6 +346,7 @@ export default function StaffClient({
         roleTag: createRole,
         email: createLoginEmail,
         phone: createPhone || "+33 6 -- -- -- --",
+        password: createPassword,
         birthDate: createBirthDate,
         birthPlace: createBirthPlace,
         nationality: createNationality,
@@ -443,7 +480,7 @@ export default function StaffClient({
               {tLoc.createTitle}
             </h2>
             <p className="text-[9px] font-black uppercase text-zinc-450 tracking-wider">
-              {tLoc.createSubtitle}
+              {getCreateSubtitle()}
             </p>
           </div>
         </div>
@@ -466,22 +503,22 @@ export default function StaffClient({
           <form onSubmit={handleCreateSubmit} className="space-y-6">
             {/* 1. ROLE */}
             <div>
-              <label className="block text-[9px] font-black text-zinc-500 uppercase mb-2">{tLoc.fieldRole}</label>
+              <label className="block text-[9px] font-black text-zinc-500 uppercase mb-2">{getFieldRoleLabel()}</label>
               <select
                 required
                 value={createRole}
                 onChange={(e) => handleCreateRoleChange(e.target.value)}
                 className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
               >
-                {isOneTeamPlan ? (
+                {(isOneTeamPlan && currentUserRole !== "PRESIDENT" && currentUserRole !== "DIRECTEUR_SPORTIF" && currentUserRole !== "SECRETAIRE_GENERAL" && currentUserRole !== "MANAGER_EVO_SPORTS") ? (
                   <>
-                    {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
+                    {!["DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
                     <option value="ENTRAINEUR_PRINCIPAL">{rolesLabelMap["ENTRAINEUR_PRINCIPAL"]}</option>
                     <option value="MEDECIN">{rolesLabelMap["MEDECIN"]}</option>
                   </>
                 ) : (
                   <>
-                    {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
+                    {!["DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
                     {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && <option value="SECRETAIRE_GENERAL">{rolesLabelMap["SECRETAIRE_GENERAL"]}</option>}
                     <option value="ENTRAINEUR_PRINCIPAL">{rolesLabelMap["ENTRAINEUR_PRINCIPAL"]}</option>
                     <option value="ENTRAINEUR_ADJOINT">{rolesLabelMap["ENTRAINEUR_ADJOINT"]}</option>
@@ -833,7 +870,13 @@ export default function StaffClient({
                   {canManage && (
                     <td className="py-3.5 px-4">
                       <div className="flex items-center justify-center gap-1.5">
-                        {!((currentUserRole === "SECRETAIRE_GENERAL" || currentUserRole === "ENTRAINEUR_PRINCIPAL" || currentUserRole === "ENTRAINEUR_ADJOINT") && ["PRESIDENT", "SECRETAIRE_GENERAL", "DIRECTEUR_SPORTIF"].includes(member.roleTag)) && (
+                        {!(
+                          (currentUserRole === "SECRETAIRE_GENERAL" || currentUserRole === "ENTRAINEUR_PRINCIPAL" || currentUserRole === "ENTRAINEUR_ADJOINT") && 
+                          ["PRESIDENT", "SECRETAIRE_GENERAL", "DIRECTEUR_SPORTIF"].includes(member.roleTag)
+                        ) && !(
+                          currentUserRole === "DIRECTEUR_SPORTIF" && 
+                          ["PRESIDENT", "DIRECTEUR_SPORTIF"].includes(member.roleTag)
+                        ) && (member.roleTag !== "PRESIDENT" || currentUserRole === "MANAGER_EVO_SPORTS") && (
                           <>
                             <button 
                               onClick={() => handleOpenEdit(member)}
@@ -879,7 +922,7 @@ export default function StaffClient({
         </div>
       </div>
 
-      {initialLogs && initialLogs.length > 0 && (
+      {initialLogs && initialLogs.length > 0 && ["PRESIDENT", "DIRECTEUR_SPORTIF", "MANAGER_EVO_SPORTS"].includes(currentUserRole || "") && (
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
           <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-3">
             <div>
@@ -1034,15 +1077,15 @@ export default function StaffClient({
                   className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs text-zinc-900 shadow-inner outline-none transition-all focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold disabled:opacity-75 disabled:cursor-not-allowed"
                 >
                   {editingMember?.roleTag === "PRESIDENT" && <option value="PRESIDENT">{rolesLabelMap["PRESIDENT"]}</option>}
-                  {isOneTeamPlan ? (
+                  {(isOneTeamPlan && currentUserRole !== "PRESIDENT" && currentUserRole !== "DIRECTEUR_SPORTIF" && currentUserRole !== "SECRETAIRE_GENERAL" && currentUserRole !== "MANAGER_EVO_SPORTS") ? (
                     <>
-                      {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && editingMember?.roleTag !== "PRESIDENT" && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
+                      {!["DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && editingMember?.roleTag !== "PRESIDENT" && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
                       {editingMember?.roleTag !== "PRESIDENT" && <option value="ENTRAINEUR_PRINCIPAL">{rolesLabelMap["ENTRAINEUR_PRINCIPAL"]}</option>}
                       {editingMember?.roleTag !== "PRESIDENT" && <option value="MEDECIN">{rolesLabelMap["MEDECIN"]}</option>}
                     </>
                   ) : (
                     <>
-                      {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && editingMember?.roleTag !== "PRESIDENT" && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
+                      {!["DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && editingMember?.roleTag !== "PRESIDENT" && <option value="DIRECTEUR_SPORTIF">{rolesLabelMap["DIRECTEUR_SPORTIF"]}</option>}
                       {!["SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"].includes(currentUserRole || "") && editingMember?.roleTag !== "PRESIDENT" && <option value="SECRETAIRE_GENERAL">{rolesLabelMap["SECRETAIRE_GENERAL"]}</option>}
                       {editingMember?.roleTag !== "PRESIDENT" && <option value="ENTRAINEUR_PRINCIPAL">{rolesLabelMap["ENTRAINEUR_PRINCIPAL"]}</option>}
                       {editingMember?.roleTag !== "PRESIDENT" && <option value="ENTRAINEUR_ADJOINT">{rolesLabelMap["ENTRAINEUR_ADJOINT"]}</option>}

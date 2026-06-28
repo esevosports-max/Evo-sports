@@ -41,6 +41,16 @@ export async function createPlayer(data: {
     }
 
     if (!club) {
+      const staffMember = await db.staff.findUnique({
+        where: { userId },
+        include: { club: true }
+      })
+      if (staffMember) {
+        club = staffMember.club
+      }
+    }
+
+    if (!club) {
       throw new Error("Club introuvable")
     }
 

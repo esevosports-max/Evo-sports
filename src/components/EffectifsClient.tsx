@@ -1299,7 +1299,7 @@ export default function EffectifsClient({ initialPlayers, categories, userRole, 
         </div>
       )}
 
-      {initialLogs && initialLogs.length > 0 && (
+      {initialLogs && initialLogs.length > 0 && ["PRESIDENT", "DIRECTEUR_SPORTIF", "MANAGER_EVO_SPORTS"].includes(userRole || "") && (
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
           <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-3">
             <div>

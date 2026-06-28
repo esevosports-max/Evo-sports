@@ -179,6 +179,86 @@ export async function createEvent(data: {
       }
     })
 
+    // Fetch all staff members, players and the club owner/president to send notifications
+    try {
+      const [staff, players, club] = await Promise.all([
+        db.staff.findMany({
+          where: { clubId },
+          select: { userId: true }
+        }),
+        db.player.findMany({
+          where: { clubId },
+          select: { userId: true }
+        }),
+        db.club.findUnique({
+          where: { id: clubId },
+          select: { presidentId: true }
+        })
+      ])
+
+      const recipientIds = new Set<string>()
+      if (club?.presidentId) {
+        recipientIds.add(club.presidentId)
+      }
+      staff.forEach(s => {
+        if (s.userId) recipientIds.add(s.userId)
+      })
+      players.forEach(p => {
+        if (p.userId) recipientIds.add(p.userId)
+      })
+
+      // Exclude the event creator so they don't notify themselves
+      recipientIds.delete(userId)
+
+      if (recipientIds.size > 0) {
+        let formattedDate = data.date
+        try {
+          const d = new Date(data.date)
+          if (!isNaN(d.getTime())) {
+            formattedDate = d.toLocaleDateString("fr-FR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric"
+            })
+          }
+        } catch {}
+
+        const typeLabels: Record<string, string> = {
+          MATCH: "Match ⚽",
+          TRAINING: "Entraînement 🏃‍♂️",
+          MEETING: "Réunion 🤝",
+          EXCURSION: "Sortie / Déplacement 🚌",
+          MEDICAL_EXAM: "Examen Médical 🩺",
+        }
+        const eventLabel = typeLabels[data.type] || "Événement 📅"
+
+        const notificationTitle = `📅 Nouvel Événement : ${data.title}`
+        const notificationMessage = `Un nouvel événement de type "${eventLabel}" a été programmé.\n\n📅 Date : ${formattedDate}\n⏰ Heure : ${data.time}\n📍 Lieu : ${data.location}${data.assignedTeam ? `\n👥 Équipe : ${data.assignedTeam}` : ""}${data.details ? `\n📝 Détails : ${data.details}` : ""}`
+
+        let expiresAt: Date | null = null
+        try {
+          const eventDateTime = new Date(`${data.date}T${data.time}:00`)
+          if (!isNaN(eventDateTime.getTime())) {
+            expiresAt = new Date(eventDateTime.getTime() + 48 * 60 * 60 * 1000)
+          }
+        } catch {}
+
+        await db.notification.createMany({
+          data: Array.from(recipientIds).map(recId => ({
+            userId: recId,
+            title: notificationTitle,
+            message: notificationMessage,
+            type: "EVENT",
+            read: false,
+            expiresAt
+          }))
+        })
+      }
+    } catch (notificationError) {
+      console.error("Error creating notifications for calendar event:", notificationError)
+    }
+
+    revalidatePath("/dashboard")
     revalidatePath("/dashboard/planning")
     revalidatePath("/dashboard/match")
 

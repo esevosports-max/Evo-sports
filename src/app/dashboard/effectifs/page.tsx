@@ -184,21 +184,26 @@ export default async function EffectifsPage() {
     playersCount: c.players?.length || 0
   }))
 
-  const logs = await db.accountActionLog.findMany({
-    where: { clubId },
-    orderBy: { createdAt: "desc" },
-    take: 30
-  })
+  const canSeeLogs = ["PRESIDENT", "DIRECTEUR_SPORTIF", "MANAGER_EVO_SPORTS"].includes(userRole || "")
+  let serializedLogs: any[] = []
 
-  const serializedLogs = logs.map(log => ({
-    id: log.id,
-    actionType: log.actionType,
-    targetName: log.targetName,
-    targetRole: log.targetRole,
-    operatorName: log.operatorName,
-    operatorRole: log.operatorRole,
-    createdAt: log.createdAt.toISOString()
-  }))
+  if (canSeeLogs) {
+    const logs = await db.accountActionLog.findMany({
+      where: { clubId },
+      orderBy: { createdAt: "desc" },
+      take: 30
+    })
+
+    serializedLogs = logs.map(log => ({
+      id: log.id,
+      actionType: log.actionType,
+      targetName: log.targetName,
+      targetRole: log.targetRole,
+      operatorName: log.operatorName,
+      operatorRole: log.operatorRole,
+      createdAt: log.createdAt.toISOString()
+    }))
+  }
 
   return (
     <EffectifsClient 

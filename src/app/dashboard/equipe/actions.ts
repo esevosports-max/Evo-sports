@@ -104,7 +104,7 @@ export async function createTeamCategory(data: {
     const userRole = session.user.role?.name
 
     if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS" && userRole !== "DIRECTEUR_SPORTIF") {
-      throw new Error("Action réservée aux gestionnaires")
+      throw new Error("Action réservée au Président et au Directeur Sportif du club")
     }
 
     // Find the club ID
@@ -173,7 +173,7 @@ export async function deleteTeamCategory(id: string) {
     const userRole = session.user.role?.name
 
     if (userRole !== "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS" && userRole !== "DIRECTEUR_SPORTIF") {
-      throw new Error("Action réservée aux gestionnaires")
+      throw new Error("Action réservée au Président et au Directeur Sportif du club")
     }
 
     await db.teamCategory.delete({

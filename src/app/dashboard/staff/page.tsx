@@ -52,6 +52,15 @@ export default async function StaffPage() {
 
   const clubId = club.id
 
+  // Fetch President User
+  let presidentUser = null
+  if (club.presidentId) {
+    presidentUser = await db.user.findUnique({
+      where: { id: club.presidentId },
+      include: { role: true }
+    })
+  }
+
   // Fetch Categories
   const dbCategories = await db.teamCategory.findMany({
     where: { clubId }
@@ -108,26 +117,47 @@ export default async function StaffPage() {
     }
   })
 
+  if (presidentUser) {
+    staff.unshift({
+      id: presidentUser.id,
+      name: presidentUser.name || "Président du Club",
+      role: roleMapLabels["PRESIDENT"] || "Président de Club",
+      roleTag: "PRESIDENT",
+      email: presidentUser.email || "",
+      phone: presidentUser.phone || "Non renseigné",
+      isBlocked: presidentUser.blocked || false,
+      joined: presidentUser.createdAt.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
+      avatarColor: colorMap["PRESIDENT"] || "bg-red-600",
+      assignedTeams: [],
+      assignedTeamIds: []
+    })
+  }
+
   const categories = dbCategories.map((c) => ({
     id: c.id,
     name: c.name
   }))
 
-  const logs = await db.accountActionLog.findMany({
-    where: { clubId },
-    orderBy: { createdAt: "desc" },
-    take: 30
-  })
+  const canSeeLogs = ["PRESIDENT", "DIRECTEUR_SPORTIF", "MANAGER_EVO_SPORTS"].includes(userRole || "")
+  let serializedLogs: any[] = []
 
-  const serializedLogs = logs.map(log => ({
-    id: log.id,
-    actionType: log.actionType,
-    targetName: log.targetName,
-    targetRole: log.targetRole,
-    operatorName: log.operatorName,
-    operatorRole: log.operatorRole,
-    createdAt: log.createdAt.toISOString()
-  }))
+  if (canSeeLogs) {
+    const logs = await db.accountActionLog.findMany({
+      where: { clubId },
+      orderBy: { createdAt: "desc" },
+      take: 30
+    })
+
+    serializedLogs = logs.map(log => ({
+      id: log.id,
+      actionType: log.actionType,
+      targetName: log.targetName,
+      targetRole: log.targetRole,
+      operatorName: log.operatorName,
+      operatorRole: log.operatorRole,
+      createdAt: log.createdAt.toISOString()
+    }))
+  }
 
   return (
     <StaffClient 

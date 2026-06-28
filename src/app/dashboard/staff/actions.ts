@@ -11,6 +11,7 @@ export async function createStaffMember(data: {
   roleTag: string
   email: string
   phone: string
+  password?: string
   birthDate?: string
   birthPlace?: string
   nationality?: string
@@ -30,6 +31,14 @@ export async function createStaffMember(data: {
     }
 
     if (userRole === "SECRETAIRE_GENERAL" && ["PRESIDENT", "SECRETAIRE_GENERAL", "DIRECTEUR_SPORTIF"].includes(data.roleTag)) {
+      throw new Error("Vous n'êtes pas autorisé à attribuer ce rôle")
+    }
+
+    if (userRole === "DIRECTEUR_SPORTIF" && ["PRESIDENT", "DIRECTEUR_SPORTIF"].includes(data.roleTag)) {
+      throw new Error("Vous n'êtes pas autorisé à attribuer ce rôle")
+    }
+
+    if (data.roleTag === "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
       throw new Error("Vous n'êtes pas autorisé à attribuer ce rôle")
     }
 
@@ -60,7 +69,7 @@ export async function createStaffMember(data: {
     const plan = club.subscriptionPlan || "Club"
     const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
     
-    if (isOneTeamPlan) {
+    if (isOneTeamPlan && userRole !== "PRESIDENT" && userRole !== "DIRECTEUR_SPORTIF" && userRole !== "SECRETAIRE_GENERAL" && userRole !== "MANAGER_EVO_SPORTS") {
       const forbiddenRoles = ["ENTRAINEUR_ADJOINT", "SECRETAIRE_GENERAL", "ENTRAINEUR_GARDIENS", "PREPARATEUR_PHYSIQUE"]
       if (forbiddenRoles.includes(data.roleTag)) {
         throw new Error("Votre forfait '1 Équipe' ne permet pas de créer ce type de compte.")
@@ -179,7 +188,7 @@ export async function createStaffMember(data: {
         name: fullName,
         email: emailNormalized,
         phone: data.phone,
-        password: "StaffPassword123", // Default password
+        password: data.password || "StaffPassword123", // Default password if not provided
         roleId: staffRole?.id || null
       }
     })
@@ -248,6 +257,13 @@ export async function deleteStaffMember(staffId: string) {
     if (userRole === "SECRETAIRE_GENERAL") {
       const targetRole = staff.user?.role?.name
       if (targetRole === "PRESIDENT" || targetRole === "SECRETAIRE_GENERAL" || targetRole === "DIRECTEUR_SPORTIF") {
+        throw new Error("Vous n'êtes pas autorisé à supprimer ce rôle")
+      }
+    }
+
+    if (userRole === "DIRECTEUR_SPORTIF") {
+      const targetRole = staff.user?.role?.name
+      if (targetRole === "PRESIDENT" || targetRole === "DIRECTEUR_SPORTIF") {
         throw new Error("Vous n'êtes pas autorisé à supprimer ce rôle")
       }
     }
@@ -358,7 +374,7 @@ export async function updateStaffMember(
     const plan = club.subscriptionPlan || "Club"
     const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
     
-    if (isOneTeamPlan) {
+    if (isOneTeamPlan && userRole !== "PRESIDENT" && userRole !== "DIRECTEUR_SPORTIF" && userRole !== "SECRETAIRE_GENERAL" && userRole !== "MANAGER_EVO_SPORTS") {
       const forbiddenRoles = ["ENTRAINEUR_ADJOINT", "SECRETAIRE_GENERAL", "ENTRAINEUR_GARDIENS", "PREPARATEUR_PHYSIQUE"]
       if (forbiddenRoles.includes(data.roleTag)) {
         throw new Error("Votre forfait '1 Équipe' ne permet pas d'avoir ce rôle dans le staff.")
@@ -415,6 +431,23 @@ export async function updateStaffMember(
       if (targetRole === "PRESIDENT" || targetRole === "SECRETAIRE_GENERAL" || targetRole === "DIRECTEUR_SPORTIF") {
         throw new Error("Vous n'êtes pas autorisé à modifier ce rôle")
       }
+      if (["PRESIDENT", "SECRETAIRE_GENERAL", "DIRECTEUR_SPORTIF"].includes(data.roleTag)) {
+        throw new Error("Vous n'êtes pas autorisé à attribuer ce rôle")
+      }
+    }
+
+    if (userRole === "DIRECTEUR_SPORTIF") {
+      const targetRole = staff.user?.role?.name
+      if (targetRole === "PRESIDENT" || targetRole === "DIRECTEUR_SPORTIF") {
+        throw new Error("Vous n'êtes pas autorisé à modifier ce rôle")
+      }
+      if (["PRESIDENT", "DIRECTEUR_SPORTIF"].includes(data.roleTag)) {
+        throw new Error("Vous n'êtes pas autorisé à attribuer ce rôle")
+      }
+    }
+
+    if (data.roleTag === "PRESIDENT" && userRole !== "MANAGER_EVO_SPORTS") {
+      throw new Error("Vous n'êtes pas autorisé à attribuer ce rôle")
     }
 
     let staffRole = await db.role.findUnique({
@@ -555,6 +588,13 @@ export async function toggleBlockStaffMember(staffId: string) {
     if (userRole === "SECRETAIRE_GENERAL") {
       const targetRole = staff.user?.role?.name
       if (targetRole === "PRESIDENT" || targetRole === "SECRETAIRE_GENERAL" || targetRole === "DIRECTEUR_SPORTIF") {
+        throw new Error("Vous n'êtes pas autorisé à bloquer ce rôle")
+      }
+    }
+
+    if (userRole === "DIRECTEUR_SPORTIF") {
+      const targetRole = staff.user?.role?.name
+      if (targetRole === "PRESIDENT" || targetRole === "DIRECTEUR_SPORTIF") {
         throw new Error("Vous n'êtes pas autorisé à bloquer ce rôle")
       }
     }
