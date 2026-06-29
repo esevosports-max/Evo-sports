@@ -224,10 +224,10 @@ export default function Home() {
             {t("hero_cta_trial")}
           </Link>
           <Link
-            href="/about"
-            className="rounded-xl bg-gradient-to-b from-zinc-100 via-zinc-200 to-zinc-300 border border-zinc-300/80 text-emerald-800 px-6 py-3.5 text-sm font-black uppercase tracking-wider shadow-sm hover:from-white hover:via-zinc-100 hover:to-zinc-200 hover:text-emerald-600 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
+            href="/login"
+            className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 border border-emerald-400/20 text-white px-6 py-3.5 text-sm font-black uppercase tracking-wider shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.65)] hover:from-emerald-400 hover:to-teal-400 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
           >
-            {t("hero_cta_more")}
+            {t("nav_login")}
           </Link>
         </div>
 
@@ -244,9 +244,8 @@ export default function Home() {
 
           <div className="relative rounded-2xl border border-zinc-200/50 bg-white/30 p-2 shadow-2xl backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/30 overflow-hidden group">
             <div className="rounded-xl border border-zinc-200/50 overflow-hidden dark:border-zinc-800/50 bg-zinc-950">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src="/offers-banner.png" 
+                src="/ecosystem-banner.jpg" 
                 alt="Découvrez nos offres - EVO SPORTS Banner" 
                 className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.01]" 
               />

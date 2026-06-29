@@ -7,7 +7,7 @@ export const translations: Record<Language, Record<string, string>> = {
     nav_about: "À Propos",
     nav_pricing: "Tarifs",
     nav_dashboard: "Tableau de Bord",
-    nav_login: "Connexion",
+    nav_login: "Se connecter",
     nav_join: "Rejoindre",
     nav_logout: "Déconnexion",
     nav_public: "Navigation Publique",
