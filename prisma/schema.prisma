@@ -31,6 +31,7 @@ model User {
   club           Club?                    @relation("ClubPresident")
   clubRequest    ClubRegistrationRequest?
   notifications  Notification[]
+  pushTokens     PushToken[]
   player         Player?
   staff          Staff?
   role           Role?                    @relation(fields: [roleId], references: [id])
@@ -538,4 +539,14 @@ model PaymentConfig {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model PushToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  deviceType String?  @default("android")
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 

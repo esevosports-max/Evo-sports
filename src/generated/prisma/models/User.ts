@@ -273,6 +273,7 @@ export type UserWhereInput = {
   club?: Prisma.XOR<Prisma.ClubNullableScalarRelationFilter, Prisma.ClubWhereInput> | null
   clubRequest?: Prisma.XOR<Prisma.ClubRegistrationRequestNullableScalarRelationFilter, Prisma.ClubRegistrationRequestWhereInput> | null
   notifications?: Prisma.NotificationListRelationFilter
+  pushTokens?: Prisma.PushTokenListRelationFilter
   player?: Prisma.XOR<Prisma.PlayerNullableScalarRelationFilter, Prisma.PlayerWhereInput> | null
   staff?: Prisma.XOR<Prisma.StaffNullableScalarRelationFilter, Prisma.StaffWhereInput> | null
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
@@ -298,6 +299,7 @@ export type UserOrderByWithRelationInput = {
   club?: Prisma.ClubOrderByWithRelationInput
   clubRequest?: Prisma.ClubRegistrationRequestOrderByWithRelationInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  pushTokens?: Prisma.PushTokenOrderByRelationAggregateInput
   player?: Prisma.PlayerOrderByWithRelationInput
   staff?: Prisma.StaffOrderByWithRelationInput
   role?: Prisma.RoleOrderByWithRelationInput
@@ -326,6 +328,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   club?: Prisma.XOR<Prisma.ClubNullableScalarRelationFilter, Prisma.ClubWhereInput> | null
   clubRequest?: Prisma.XOR<Prisma.ClubRegistrationRequestNullableScalarRelationFilter, Prisma.ClubRegistrationRequestWhereInput> | null
   notifications?: Prisma.NotificationListRelationFilter
+  pushTokens?: Prisma.PushTokenListRelationFilter
   player?: Prisma.XOR<Prisma.PlayerNullableScalarRelationFilter, Prisma.PlayerWhereInput> | null
   staff?: Prisma.XOR<Prisma.StaffNullableScalarRelationFilter, Prisma.StaffWhereInput> | null
   role?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
@@ -394,6 +397,7 @@ export type UserCreateInput = {
   club?: Prisma.ClubCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffCreateNestedOneWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -419,6 +423,7 @@ export type UserUncheckedCreateInput = {
   club?: Prisma.ClubUncheckedCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerUncheckedCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffUncheckedCreateNestedOneWithoutUserInput
 }
@@ -442,6 +447,7 @@ export type UserUpdateInput = {
   club?: Prisma.ClubUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUpdateOneWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
@@ -467,6 +473,7 @@ export type UserUncheckedUpdateInput = {
   club?: Prisma.ClubUncheckedUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUncheckedUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -738,6 +745,20 @@ export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
 }
 
+export type UserCreateNestedOneWithoutPushTokensInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPushTokensInput, Prisma.UserUncheckedCreateWithoutPushTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPushTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPushTokensNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPushTokensInput, Prisma.UserUncheckedCreateWithoutPushTokensInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPushTokensInput
+  upsert?: Prisma.UserUpsertWithoutPushTokensInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPushTokensInput, Prisma.UserUpdateWithoutPushTokensInput>, Prisma.UserUncheckedUpdateWithoutPushTokensInput>
+}
+
 export type UserCreateWithoutClubRequestInput = {
   id?: string
   name?: string | null
@@ -756,6 +777,7 @@ export type UserCreateWithoutClubRequestInput = {
   modifiedFields?: string | null
   club?: Prisma.ClubCreateNestedOneWithoutPresidentInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffCreateNestedOneWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -780,6 +802,7 @@ export type UserUncheckedCreateWithoutClubRequestInput = {
   modifiedFields?: string | null
   club?: Prisma.ClubUncheckedCreateNestedOneWithoutPresidentInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerUncheckedCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffUncheckedCreateNestedOneWithoutUserInput
 }
@@ -818,6 +841,7 @@ export type UserUpdateWithoutClubRequestInput = {
   modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   club?: Prisma.ClubUpdateOneWithoutPresidentNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUpdateOneWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
@@ -842,6 +866,7 @@ export type UserUncheckedUpdateWithoutClubRequestInput = {
   modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   club?: Prisma.ClubUncheckedUpdateOneWithoutPresidentNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUncheckedUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -865,6 +890,7 @@ export type UserCreateWithoutRoleInput = {
   club?: Prisma.ClubCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffCreateNestedOneWithoutUserInput
 }
@@ -888,6 +914,7 @@ export type UserUncheckedCreateWithoutRoleInput = {
   club?: Prisma.ClubUncheckedCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerUncheckedCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffUncheckedCreateNestedOneWithoutUserInput
 }
@@ -958,6 +985,7 @@ export type UserCreateWithoutClubInput = {
   modifiedFields?: string | null
   clubRequest?: Prisma.ClubRegistrationRequestCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffCreateNestedOneWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -982,6 +1010,7 @@ export type UserUncheckedCreateWithoutClubInput = {
   modifiedFields?: string | null
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerUncheckedCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1020,6 +1049,7 @@ export type UserUpdateWithoutClubInput = {
   modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clubRequest?: Prisma.ClubRegistrationRequestUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUpdateOneWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
@@ -1044,6 +1074,7 @@ export type UserUncheckedUpdateWithoutClubInput = {
   modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUncheckedUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1067,6 +1098,7 @@ export type UserCreateWithoutStaffInput = {
   club?: Prisma.ClubCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerCreateNestedOneWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
 }
@@ -1091,6 +1123,7 @@ export type UserUncheckedCreateWithoutStaffInput = {
   club?: Prisma.ClubUncheckedCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -1129,6 +1162,7 @@ export type UserUpdateWithoutStaffInput = {
   club?: Prisma.ClubUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUpdateOneWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
 }
@@ -1153,6 +1187,7 @@ export type UserUncheckedUpdateWithoutStaffInput = {
   club?: Prisma.ClubUncheckedUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -1175,6 +1210,7 @@ export type UserCreateWithoutPlayerInput = {
   club?: Prisma.ClubCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
   staff?: Prisma.StaffCreateNestedOneWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
 }
@@ -1199,6 +1235,7 @@ export type UserUncheckedCreateWithoutPlayerInput = {
   club?: Prisma.ClubUncheckedCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
   staff?: Prisma.StaffUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -1237,6 +1274,7 @@ export type UserUpdateWithoutPlayerInput = {
   club?: Prisma.ClubUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
   staff?: Prisma.StaffUpdateOneWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
 }
@@ -1261,6 +1299,7 @@ export type UserUncheckedUpdateWithoutPlayerInput = {
   club?: Prisma.ClubUncheckedUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
   staff?: Prisma.StaffUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -1282,6 +1321,7 @@ export type UserCreateWithoutNotificationsInput = {
   modifiedFields?: string | null
   club?: Prisma.ClubCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestCreateNestedOneWithoutUserInput
+  pushTokens?: Prisma.PushTokenCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffCreateNestedOneWithoutUserInput
   role?: Prisma.RoleCreateNestedOneWithoutUsersInput
@@ -1306,6 +1346,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   modifiedFields?: string | null
   club?: Prisma.ClubUncheckedCreateNestedOneWithoutPresidentInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedCreateNestedOneWithoutUserInput
+  pushTokens?: Prisma.PushTokenUncheckedCreateNestedManyWithoutUserInput
   player?: Prisma.PlayerUncheckedCreateNestedOneWithoutUserInput
   staff?: Prisma.StaffUncheckedCreateNestedOneWithoutUserInput
 }
@@ -1344,6 +1385,7 @@ export type UserUpdateWithoutNotificationsInput = {
   modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   club?: Prisma.ClubUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUpdateOneWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUpdateOneWithoutUserNestedInput
   role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
@@ -1368,6 +1410,119 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   club?: Prisma.ClubUncheckedUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
+  player?: Prisma.PlayerUncheckedUpdateOneWithoutUserNestedInput
+  staff?: Prisma.StaffUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPushTokensInput = {
+  id?: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: Date | string | null
+  image?: string | null
+  password?: string | null
+  phone?: string | null
+  blocked?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  blockedAt?: Date | string | null
+  blockedBy?: string | null
+  modifiedAt?: Date | string | null
+  modifiedBy?: string | null
+  modifiedFields?: string | null
+  club?: Prisma.ClubCreateNestedOneWithoutPresidentInput
+  clubRequest?: Prisma.ClubRegistrationRequestCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  player?: Prisma.PlayerCreateNestedOneWithoutUserInput
+  staff?: Prisma.StaffCreateNestedOneWithoutUserInput
+  role?: Prisma.RoleCreateNestedOneWithoutUsersInput
+}
+
+export type UserUncheckedCreateWithoutPushTokensInput = {
+  id?: string
+  name?: string | null
+  email?: string | null
+  emailVerified?: Date | string | null
+  image?: string | null
+  password?: string | null
+  roleId?: string | null
+  phone?: string | null
+  blocked?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  blockedAt?: Date | string | null
+  blockedBy?: string | null
+  modifiedAt?: Date | string | null
+  modifiedBy?: string | null
+  modifiedFields?: string | null
+  club?: Prisma.ClubUncheckedCreateNestedOneWithoutPresidentInput
+  clubRequest?: Prisma.ClubRegistrationRequestUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  player?: Prisma.PlayerUncheckedCreateNestedOneWithoutUserInput
+  staff?: Prisma.StaffUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPushTokensInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPushTokensInput, Prisma.UserUncheckedCreateWithoutPushTokensInput>
+}
+
+export type UserUpsertWithoutPushTokensInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPushTokensInput, Prisma.UserUncheckedUpdateWithoutPushTokensInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPushTokensInput, Prisma.UserUncheckedCreateWithoutPushTokensInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPushTokensInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPushTokensInput, Prisma.UserUncheckedUpdateWithoutPushTokensInput>
+}
+
+export type UserUpdateWithoutPushTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  blockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  modifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  club?: Prisma.ClubUpdateOneWithoutPresidentNestedInput
+  clubRequest?: Prisma.ClubRegistrationRequestUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  player?: Prisma.PlayerUpdateOneWithoutUserNestedInput
+  staff?: Prisma.StaffUpdateOneWithoutUserNestedInput
+  role?: Prisma.RoleUpdateOneWithoutUsersNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPushTokensInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  roleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  blockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  blockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  modifiedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modifiedFields?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  club?: Prisma.ClubUncheckedUpdateOneWithoutPresidentNestedInput
+  clubRequest?: Prisma.ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUncheckedUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1409,6 +1564,7 @@ export type UserUpdateWithoutRoleInput = {
   club?: Prisma.ClubUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUpdateOneWithoutUserNestedInput
 }
@@ -1432,6 +1588,7 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   club?: Prisma.ClubUncheckedUpdateOneWithoutPresidentNestedInput
   clubRequest?: Prisma.ClubRegistrationRequestUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  pushTokens?: Prisma.PushTokenUncheckedUpdateManyWithoutUserNestedInput
   player?: Prisma.PlayerUncheckedUpdateOneWithoutUserNestedInput
   staff?: Prisma.StaffUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -1461,10 +1618,12 @@ export type UserUncheckedUpdateManyWithoutRoleInput = {
 
 export type UserCountOutputType = {
   notifications: number
+  pushTokens: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+  pushTokens?: boolean | UserCountOutputTypeCountPushTokensArgs
 }
 
 /**
@@ -1482,6 +1641,13 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
  */
 export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPushTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PushTokenWhereInput
 }
 
 
@@ -1505,6 +1671,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   club?: boolean | Prisma.User$clubArgs<ExtArgs>
   clubRequest?: boolean | Prisma.User$clubRequestArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  pushTokens?: boolean | Prisma.User$pushTokensArgs<ExtArgs>
   player?: boolean | Prisma.User$playerArgs<ExtArgs>
   staff?: boolean | Prisma.User$staffArgs<ExtArgs>
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
@@ -1575,6 +1742,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   club?: boolean | Prisma.User$clubArgs<ExtArgs>
   clubRequest?: boolean | Prisma.User$clubRequestArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  pushTokens?: boolean | Prisma.User$pushTokensArgs<ExtArgs>
   player?: boolean | Prisma.User$playerArgs<ExtArgs>
   staff?: boolean | Prisma.User$staffArgs<ExtArgs>
   role?: boolean | Prisma.User$roleArgs<ExtArgs>
@@ -1593,6 +1761,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     club: Prisma.$ClubPayload<ExtArgs> | null
     clubRequest: Prisma.$ClubRegistrationRequestPayload<ExtArgs> | null
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    pushTokens: Prisma.$PushTokenPayload<ExtArgs>[]
     player: Prisma.$PlayerPayload<ExtArgs> | null
     staff: Prisma.$StaffPayload<ExtArgs> | null
     role: Prisma.$RolePayload<ExtArgs> | null
@@ -2011,6 +2180,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   club<T extends Prisma.User$clubArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$clubArgs<ExtArgs>>): Prisma.Prisma__ClubClient<runtime.Types.Result.GetResult<Prisma.$ClubPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   clubRequest<T extends Prisma.User$clubRequestArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$clubRequestArgs<ExtArgs>>): Prisma.Prisma__ClubRegistrationRequestClient<runtime.Types.Result.GetResult<Prisma.$ClubRegistrationRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pushTokens<T extends Prisma.User$pushTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pushTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PushTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   player<T extends Prisma.User$playerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$playerArgs<ExtArgs>>): Prisma.Prisma__PlayerClient<runtime.Types.Result.GetResult<Prisma.$PlayerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   staff<T extends Prisma.User$staffArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$staffArgs<ExtArgs>>): Prisma.Prisma__StaffClient<runtime.Types.Result.GetResult<Prisma.$StaffPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   role<T extends Prisma.User$roleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$roleArgs<ExtArgs>>): Prisma.Prisma__RoleClient<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -2519,6 +2689,30 @@ export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.pushTokens
+ */
+export type User$pushTokensArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PushToken
+   */
+  select?: Prisma.PushTokenSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PushToken
+   */
+  omit?: Prisma.PushTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PushTokenInclude<ExtArgs> | null
+  where?: Prisma.PushTokenWhereInput
+  orderBy?: Prisma.PushTokenOrderByWithRelationInput | Prisma.PushTokenOrderByWithRelationInput[]
+  cursor?: Prisma.PushTokenWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PushTokenScalarFieldEnum | Prisma.PushTokenScalarFieldEnum[]
 }
 
 /**

@@ -351,8 +351,9 @@ export default function Home() {
               </Link>
 
               {/* Android App Link */}
-              <Link
-                href="#"
+              <a
+                href="/com.evosports.app.apk"
+                download
                 className="group flex flex-col items-center justify-center rounded-2xl border border-zinc-200/50 bg-white p-8 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800/50 dark:bg-zinc-950/50 dark:hover:bg-zinc-900/50"
               >
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-900 transition-colors duration-300 group-hover:bg-emerald-500/10">
@@ -369,7 +370,7 @@ export default function Home() {
                 <span className="mt-4 text-[10px] font-black uppercase text-emerald-500 tracking-widest group-hover:underline">
                   {t("download_android_btn")}
                 </span>
-              </Link>
+              </a>
 
               {/* iOS App Link */}
               <Link

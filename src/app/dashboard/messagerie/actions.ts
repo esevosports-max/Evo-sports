@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { getClubIdForUser } from "../planning/actions"
+import { sendPushNotificationToUsers } from "@/lib/pushNotifications"
 
 // Helper to seed default channels for a club
 async function seedDefaultChannels(clubId: string) {
@@ -329,7 +330,22 @@ export async function sendMessage(channelId: string, content: string) {
       }
     })
 
-
+    // Send push notification to other channel members in the background
+    try {
+      const recipientIds = await getChannelRecipientUserIds(channel, userId)
+      if (recipientIds.length > 0) {
+        await sendPushNotificationToUsers(recipientIds, {
+          title: `${userName} dans ${channel.name}`,
+          body: content.length > 150 ? `${content.substring(0, 147)}...` : content,
+          data: {
+            type: "chat",
+            channelId: channel.id,
+          }
+        })
+      }
+    } catch (pushErr) {
+      console.error("Failed to send push notification for message:", pushErr)
+    }
 
     revalidatePath("/dashboard/messagerie")
     return { success: true }
@@ -405,7 +421,22 @@ export async function createCustomChannel(data: {
         }
       })
 
-
+      // Send push notification to recipients for the initial broadcast message
+      try {
+        const recipientIds = await getChannelRecipientUserIds(newChannel, userId)
+        if (recipientIds.length > 0) {
+          await sendPushNotificationToUsers(recipientIds, {
+            title: `${userName} - ${newChannel.name}`,
+            body: data.initialMessage.length > 150 ? `${data.initialMessage.substring(0, 147)}...` : data.initialMessage,
+            data: {
+              type: "chat",
+              channelId: newChannel.id,
+            }
+          })
+        }
+      } catch (pushErr) {
+        console.error("Failed to send push notification for custom channel creation:", pushErr)
+      }
     }
 
     revalidatePath("/dashboard/messagerie")
@@ -612,3 +643,83 @@ export async function getRecipientStructure() {
     return { success: false, error: e.message || "Erreur structure destinataires" }
   }
 }
+
+/**
+ * Resolves all recipient user IDs for a given chat channel.
+ */
+async function getChannelRecipientUserIds(channel: any, senderId: string): Promise<string[]> {
+  const clubId = channel.clubId
+  const targetUserIds = channel.targetUserIds as string[] | null
+  const targetTeams = channel.targetTeams as string[] | null
+  const targetRoles = channel.targetRoles as string[] | null
+
+  let userIds: Set<string> = new Set()
+
+  if (!channel.isCustom && !channel.isPrivate) {
+    // Standard public channel: notify everyone in the club
+    const players = await db.player.findMany({
+      where: { clubId },
+      select: { userId: true }
+    })
+    const staff = await db.staff.findMany({
+      where: { clubId },
+      select: { userId: true }
+    })
+    const president = await db.user.findFirst({
+      where: {
+        club: { id: clubId },
+        role: { name: "PRESIDENT" }
+      },
+      select: { id: true }
+    })
+
+    players.forEach((p) => userIds.add(p.userId))
+    staff.forEach((s) => userIds.add(s.userId))
+    if (president) userIds.add(president.id)
+  } else {
+    // Filtered or Private channel
+    if (targetUserIds && targetUserIds.length > 0) {
+      targetUserIds.forEach((id) => userIds.add(id))
+    } else {
+      // Query by target teams
+      let teamFilter = {}
+      if (targetTeams && targetTeams.length > 0) {
+        teamFilter = { teamCategoryId: { in: targetTeams } }
+      }
+
+      const players = await db.player.findMany({
+        where: { clubId, ...teamFilter },
+        select: { userId: true }
+      })
+      players.forEach((p) => userIds.add(p.userId))
+
+      // Query by target roles (staff)
+      const staff = await db.staff.findMany({
+        where: { clubId },
+        include: { user: { include: { role: true } } }
+      })
+      
+      const filteredStaff = targetRoles && targetRoles.length > 0
+        ? staff.filter((s) => s.user?.role && targetRoles.includes(s.user.role.name))
+        : staff
+      
+      filteredStaff.forEach((s) => userIds.add(s.userId))
+    }
+
+    // Always include President (unless they are the sender)
+    const president = await db.user.findFirst({
+      where: {
+        club: { id: clubId },
+        role: { name: "PRESIDENT" }
+      },
+      select: { id: true }
+    })
+    if (president) userIds.add(president.id)
+  }
+
+  // Do not send a push notification to the sender
+  userIds.delete(senderId)
+
+  return Array.from(userIds)
+}
+

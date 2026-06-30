@@ -5,6 +5,7 @@ import { ROLE_LABELS } from "@/lib/rbac"
 import DashboardNavbarClient from "@/components/DashboardNavbarClient"
 import SubscriptionGuard from "@/components/SubscriptionGuard"
 import DashboardHeaderClient from "@/components/DashboardHeaderClient"
+import PushNotificationRegister from "@/components/PushNotificationRegister"
 
 export default async function DashboardLayout({
   children,
@@ -178,6 +179,8 @@ export default async function DashboardLayout({
           <div className="max-w-7xl mx-auto w-full bg-white space-y-6">
             
             <DashboardHeaderClient userName={user.name || "madjid beghdadi"} roleLabel={roleLabel} roleName={roleName} />
+
+            <PushNotificationRegister />
 
             {children}
           </div>

@@ -81,7 +81,8 @@ export const ModelName = {
   PlayerGPSData: 'PlayerGPSData',
   GpsDevice: 'GpsDevice',
   Telemetry: 'Telemetry',
-  PaymentConfig: 'PaymentConfig'
+  PaymentConfig: 'PaymentConfig',
+  PushToken: 'PushToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -640,6 +641,17 @@ export const PaymentConfigScalarFieldEnum = {
 } as const
 
 export type PaymentConfigScalarFieldEnum = (typeof PaymentConfigScalarFieldEnum)[keyof typeof PaymentConfigScalarFieldEnum]
+
+
+export const PushTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  deviceType: 'deviceType',
+  createdAt: 'createdAt'
+} as const
+
+export type PushTokenScalarFieldEnum = (typeof PushTokenScalarFieldEnum)[keyof typeof PushTokenScalarFieldEnum]
 
 
 export const SortOrder = {

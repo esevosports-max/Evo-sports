@@ -196,3 +196,8 @@ export type Telemetry = Prisma.TelemetryModel
  * 
  */
 export type PaymentConfig = Prisma.PaymentConfigModel
+/**
+ * Model PushToken
+ * 
+ */
+export type PushToken = Prisma.PushTokenModel
