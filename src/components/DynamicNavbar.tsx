@@ -279,149 +279,143 @@ export default function DynamicNavbar({
           <div className="absolute inset-0" onClick={() => setDrawerOpen(false)} />
           
           {/* Drawer Body */}
-          <div className="relative w-full max-w-xs h-full bg-white shadow-2xl p-6 flex flex-col justify-between animate-in slide-in-from-right duration-300 ease-out border-l border-zinc-200/80">
+          <div className="relative w-full max-w-xs h-full bg-[#0B1528]/95 backdrop-blur-xl shadow-2xl p-6 flex flex-col justify-between animate-in slide-in-from-right duration-300 ease-out border-l border-white/10 text-white">
             <div>
               {/* Header with close button */}
-              <div className="flex items-center justify-between pb-6 border-b border-zinc-100">
-                <span className="bg-gradient-to-r from-zinc-900 to-zinc-650 bg-clip-text text-xs font-black uppercase tracking-widest text-transparent">
-                  EVO SPORTS
-                </span>
+              <div className="flex items-center justify-between pb-6 border-b border-white/10">
+                <Link href="/" onClick={() => setDrawerOpen(false)} className="flex items-center">
+                  <img src="/logo.png" alt="EVO SPORTS" className="h-8 w-auto object-contain" />
+                </Link>
                 <button
                   onClick={() => setDrawerOpen(false)}
-                  className="rounded-lg p-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors cursor-pointer"
+                  className="rounded-lg p-1.5 text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
- 
-              {/* User Profile Info */}
-              {isAuthenticated && user && (
-                <div className="mt-4 p-3 bg-zinc-50 border border-zinc-150 rounded-2xl flex items-center gap-3 text-left w-full">
-                  <div className="h-9 w-9 rounded-xl flex items-center justify-center font-black text-sm uppercase tracking-wider bg-zinc-900 text-white shrink-0">
-                    {(user.name || "U").substring(0, 1).toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-black text-zinc-800 truncate">{user.name || "—"}</p>
-                    <p className="text-[10px] text-zinc-450 truncate font-semibold mt-0.5">{user.email || "—"}</p>
-                    {user.role?.name && (
-                      <span className="inline-flex rounded px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider mt-1 bg-emerald-500/10 text-emerald-600">
-                        {user.role.name.replace(/_/g, " ")}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
   
               {/* Navigation Links (top) */}
-              <nav className="mt-4 flex-1 overflow-y-auto pr-1 space-y-4 max-h-[calc(100vh-270px)] custom-scrollbar">
+              <nav className="mt-4 flex-1 overflow-y-auto pr-1 space-y-4 max-h-[calc(100vh-320px)] custom-scrollbar">
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">{t("nav_public")}</p>
-                  <div className="space-y-1.5">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Navigation Publique</p>
+                  <div className="space-y-1">
                     {navLinks.map((link) => (
                       <Link
                         key={link.name}
                         href={link.href}
                         onClick={() => setDrawerOpen(false)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all ${
+                        className={`flex items-center px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all ${
                           isActive(link.href)
-                            ? "bg-emerald-500/10 text-emerald-600"
-                            : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                            ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/10"
+                            : "text-white/70 hover:bg-white/5 hover:text-white"
                         }`}
                       >
-                        <span>🧭</span> {link.name}
+                        {link.name}
                       </Link>
                     ))}
                   </div>
                 </div>
  
                 {isAuthenticated && (
-                  <div className="pt-2">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">{t("nav_private")}</p>
-                    <div className="space-y-1">
-                      {(() => {
-                        const userRole = user?.role?.name || ""
-                        const isManager = userRole === "MANAGER_EVO_SPORTS"
-                        const linksToRender = isManager
-                          ? [
-                              { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠" },
-                              { href: "/dashboard/planning", label: t("db_general_planning"), icon: "📅" },
-                              { href: "/dashboard/roles", label: t("db_roles_permissions"), icon: "🔑" },
-                              { href: "/dashboard/manager/demandes", label: t("db_reg_requests"), icon: "📥" },
-                              { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️" },
-                              { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳" },
-                              { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️" },
-                            ]
-                          : [
-                              { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠" },
-                              { href: "/dashboard/planning", label: t("feat_planning_title"), icon: "📅" },
-                              { href: "/dashboard/messagerie", label: t("feat_messaging_title"), icon: "💬" },
-                              { href: "/dashboard/sondage", label: t("feat_polls_title"), icon: "📊" },
-                              { href: "/dashboard/equipe", label: t("feat_structure_title"), icon: "🛡️" },
-                              { href: "/dashboard/staff", label: t("feat_staff_title"), icon: "💼", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "MANAGER_EVO_SPORTS"] },
-                              { href: "/dashboard/effectifs", label: t("feat_players_title"), icon: "⚽" },
-                              { href: "/dashboard/composition", label: t("feat_composition_title"), icon: "📋", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "JOUEUR", "MANAGER_EVO_SPORTS"] },
-                              { href: "/dashboard/entrainement", label: t("feat_trainings_title"), icon: "🏃‍♂️", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
-                              { href: "/dashboard/match", label: t("feat_matches_title"), icon: "📅", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "JOUEUR", "MANAGER_EVO_SPORTS"] },
-                              { href: "/dashboard/medical/blessures", label: t("feat_injuries_title"), icon: "🩹", requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR"] },
-                              { href: "/dashboard/medical/dossier-medical", label: t("feat_medical_title"), icon: "📁", requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"] },
-                              { href: "/dashboard/test", label: t("feat_tests_title"), icon: "🧪", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
-                              { href: "/dashboard/gps", label: t("feat_gps_title"), icon: "🛰️", requiredRoles: ["PRESIDENT", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "MANAGER_EVO_SPORTS"] },
-                              { href: "/dashboard/quotidienne", label: t("feat_welfare_title"), icon: "📝", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR", "MANAGER_EVO_SPORTS"] },
-                            ]
-
-                        return linksToRender
-                          .filter((item) => !item.requiredRoles || item.requiredRoles.includes(userRole))
-                          .map((item) => {
-                            const active = pathname === item.href
-
-                            return (
-                              <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => setDrawerOpen(false)}
-                                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                                  active
-                                    ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/10"
-                                    : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-                                }`}
-                              >
-                                <span className="flex items-center gap-2">
-                                  <span>{item.icon}</span> {item.label}
-                                </span>
-                              </Link>
-                            )
-                          })
-                      })()}
+                  <>
+                    <hr className="border-white/10 my-4" />
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Espace Club Privé</p>
+                      <div className="space-y-1">
+                        {(() => {
+                          const userRole = user?.role?.name || ""
+                          const isManager = userRole === "MANAGER_EVO_SPORTS"
+                          const linksToRender = isManager
+                            ? [
+                                { href: "/dashboard", label: t("nav_dashboard") },
+                                { href: "/dashboard/planning", label: t("db_general_planning") },
+                                { href: "/dashboard/roles", label: t("db_roles_permissions") },
+                                { href: "/dashboard/manager/demandes", label: t("db_reg_requests") },
+                                { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt") },
+                                { href: "/dashboard/manager/paiements", label: t("db_clubs_payments") },
+                                { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés" },
+                              ]
+                            : [
+                                { href: "/dashboard", label: t("nav_dashboard") },
+                                { href: "/dashboard/planning", label: t("feat_planning_title") },
+                                { href: "/dashboard/messagerie", label: t("feat_messaging_title") },
+                                { href: "/dashboard/sondage", label: t("feat_polls_title") },
+                                { href: "/dashboard/equipe", label: t("feat_structure_title") },
+                                { href: "/dashboard/staff", label: t("feat_staff_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "MANAGER_EVO_SPORTS"] },
+                                { href: "/dashboard/effectifs", label: t("feat_players_title") },
+                                { href: "/dashboard/composition", label: t("feat_composition_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "JOUEUR", "MANAGER_EVO_SPORTS"] },
+                                { href: "/dashboard/entrainement", label: t("feat_trainings_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
+                                { href: "/dashboard/match", label: t("feat_matches_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "JOUEUR", "MANAGER_EVO_SPORTS"] },
+                                { href: "/dashboard/medical/blessures", label: t("feat_injuries_title"), requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR"] },
+                                { href: "/dashboard/medical/dossier-medical", label: t("feat_medical_title"), requiredRoles: ["PRESIDENT", "MEDECIN", "MANAGER_EVO_SPORTS", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"] },
+                                { href: "/dashboard/test", label: t("feat_tests_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
+                                { href: "/dashboard/gps", label: t("feat_gps_title"), requiredRoles: ["PRESIDENT", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "MANAGER_EVO_SPORTS"] },
+                                { href: "/dashboard/quotidienne", label: t("feat_welfare_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR", "MANAGER_EVO_SPORTS"] },
+                              ]
+  
+                          return linksToRender
+                            .filter((item) => !item.requiredRoles || item.requiredRoles.includes(userRole))
+                            .map((item) => {
+                              const active = pathname === item.href
+  
+                              return (
+                                <Link
+                                  key={item.href}
+                                  href={item.href}
+                                  onClick={() => setDrawerOpen(false)}
+                                  className={`flex items-center px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all ${
+                                    active
+                                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/10"
+                                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                                  }`}
+                                >
+                                  {item.label}
+                                </Link>
+                              )
+                            })
+                        })()}
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </nav>
             </div>
  
-            {/* Bottom Actions */}
-            <div className="space-y-3 pt-6 border-t border-zinc-150/80">
+            {/* Bottom Actions: Espace Système */}
+            <div className="pt-6 border-t border-white/10 space-y-4">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Espace Système</p>
+              
               {isAuthenticated ? (
                 <>
-                  {/* Account Settings */}
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setDrawerOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900 transition-all font-semibold"
-                  >
-                    <span>⚙️</span> {t("nav_settings")}
-                  </Link>
+                  {/* User Profile Info */}
+                  {user && (
+                    <div className="p-3 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-3 text-left w-full">
+                      <div className="h-9 w-9 rounded-xl flex items-center justify-center font-black text-sm uppercase tracking-wider bg-white text-zinc-900 shrink-0">
+                        {(user.name || "U").substring(0, 1).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-white truncate">{user.name || "—"}</p>
+                        <p className="text-[10px] text-white/60 truncate font-semibold mt-0.5">{user.email || "—"}</p>
+                        {user.role?.name && (
+                          <span className="inline-flex rounded px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider mt-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/10">
+                            {user.role.name.replace(/_/g, " ")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
  
-                  {/* Logout Button (in beautiful crimson red) */}
+                  {/* Logout Button (in red background, white text, no icons) */}
                   <button
                     onClick={async () => {
                       setDrawerOpen(false)
                       await signOut({ callbackUrl: "/login" })
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-50 hover:bg-red-100 text-red-655 hover:text-red-700 transition-all border border-red-100 cursor-pointer font-semibold"
+                    className="w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-655 hover:bg-red-500 text-white transition-all border border-red-550 cursor-pointer font-semibold"
                   >
-                    <span>🚪</span> {t("nav_logout_btn")}
+                    {t("nav_logout_btn")}
                   </button>
                 </>
               ) : (
@@ -430,16 +424,16 @@ export default function DynamicNavbar({
                   <Link
                     href="/login"
                     onClick={() => setDrawerOpen(false)}
-                    className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-zinc-100 hover:bg-zinc-200 text-zinc-755 transition-all border border-zinc-200 cursor-pointer font-semibold"
+                    className="w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500 hover:bg-emerald-450 text-white shadow-md shadow-emerald-500/25 transition-all border border-emerald-400/20 cursor-pointer font-semibold"
                   >
-                    <span>🔑</span> {t("nav_login")}
+                    {t("nav_login")}
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setDrawerOpen(false)}
-                    className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-emerald-500 hover:bg-emerald-450 text-white shadow-md shadow-emerald-500/20 transition-all border border-emerald-400/20 cursor-pointer font-semibold"
+                    className="w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-white/10 hover:bg-white/15 text-white transition-all border border-white/10 cursor-pointer font-semibold"
                   >
-                    <span>✨</span> {t("nav_join")}
+                    {t("nav_join")}
                   </Link>
                 </>
               )}
