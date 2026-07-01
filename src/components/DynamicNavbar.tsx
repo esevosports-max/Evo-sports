@@ -355,6 +355,7 @@ export default function DynamicNavbar({
                                 { href: "/dashboard/test", label: t("feat_tests_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MANAGER_EVO_SPORTS"] },
                                 { href: "/dashboard/gps", label: t("feat_gps_title"), requiredRoles: ["PRESIDENT", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "MANAGER_EVO_SPORTS"] },
                                 { href: "/dashboard/quotidienne", label: t("feat_welfare_title"), requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR", "MANAGER_EVO_SPORTS"] },
+                                { href: "/dashboard/presence", label: language === "EN" ? "Attendance" : language === "AR" ? "الغياب والحضور" : "Présences", requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MEDECIN", "MANAGER_EVO_SPORTS"] },
                               ]
   
                           return linksToRender
