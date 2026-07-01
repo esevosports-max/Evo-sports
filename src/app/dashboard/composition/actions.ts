@@ -269,3 +269,37 @@ export async function communicateCompositionAction(teamCategoryId: string) {
     return { success: false, error: e.message || "Erreur lors de la communication" }
   }
 }
+
+export async function uncommunicateCompositionAction(teamCategoryId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const userRole = session.user.role?.name
+
+    const ALLOWED_COMPOSITION_WRITERS = ["PRESIDENT", "MANAGER_EVO_SPORTS", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT"]
+    if (!userRole || !ALLOWED_COMPOSITION_WRITERS.includes(userRole)) {
+      throw new Error("Action réservée aux gestionnaires et entraîneurs")
+    }
+
+    // Set isCommunicated as false in the database
+    await db.composition.update({
+      where: { teamCategoryId },
+      data: {
+        isCommunicated: false,
+        communicatedAt: null
+      }
+    })
+
+    revalidatePath("/dashboard")
+    revalidatePath("/dashboard/composition")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error uncommunicating composition:", e)
+    return { success: false, error: e.message || "Erreur lors de la suppression de la communication" }
+  }
+}
+

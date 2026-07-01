@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { saveCompositionAction, sendCompositionNotificationAction, communicateCompositionAction } from "@/app/dashboard/composition/actions"
+import { saveCompositionAction, sendCompositionNotificationAction, communicateCompositionAction, uncommunicateCompositionAction } from "@/app/dashboard/composition/actions"
 
 interface Player {
   id: string
@@ -85,6 +85,14 @@ export default function CompositionClient({
 
   // 3. Substitutes State (List of player IDs)
   const [substitutes, setSubstitutes] = useState<string[]>([])
+
+  // List of all compositions
+  const [compositions, setCompositions] = useState<DatabaseComposition[]>(initialCompositions)
+
+  // Sync state if initialCompositions prop changes
+  useEffect(() => {
+    setCompositions(initialCompositions)
+  }, [initialCompositions])
 
   // UI state
   const [searchQuery, setSearchQuery] = useState("")
@@ -269,6 +277,19 @@ export default function CompositionClient({
         showToast("Composition enregistrée avec succès dans la base de données ! 💾")
         // Check if composition is complete (11 starters and >= 2 substitutes)
         setIsSavedAndComplete(totalStartersCount === 11 && substitutes.length >= 2)
+        // Update local compositions list state
+        setCompositions(prev => {
+          const exists = prev.some(c => c.teamCategoryId === selectedCategoryId)
+          if (exists) {
+            return prev.map(c =>
+              c.teamCategoryId === selectedCategoryId
+                ? { ...c, formation, slots, substitutes }
+                : c
+            )
+          } else {
+            return [...prev, { teamCategoryId: selectedCategoryId, formation, slots, substitutes, isCommunicated: false, communicatedAt: null }]
+          }
+        })
       } else {
         setValidationError(res.error || "Une erreur est survenue lors de l'enregistrement.")
       }
@@ -631,6 +652,31 @@ export default function CompositionClient({
     showToast("Composition vidée. Cliquez sur enregistrer pour valider.")
   }
 
+  const handleUncommunicate = async (categoryId: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer cette composition de la liste des compositions communiquées ? Elle ne sera plus visible pour les joueurs.")) return
+
+    try {
+      const res = await uncommunicateCompositionAction(categoryId)
+      if (res.success) {
+        showToast("La composition a été retirée des compositions communiquées. ❌")
+        setCompositions(prev => prev.map(c => 
+          c.teamCategoryId === categoryId 
+            ? { ...c, isCommunicated: false, communicatedAt: null }
+            : c
+        ))
+        if (categoryId === selectedCategoryId) {
+          setIsCommunicated(false)
+        }
+      } else {
+        alert("Une erreur est survenue lors du retrait de la composition : " + res.error)
+      }
+    } catch (e) {
+      console.error(e)
+      alert("Impossible de retirer la composition.")
+    }
+  }
+
+
   // 5. Draggable Coordinates Mechanics (pitch coordinates)
   const handlePitchMouseMove = (e: React.MouseEvent) => {
     if (!activeDragSlotId || !pitchRef.current) return
@@ -717,6 +763,8 @@ export default function CompositionClient({
     const matchesPosition = filterPosition === "Tous" || p.position === filterPosition
     return matchesSearch && matchesPosition
   })
+
+  const communicatedList = compositions.filter((c) => c.isCommunicated)
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -1125,6 +1173,11 @@ export default function CompositionClient({
                             setIsCommunicated(true)
                             showToast("La formation a été communiquée aux joueurs avec succès ! 📢")
                             setShowConfirmModal(false)
+                            setCompositions(prev => prev.map(c => 
+                              c.teamCategoryId === selectedCategoryId 
+                                ? { ...c, isCommunicated: true, communicatedAt: new Date().toISOString() }
+                                : c
+                            ))
                           } else {
                             alert("Erreur lors de la communication : " + res.error)
                           }
@@ -1410,6 +1463,82 @@ export default function CompositionClient({
         </div>
 
       </div>
+
+      {/* Section des compositions communiquées */}
+      <section className="rounded-2xl border border-zinc-200/50 bg-white p-6 shadow-sm dark:border-zinc-800/50 dark:bg-zinc-900 space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-zinc-150 dark:border-zinc-850 pb-3 gap-2">
+          <div>
+            <h2 className="text-lg font-black uppercase tracking-wider text-zinc-900 dark:text-white flex items-center gap-2">
+              📢 Compositions Communiquées ({communicatedList.length})
+            </h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Compositions actuellement visibles par les joueurs sur leur tableau de bord.
+            </p>
+          </div>
+        </div>
+
+        {communicatedList.length === 0 ? (
+          <div className="py-8 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-400 dark:text-zinc-500 text-xs font-bold">
+            Aucune composition n&apos;est actuellement communiquée aux joueurs.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {communicatedList.map((comp) => {
+              const catName = categories.find((c) => c.id === comp.teamCategoryId)?.name || "Catégorie inconnue"
+              return (
+                <div
+                  key={comp.teamCategoryId}
+                  className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.02] dark:bg-emerald-950/5 flex flex-col justify-between gap-4 transition-all hover:shadow-md"
+                >
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <h4 className="text-xs font-extrabold text-zinc-900 dark:text-white uppercase truncate">
+                        {catName}
+                      </h4>
+                      <span className="text-[9px] font-black text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-wider shrink-0">
+                        Publiée
+                      </span>
+                    </div>
+                    
+                    <div className="text-xs space-y-1 text-zinc-650 dark:text-zinc-400">
+                      <p>
+                        ⚽ Schéma : <strong className="text-zinc-850 dark:text-white">{comp.formation.defenders}-{comp.formation.midfielders}-{comp.formation.forwards}</strong>
+                      </p>
+                      <p>
+                        👥 Effectif : <strong className="text-zinc-850 dark:text-white">11 Titulaires</strong> &bull; <strong className="text-zinc-850 dark:text-white">{comp.substitutes ? comp.substitutes.length : 0} Remplaçants</strong>
+                      </p>
+                      {comp.communicatedAt && (
+                        <p className="text-[10px] text-zinc-400 italic mt-2" suppressHydrationWarning>
+                          Le {new Date(comp.communicatedAt).toLocaleDateString("fr-FR")} à {new Date(comp.communicatedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedCategoryId(comp.teamCategoryId)
+                        window.scrollTo({ top: 0, behavior: "smooth" })
+                      }}
+                      className="flex-1 py-2 text-center bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-850 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer border border-zinc-200/50 dark:border-zinc-800"
+                    >
+                      ✏️ Voir / Modifier
+                    </button>
+                    
+                    <button
+                      onClick={() => handleUncommunicate(comp.teamCategoryId)}
+                      className="flex-1 py-2 text-center bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer shadow-md shadow-red-500/10 active:scale-95 border border-red-500"
+                    >
+                      🗑️ Supprimer de la liste
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </section>
     </div>
   )
 }
