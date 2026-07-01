@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation"
 import {
   createPhysicalTest,
   deletePhysicalTest,
-  DEFAULT_PHYSICAL_TEST_TEMPLATE,
   savePhysicalTestTemplateAction
 } from "@/app/dashboard/test/actions"
+import { DEFAULT_PHYSICAL_TEST_TEMPLATE } from "@/app/dashboard/test/constants"
 
 interface PhysicalQuality {
   key: string
