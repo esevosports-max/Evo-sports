@@ -727,7 +727,7 @@ export default function TestClient({
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
                   {latestTest
                     ? scoreDefinition.description
-                    : "Aucune évaluation physique n'a encore été enregistrée pour vous. Votre note globale sera calculée dès que le staff technique aura saisi vos résultats physiques."}
+                    : "Vos résultats seront affichés dès que vous ferez un test physique."}
                 </p>
               </div>
 
@@ -805,7 +805,7 @@ export default function TestClient({
 
             {tests.length === 0 ? (
               <div className="text-center p-8 text-zinc-400 font-bold text-xs">
-                Aucun test physique n&apos;a encore été enregistré pour vous.
+                Vos résultats seront affichés dès que vous ferez un test physique.
               </div>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-850">

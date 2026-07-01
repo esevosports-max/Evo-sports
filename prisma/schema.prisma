@@ -198,6 +198,7 @@ model Player {
   dailyResponses   DailyResponse[]
   physicalIndices  PhysicalIndex[]
   physicalTests    PhysicalTest[]
+  presences        Presence[]
   club             Club            @relation(fields: [clubId], references: [id], onDelete: Cascade)
   teamCategory     TeamCategory?   @relation(fields: [teamCategoryId], references: [id])
   user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -286,6 +287,20 @@ model PhysicalTest {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model Presence {
+  id        String   @id @default(cuid())
+  playerId  String
+  eventId   String
+  eventType String   // "MATCH", "TRAINING", "CONVOCATION"
+  status    String   // "PRESENT" or "ABSENT"
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, eventId, eventType])
 }
 
 model SerialCode {

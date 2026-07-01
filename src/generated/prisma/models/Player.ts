@@ -423,6 +423,7 @@ export type PlayerWhereInput = {
   dailyResponses?: Prisma.DailyResponseListRelationFilter
   physicalIndices?: Prisma.PhysicalIndexListRelationFilter
   physicalTests?: Prisma.PhysicalTestListRelationFilter
+  presences?: Prisma.PresenceListRelationFilter
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryNullableScalarRelationFilter, Prisma.TeamCategoryWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -465,6 +466,7 @@ export type PlayerOrderByWithRelationInput = {
   dailyResponses?: Prisma.DailyResponseOrderByRelationAggregateInput
   physicalIndices?: Prisma.PhysicalIndexOrderByRelationAggregateInput
   physicalTests?: Prisma.PhysicalTestOrderByRelationAggregateInput
+  presences?: Prisma.PresenceOrderByRelationAggregateInput
   club?: Prisma.ClubOrderByWithRelationInput
   teamCategory?: Prisma.TeamCategoryOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
@@ -510,6 +512,7 @@ export type PlayerWhereUniqueInput = Prisma.AtLeast<{
   dailyResponses?: Prisma.DailyResponseListRelationFilter
   physicalIndices?: Prisma.PhysicalIndexListRelationFilter
   physicalTests?: Prisma.PhysicalTestListRelationFilter
+  presences?: Prisma.PresenceListRelationFilter
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
   teamCategory?: Prisma.XOR<Prisma.TeamCategoryNullableScalarRelationFilter, Prisma.TeamCategoryWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -623,6 +626,7 @@ export type PlayerCreateInput = {
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
@@ -665,6 +669,7 @@ export type PlayerUncheckedCreateInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
@@ -701,6 +706,7 @@ export type PlayerUpdateInput = {
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -743,6 +749,7 @@ export type PlayerUncheckedUpdateInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
@@ -1140,6 +1147,20 @@ export type PlayerUpdateOneRequiredWithoutPhysicalTestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PlayerUpdateToOneWithWhereWithoutPhysicalTestsInput, Prisma.PlayerUpdateWithoutPhysicalTestsInput>, Prisma.PlayerUncheckedUpdateWithoutPhysicalTestsInput>
 }
 
+export type PlayerCreateNestedOneWithoutPresencesInput = {
+  create?: Prisma.XOR<Prisma.PlayerCreateWithoutPresencesInput, Prisma.PlayerUncheckedCreateWithoutPresencesInput>
+  connectOrCreate?: Prisma.PlayerCreateOrConnectWithoutPresencesInput
+  connect?: Prisma.PlayerWhereUniqueInput
+}
+
+export type PlayerUpdateOneRequiredWithoutPresencesNestedInput = {
+  create?: Prisma.XOR<Prisma.PlayerCreateWithoutPresencesInput, Prisma.PlayerUncheckedCreateWithoutPresencesInput>
+  connectOrCreate?: Prisma.PlayerCreateOrConnectWithoutPresencesInput
+  upsert?: Prisma.PlayerUpsertWithoutPresencesInput
+  connect?: Prisma.PlayerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PlayerUpdateToOneWithWhereWithoutPresencesInput, Prisma.PlayerUpdateWithoutPresencesInput>, Prisma.PlayerUncheckedUpdateWithoutPresencesInput>
+}
+
 export type PlayerCreateNestedOneWithoutGpsDataInput = {
   create?: Prisma.XOR<Prisma.PlayerCreateWithoutGpsDataInput, Prisma.PlayerUncheckedCreateWithoutGpsDataInput>
   connectOrCreate?: Prisma.PlayerCreateOrConnectWithoutGpsDataInput
@@ -1215,6 +1236,7 @@ export type PlayerCreateWithoutUserInput = {
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   gpsData?: Prisma.PlayerGPSDataCreateNestedManyWithoutPlayerInput
@@ -1255,6 +1277,7 @@ export type PlayerUncheckedCreateWithoutUserInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
@@ -1307,6 +1330,7 @@ export type PlayerUpdateWithoutUserInput = {
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   gpsData?: Prisma.PlayerGPSDataUpdateManyWithoutPlayerNestedInput
@@ -1347,6 +1371,7 @@ export type PlayerUncheckedUpdateWithoutUserInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
@@ -1383,6 +1408,7 @@ export type PlayerCreateWithoutClubInput = {
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataCreateNestedManyWithoutPlayerInput
@@ -1423,6 +1449,7 @@ export type PlayerUncheckedCreateWithoutClubInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
@@ -1521,6 +1548,7 @@ export type PlayerCreateWithoutTeamCategoryInput = {
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataCreateNestedManyWithoutPlayerInput
@@ -1561,6 +1589,7 @@ export type PlayerUncheckedCreateWithoutTeamCategoryInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
@@ -1622,6 +1651,7 @@ export type PlayerCreateWithoutPhysicalIndicesInput = {
   medication?: string | null
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
@@ -1663,6 +1693,7 @@ export type PlayerUncheckedCreateWithoutPhysicalIndicesInput = {
   medication?: string | null
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
@@ -1714,6 +1745,7 @@ export type PlayerUpdateWithoutPhysicalIndicesInput = {
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -1755,6 +1787,7 @@ export type PlayerUncheckedUpdateWithoutPhysicalIndicesInput = {
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
@@ -1790,6 +1823,7 @@ export type PlayerCreateWithoutDailyResponsesInput = {
   medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
@@ -1831,6 +1865,7 @@ export type PlayerUncheckedCreateWithoutDailyResponsesInput = {
   medication?: string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
@@ -1882,6 +1917,7 @@ export type PlayerUpdateWithoutDailyResponsesInput = {
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -1923,6 +1959,7 @@ export type PlayerUncheckedUpdateWithoutDailyResponsesInput = {
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
@@ -1958,6 +1995,7 @@ export type PlayerCreateWithoutPhysicalTestsInput = {
   medication?: string | null
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
@@ -1999,6 +2037,7 @@ export type PlayerUncheckedCreateWithoutPhysicalTestsInput = {
   medication?: string | null
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
@@ -2050,6 +2089,7 @@ export type PlayerUpdateWithoutPhysicalTestsInput = {
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -2091,6 +2131,179 @@ export type PlayerUncheckedUpdateWithoutPhysicalTestsInput = {
   medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
+  gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
+  telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
+  gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
+}
+
+export type PlayerCreateWithoutPresencesInput = {
+  id?: string
+  position?: string | null
+  number?: number | null
+  age?: number | null
+  height?: string | null
+  weight?: string | null
+  foot?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isInjured?: boolean
+  injuryType?: string | null
+  injurySeverity?: string | null
+  injuryDuration?: string | null
+  injuryDate?: Date | string | null
+  injuryReturn?: Date | string | null
+  injuryStatus?: string | null
+  injuryProgress?: number
+  injuryDeclaredBy?: string | null
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
+  dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
+  physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
+  physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  club: Prisma.ClubCreateNestedOneWithoutPlayersInput
+  teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
+  user: Prisma.UserCreateNestedOneWithoutPlayerInput
+  gpsData?: Prisma.PlayerGPSDataCreateNestedManyWithoutPlayerInput
+  telemetry?: Prisma.TelemetryCreateNestedManyWithoutPlayerInput
+  gpsDevice?: Prisma.GpsDeviceCreateNestedOneWithoutPlayerInput
+}
+
+export type PlayerUncheckedCreateWithoutPresencesInput = {
+  id?: string
+  userId: string
+  clubId: string
+  position?: string | null
+  number?: number | null
+  teamCategoryId?: string | null
+  age?: number | null
+  height?: string | null
+  weight?: string | null
+  foot?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isInjured?: boolean
+  injuryType?: string | null
+  injurySeverity?: string | null
+  injuryDuration?: string | null
+  injuryDate?: Date | string | null
+  injuryReturn?: Date | string | null
+  injuryStatus?: string | null
+  injuryProgress?: number
+  injuryDeclaredBy?: string | null
+  bloodGroup?: string | null
+  allergies?: string | null
+  lastCheckup?: string | null
+  clearance?: string | null
+  medicalNotes?: Prisma.PlayerCreatemedicalNotesInput | string[]
+  nationality?: string | null
+  birthDate?: string | null
+  medicalTreatment?: string | null
+  medication?: string | null
+  dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
+  physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
+  physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
+  telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
+  gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
+}
+
+export type PlayerCreateOrConnectWithoutPresencesInput = {
+  where: Prisma.PlayerWhereUniqueInput
+  create: Prisma.XOR<Prisma.PlayerCreateWithoutPresencesInput, Prisma.PlayerUncheckedCreateWithoutPresencesInput>
+}
+
+export type PlayerUpsertWithoutPresencesInput = {
+  update: Prisma.XOR<Prisma.PlayerUpdateWithoutPresencesInput, Prisma.PlayerUncheckedUpdateWithoutPresencesInput>
+  create: Prisma.XOR<Prisma.PlayerCreateWithoutPresencesInput, Prisma.PlayerUncheckedCreateWithoutPresencesInput>
+  where?: Prisma.PlayerWhereInput
+}
+
+export type PlayerUpdateToOneWithWhereWithoutPresencesInput = {
+  where?: Prisma.PlayerWhereInput
+  data: Prisma.XOR<Prisma.PlayerUpdateWithoutPresencesInput, Prisma.PlayerUncheckedUpdateWithoutPresencesInput>
+}
+
+export type PlayerUpdateWithoutPresencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weight?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  foot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isInjured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  injuryType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injurySeverity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injuryDuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injuryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  injuryReturn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  injuryStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injuryProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  injuryDeclaredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
+  physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
+  physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
+  teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
+  gpsData?: Prisma.PlayerGPSDataUpdateManyWithoutPlayerNestedInput
+  telemetry?: Prisma.TelemetryUpdateManyWithoutPlayerNestedInput
+  gpsDevice?: Prisma.GpsDeviceUpdateOneWithoutPlayerNestedInput
+}
+
+export type PlayerUncheckedUpdateWithoutPresencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  clubId?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  teamCategoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  weight?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  foot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isInjured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  injuryType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injurySeverity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injuryDuration?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injuryDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  injuryReturn?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  injuryStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  injuryProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  injuryDeclaredBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bloodGroup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastCheckup?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clearance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalNotes?: Prisma.PlayerUpdatemedicalNotesInput | string[]
+  nationality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalTreatment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medication?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
+  physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
+  physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
@@ -2127,6 +2340,7 @@ export type PlayerCreateWithoutGpsDataInput = {
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
@@ -2168,6 +2382,7 @@ export type PlayerUncheckedCreateWithoutGpsDataInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
 }
@@ -2219,6 +2434,7 @@ export type PlayerUpdateWithoutGpsDataInput = {
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -2260,6 +2476,7 @@ export type PlayerUncheckedUpdateWithoutGpsDataInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
 }
@@ -2295,6 +2512,7 @@ export type PlayerCreateWithoutGpsDeviceInput = {
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
@@ -2336,6 +2554,7 @@ export type PlayerUncheckedCreateWithoutGpsDeviceInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   telemetry?: Prisma.TelemetryUncheckedCreateNestedManyWithoutPlayerInput
 }
@@ -2387,6 +2606,7 @@ export type PlayerUpdateWithoutGpsDeviceInput = {
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -2428,6 +2648,7 @@ export type PlayerUncheckedUpdateWithoutGpsDeviceInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
 }
@@ -2463,6 +2684,7 @@ export type PlayerCreateWithoutTelemetryInput = {
   dailyResponses?: Prisma.DailyResponseCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceCreateNestedManyWithoutPlayerInput
   club: Prisma.ClubCreateNestedOneWithoutPlayersInput
   teamCategory?: Prisma.TeamCategoryCreateNestedOneWithoutPlayersInput
   user: Prisma.UserCreateNestedOneWithoutPlayerInput
@@ -2504,6 +2726,7 @@ export type PlayerUncheckedCreateWithoutTelemetryInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedCreateNestedManyWithoutPlayerInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedCreateNestedManyWithoutPlayerInput
   physicalTests?: Prisma.PhysicalTestUncheckedCreateNestedManyWithoutPlayerInput
+  presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutPlayerInput
   gpsData?: Prisma.PlayerGPSDataUncheckedCreateNestedManyWithoutPlayerInput
   gpsDevice?: Prisma.GpsDeviceUncheckedCreateNestedOneWithoutPlayerInput
 }
@@ -2555,6 +2778,7 @@ export type PlayerUpdateWithoutTelemetryInput = {
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
@@ -2596,6 +2820,7 @@ export type PlayerUncheckedUpdateWithoutTelemetryInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
 }
@@ -2663,6 +2888,7 @@ export type PlayerUpdateWithoutClubInput = {
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   teamCategory?: Prisma.TeamCategoryUpdateOneWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUpdateManyWithoutPlayerNestedInput
@@ -2703,6 +2929,7 @@ export type PlayerUncheckedUpdateWithoutClubInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
@@ -2803,6 +3030,7 @@ export type PlayerUpdateWithoutTeamCategoryInput = {
   dailyResponses?: Prisma.DailyResponseUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUpdateManyWithoutPlayerNestedInput
   club?: Prisma.ClubUpdateOneRequiredWithoutPlayersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUpdateManyWithoutPlayerNestedInput
@@ -2843,6 +3071,7 @@ export type PlayerUncheckedUpdateWithoutTeamCategoryInput = {
   dailyResponses?: Prisma.DailyResponseUncheckedUpdateManyWithoutPlayerNestedInput
   physicalIndices?: Prisma.PhysicalIndexUncheckedUpdateManyWithoutPlayerNestedInput
   physicalTests?: Prisma.PhysicalTestUncheckedUpdateManyWithoutPlayerNestedInput
+  presences?: Prisma.PresenceUncheckedUpdateManyWithoutPlayerNestedInput
   gpsData?: Prisma.PlayerGPSDataUncheckedUpdateManyWithoutPlayerNestedInput
   telemetry?: Prisma.TelemetryUncheckedUpdateManyWithoutPlayerNestedInput
   gpsDevice?: Prisma.GpsDeviceUncheckedUpdateOneWithoutPlayerNestedInput
@@ -2889,6 +3118,7 @@ export type PlayerCountOutputType = {
   dailyResponses: number
   physicalIndices: number
   physicalTests: number
+  presences: number
   gpsData: number
   telemetry: number
 }
@@ -2897,6 +3127,7 @@ export type PlayerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   dailyResponses?: boolean | PlayerCountOutputTypeCountDailyResponsesArgs
   physicalIndices?: boolean | PlayerCountOutputTypeCountPhysicalIndicesArgs
   physicalTests?: boolean | PlayerCountOutputTypeCountPhysicalTestsArgs
+  presences?: boolean | PlayerCountOutputTypeCountPresencesArgs
   gpsData?: boolean | PlayerCountOutputTypeCountGpsDataArgs
   telemetry?: boolean | PlayerCountOutputTypeCountTelemetryArgs
 }
@@ -2930,6 +3161,13 @@ export type PlayerCountOutputTypeCountPhysicalIndicesArgs<ExtArgs extends runtim
  */
 export type PlayerCountOutputTypeCountPhysicalTestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PhysicalTestWhereInput
+}
+
+/**
+ * PlayerCountOutputType without action
+ */
+export type PlayerCountOutputTypeCountPresencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PresenceWhereInput
 }
 
 /**
@@ -2981,6 +3219,7 @@ export type PlayerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   dailyResponses?: boolean | Prisma.Player$dailyResponsesArgs<ExtArgs>
   physicalIndices?: boolean | Prisma.Player$physicalIndicesArgs<ExtArgs>
   physicalTests?: boolean | Prisma.Player$physicalTestsArgs<ExtArgs>
+  presences?: boolean | Prisma.Player$presencesArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.Player$teamCategoryArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -3100,6 +3339,7 @@ export type PlayerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   dailyResponses?: boolean | Prisma.Player$dailyResponsesArgs<ExtArgs>
   physicalIndices?: boolean | Prisma.Player$physicalIndicesArgs<ExtArgs>
   physicalTests?: boolean | Prisma.Player$physicalTestsArgs<ExtArgs>
+  presences?: boolean | Prisma.Player$presencesArgs<ExtArgs>
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   teamCategory?: boolean | Prisma.Player$teamCategoryArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -3125,6 +3365,7 @@ export type $PlayerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     dailyResponses: Prisma.$DailyResponsePayload<ExtArgs>[]
     physicalIndices: Prisma.$PhysicalIndexPayload<ExtArgs>[]
     physicalTests: Prisma.$PhysicalTestPayload<ExtArgs>[]
+    presences: Prisma.$PresencePayload<ExtArgs>[]
     club: Prisma.$ClubPayload<ExtArgs>
     teamCategory: Prisma.$TeamCategoryPayload<ExtArgs> | null
     user: Prisma.$UserPayload<ExtArgs>
@@ -3560,6 +3801,7 @@ export interface Prisma__PlayerClient<T, Null = never, ExtArgs extends runtime.T
   dailyResponses<T extends Prisma.Player$dailyResponsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Player$dailyResponsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DailyResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   physicalIndices<T extends Prisma.Player$physicalIndicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Player$physicalIndicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PhysicalIndexPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   physicalTests<T extends Prisma.Player$physicalTestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Player$physicalTestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PhysicalTestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  presences<T extends Prisma.Player$presencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Player$presencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PresencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   club<T extends Prisma.ClubDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClubDefaultArgs<ExtArgs>>): Prisma.Prisma__ClubClient<runtime.Types.Result.GetResult<Prisma.$ClubPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   teamCategory<T extends Prisma.Player$teamCategoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Player$teamCategoryArgs<ExtArgs>>): Prisma.Prisma__TeamCategoryClient<runtime.Types.Result.GetResult<Prisma.$TeamCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -4095,6 +4337,30 @@ export type Player$physicalTestsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.PhysicalTestScalarFieldEnum | Prisma.PhysicalTestScalarFieldEnum[]
+}
+
+/**
+ * Player.presences
+ */
+export type Player$presencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Presence
+   */
+  select?: Prisma.PresenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Presence
+   */
+  omit?: Prisma.PresenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PresenceInclude<ExtArgs> | null
+  where?: Prisma.PresenceWhereInput
+  orderBy?: Prisma.PresenceOrderByWithRelationInput | Prisma.PresenceOrderByWithRelationInput[]
+  cursor?: Prisma.PresenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PresenceScalarFieldEnum | Prisma.PresenceScalarFieldEnum[]
 }
 
 /**

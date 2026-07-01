@@ -124,6 +124,13 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
           description: t("desc_welfare"),
           requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "JOUEUR", "MANAGER_EVO_SPORTS"]
         },
+        { 
+          href: "/dashboard/presence", 
+          label: language === "EN" ? "Attendance" : language === "AR" ? "الغياب والحضور" : "Présences", 
+          icon: "📊", 
+          description: language === "EN" ? "Track player attendance and absence rates" : language === "AR" ? "متابعة حضور وغياب اللاعبين" : "Suivre la présence des joueurs",
+          requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MEDECIN", "MANAGER_EVO_SPORTS"]
+        },
       ]
 
   const isRoleAuthorized = (allowed?: string[]) => {

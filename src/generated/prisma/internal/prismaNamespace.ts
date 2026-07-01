@@ -398,6 +398,7 @@ export const ModelName = {
   DailyQuestionnaire: 'DailyQuestionnaire',
   DailyResponse: 'DailyResponse',
   PhysicalTest: 'PhysicalTest',
+  Presence: 'Presence',
   SerialCode: 'SerialCode',
   PaymentSubmission: 'PaymentSubmission',
   Poll: 'Poll',
@@ -432,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView" | "announcement" | "systemSetting" | "notification" | "deletedAccount" | "accountActionLog" | "playerGPSData" | "gpsDevice" | "telemetry" | "paymentConfig" | "pushToken" | "subscriptionPlan"
+    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "presence" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView" | "announcement" | "systemSetting" | "notification" | "deletedAccount" | "accountActionLog" | "playerGPSData" | "gpsDevice" | "telemetry" | "paymentConfig" | "pushToken" | "subscriptionPlan"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1469,6 +1470,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PhysicalTestCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PhysicalTestCountAggregateOutputType> | number
+        }
+      }
+    }
+    Presence: {
+      payload: Prisma.$PresencePayload<ExtArgs>
+      fields: Prisma.PresenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PresenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PresenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>
+        }
+        findFirst: {
+          args: Prisma.PresenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PresenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>
+        }
+        findMany: {
+          args: Prisma.PresenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>[]
+        }
+        create: {
+          args: Prisma.PresenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>
+        }
+        createMany: {
+          args: Prisma.PresenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PresenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>[]
+        }
+        delete: {
+          args: Prisma.PresenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>
+        }
+        update: {
+          args: Prisma.PresenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>
+        }
+        deleteMany: {
+          args: Prisma.PresenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PresenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PresenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>[]
+        }
+        upsert: {
+          args: Prisma.PresenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>
+        }
+        aggregate: {
+          args: Prisma.PresenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePresence>
+        }
+        groupBy: {
+          args: Prisma.PresenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PresenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PresenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PresenceCountAggregateOutputType> | number
         }
       }
     }
@@ -3187,6 +3262,20 @@ export const PhysicalTestScalarFieldEnum = {
 export type PhysicalTestScalarFieldEnum = (typeof PhysicalTestScalarFieldEnum)[keyof typeof PhysicalTestScalarFieldEnum]
 
 
+export const PresenceScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  eventId: 'eventId',
+  eventType: 'eventType',
+  status: 'status',
+  date: 'date',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PresenceScalarFieldEnum = (typeof PresenceScalarFieldEnum)[keyof typeof PresenceScalarFieldEnum]
+
+
 export const SerialCodeScalarFieldEnum = {
   id: 'id',
   code: 'code',
@@ -3774,6 +3863,7 @@ export type GlobalOmitConfig = {
   dailyQuestionnaire?: Prisma.DailyQuestionnaireOmit
   dailyResponse?: Prisma.DailyResponseOmit
   physicalTest?: Prisma.PhysicalTestOmit
+  presence?: Prisma.PresenceOmit
   serialCode?: Prisma.SerialCodeOmit
   paymentSubmission?: Prisma.PaymentSubmissionOmit
   poll?: Prisma.PollOmit

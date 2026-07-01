@@ -65,6 +65,7 @@ export const ModelName = {
   DailyQuestionnaire: 'DailyQuestionnaire',
   DailyResponse: 'DailyResponse',
   PhysicalTest: 'PhysicalTest',
+  Presence: 'Presence',
   SerialCode: 'SerialCode',
   PaymentSubmission: 'PaymentSubmission',
   Poll: 'Poll',
@@ -370,6 +371,20 @@ export const PhysicalTestScalarFieldEnum = {
 } as const
 
 export type PhysicalTestScalarFieldEnum = (typeof PhysicalTestScalarFieldEnum)[keyof typeof PhysicalTestScalarFieldEnum]
+
+
+export const PresenceScalarFieldEnum = {
+  id: 'id',
+  playerId: 'playerId',
+  eventId: 'eventId',
+  eventType: 'eventType',
+  status: 'status',
+  date: 'date',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PresenceScalarFieldEnum = (typeof PresenceScalarFieldEnum)[keyof typeof PresenceScalarFieldEnum]
 
 
 export const SerialCodeScalarFieldEnum = {

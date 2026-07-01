@@ -144,7 +144,15 @@ export default async function TestPage() {
     } else if (playerProfile) {
       physicalTestsData = await db.physicalTest.findMany({
         where: { playerId: playerProfile.id },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
+        include: {
+          player: {
+            include: {
+              user: { select: { name: true } },
+              teamCategory: true
+            }
+          }
+        }
       })
     }
   }

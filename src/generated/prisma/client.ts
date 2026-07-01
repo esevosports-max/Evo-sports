@@ -112,6 +112,11 @@ export type DailyResponse = Prisma.DailyResponseModel
  */
 export type PhysicalTest = Prisma.PhysicalTestModel
 /**
+ * Model Presence
+ * 
+ */
+export type Presence = Prisma.PresenceModel
+/**
  * Model SerialCode
  * 
  */
