@@ -47,6 +47,13 @@ export default async function TestPage() {
       }
     })
     clubId = club?.id || staff?.clubId || ""
+    if (!physicalTestTemplate && clubId) {
+      const staffList = await db.staff.findMany({
+        where: { clubId }
+      })
+      const staffTemplate = staffList.find((s) => s.physicalTestTemplate !== null)
+      physicalTestTemplate = staffTemplate?.physicalTestTemplate || null
+    }
   } else {
     playerProfile = await db.player.findUnique({
       where: { userId },

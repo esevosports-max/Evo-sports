@@ -238,6 +238,26 @@ export default function EntrainementClient({
     if (!selectedTraining) return
 
     try {
+      // 1. Save attendance to database
+      const { saveEventAttendanceAction } = await import("@/app/dashboard/presence/actions")
+      const attendanceData = roster.map((p) => ({
+        playerId: p.id,
+        status: p.present ? "PRESENT" as const : "ABSENT" as const
+      }))
+
+      const attendanceRes = await saveEventAttendanceAction({
+        eventId: selectedTraining.id,
+        eventType: "TRAINING",
+        dateStr: selectedTraining.date,
+        attendances: attendanceData
+      })
+
+      if (!attendanceRes.success) {
+        alert(attendanceRes.error || "Une erreur est survenue lors de l'enregistrement des présences.")
+        return
+      }
+
+      // 2. Complete training in planning
       const { completeTraining } = await import("../app/dashboard/planning/actions")
       const res = await completeTraining(selectedTraining.id)
       if (!res.success) {

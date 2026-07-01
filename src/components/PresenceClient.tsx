@@ -60,7 +60,9 @@ export default function PresenceClient({
 }: PresenceClientProps) {
   const { language } = useLanguage()
   const [players, setPlayers] = useState<Player[]>(initialPlayers)
-  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents)
+  const [events, setEvents] = useState<CalendarEvent[]>(() =>
+    initialEvents.filter((e) => e.type === "MATCH" || e.type === "TRAINING")
+  )
   const [presences, setPresences] = useState<PresenceRecord[]>(initialPresences)
   const [teamCategories] = useState<TeamCategory[]>(initialTeamCategories)
 
@@ -130,8 +132,6 @@ export default function PresenceClient({
       let matchTotal = 0
       let trainingPresent = 0
       let trainingTotal = 0
-      let convocationPresent = 0
-      let convocationTotal = 0
 
       // Filter events relevant to this player (assigned to their team category, or to all teams)
       events.forEach((event) => {
@@ -150,15 +150,12 @@ export default function PresenceClient({
           } else if (category === "TRAINING") {
             trainingTotal++
             if (status === "PRESENT") trainingPresent++
-          } else {
-            convocationTotal++
-            if (status === "PRESENT") convocationPresent++
           }
         }
       })
 
-      const totalConvoked = matchTotal + trainingTotal + convocationTotal
-      const totalPresent = matchPresent + trainingPresent + convocationPresent
+      const totalConvoked = matchTotal + trainingTotal
+      const totalPresent = matchPresent + trainingPresent
       const rate = totalConvoked > 0 ? (totalPresent / totalConvoked) * 100 : 100
 
       return {
@@ -167,8 +164,6 @@ export default function PresenceClient({
         matchTotal,
         trainingPresent,
         trainingTotal,
-        convocationPresent,
-        convocationTotal,
         totalPresent,
         totalConvoked,
         rate
@@ -184,8 +179,6 @@ export default function PresenceClient({
     let matchPresent = 0
     let trainingConvoked = 0
     let trainingPresent = 0
-    let convocationConvoked = 0
-    let convocationPresent = 0
 
     playerStats.forEach((stat) => {
       grandTotalConvoked += stat.totalConvoked
@@ -194,8 +187,6 @@ export default function PresenceClient({
       matchPresent += stat.matchPresent
       trainingConvoked += stat.trainingTotal
       trainingPresent += stat.trainingPresent
-      convocationConvoked += stat.convocationTotal
-      convocationPresent += stat.convocationPresent
     })
 
     const globalRate = grandTotalConvoked > 0 ? (grandTotalPresent / grandTotalConvoked) * 100 : 100
@@ -207,8 +198,7 @@ export default function PresenceClient({
       grandTotalConvoked,
       grandTotalPresent,
       matchRate: matchConvoked > 0 ? (matchPresent / matchConvoked) * 100 : 100,
-      trainingRate: trainingConvoked > 0 ? (trainingPresent / trainingConvoked) * 100 : 100,
-      convocationRate: convocationConvoked > 0 ? (convocationPresent / convocationConvoked) * 100 : 100
+      trainingRate: trainingConvoked > 0 ? (trainingPresent / trainingConvoked) * 100 : 100
     }
   }, [playerStats])
 
@@ -319,7 +309,7 @@ export default function PresenceClient({
       </section>
 
       {/* Global Club Score & Category metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Global Club Note Card */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 flex items-center justify-between gap-4">
           <div className="space-y-1">
@@ -356,18 +346,6 @@ export default function PresenceClient({
           </div>
           <div className="h-12 w-12 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl shrink-0">
             🏃‍♂️
-          </div>
-        </div>
-
-        {/* Convocations Attendance Card */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Taux Convocations</p>
-            <h3 className="text-2xl font-black text-zinc-900 dark:text-white">{globalStats.convocationRate.toFixed(1)}%</h3>
-            <p className="text-[9px] text-zinc-500 font-bold uppercase">Médical, Réunions & Excursions</p>
-          </div>
-          <div className="h-12 w-12 rounded-xl bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl shrink-0">
-            📋
           </div>
         </div>
       </div>
@@ -420,12 +398,11 @@ export default function PresenceClient({
                       <th className="py-4 px-6">Équipe</th>
                       <th className="py-4 px-6 text-center">Matchs ⚽</th>
                       <th className="py-4 px-6 text-center">Entraînements 🏃‍♂️</th>
-                      <th className="py-4 px-6 text-center">Convocations 📋</th>
                       <th className="py-4 px-6 text-right">Note de présence</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
-                    {filteredPlayerStats.map(({ player, matchPresent, matchTotal, trainingPresent, trainingTotal, convocationPresent, convocationTotal, rate }) => (
+                    {filteredPlayerStats.map(({ player, matchPresent, matchTotal, trainingPresent, trainingTotal, rate }) => (
                       <tr key={player.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-950/20 text-xs transition-colors">
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
@@ -458,15 +435,6 @@ export default function PresenceClient({
                           {trainingTotal > 0 ? (
                             <span className={trainingPresent === trainingTotal ? "text-emerald-600 dark:text-emerald-400 font-extrabold" : ""}>
                               {trainingPresent}/{trainingTotal}
-                            </span>
-                          ) : (
-                            <span className="text-zinc-400 font-semibold">-</span>
-                          )}
-                        </td>
-                        <td className="py-4 px-6 text-center font-bold text-zinc-800 dark:text-zinc-200">
-                          {convocationTotal > 0 ? (
-                            <span className={convocationPresent === convocationTotal ? "text-emerald-600 dark:text-emerald-400 font-extrabold" : ""}>
-                              {convocationPresent}/{convocationTotal}
                             </span>
                           ) : (
                             <span className="text-zinc-400 font-semibold">-</span>

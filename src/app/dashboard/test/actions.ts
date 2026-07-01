@@ -38,12 +38,28 @@ export async function savePhysicalTestTemplateAction(template: any) {
     }
 
     // Verify staff profile exists
-    const staff = await db.staff.findUnique({
+    let staff = await db.staff.findUnique({
       where: { userId }
     })
 
     if (!staff) {
-      throw new Error("Profil technique introuvable")
+      // If the user has no Staff record, check if they are the president of a club
+      const club = await db.club.findFirst({
+        where: { presidentId: userId }
+      })
+      if (club) {
+        staff = await db.staff.create({
+          data: {
+            userId,
+            clubId: club.id,
+            title: "Président"
+          }
+        })
+      }
+    }
+
+    if (!staff) {
+      throw new Error("Profil technique introuvable et impossible d'associer un club")
     }
 
     await db.staff.update({

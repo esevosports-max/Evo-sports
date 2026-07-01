@@ -180,7 +180,41 @@ export async function recordMatchResult(matchId: string, score: string) {
       }
     })
 
+    // Automatically generate presence records for this match
+    if (match.assignedTeam) {
+      const teamCategory = await db.teamCategory.findFirst({
+        where: { name: match.assignedTeam, clubId: match.clubId }
+      })
+      if (teamCategory) {
+        const players = await db.player.findMany({
+          where: { teamCategoryId: teamCategory.id }
+        })
+
+        if (players.length > 0) {
+          // Delete existing match presences to avoid duplicates
+          await db.presence.deleteMany({
+            where: {
+              eventId: match.id,
+              eventType: "MATCH"
+            }
+          })
+
+          // Insert presence records, default to PRESENT
+          await db.presence.createMany({
+            data: players.map((p) => ({
+              playerId: p.id,
+              eventId: match.id,
+              eventType: "MATCH",
+              status: "PRESENT",
+              date: new Date(match.date)
+            }))
+          })
+        }
+      }
+    }
+
     revalidatePath("/dashboard/match")
+    revalidatePath("/dashboard/presence")
     revalidatePath("/dashboard/planning")
 
     return { success: true, match: JSON.parse(JSON.stringify(updated)) }

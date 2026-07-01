@@ -173,7 +173,8 @@ export default function TestClient({
   const [template, setTemplate] = useState<PhysicalQuality[]>(() => {
     if (initialTemplate) {
       try {
-        return typeof initialTemplate === "string" ? JSON.parse(initialTemplate) : initialTemplate
+        const parsed = typeof initialTemplate === "string" ? JSON.parse(initialTemplate) : initialTemplate
+        if (Array.isArray(parsed)) return parsed
       } catch (e) {
         console.error("Error parsing template:", e)
       }
@@ -184,11 +185,19 @@ export default function TestClient({
   // Dynamic values state for form inputs
   const [formValues, setFormValues] = useState<Record<string, number>>(() => {
     const initialValues: Record<string, number> = {}
-    const activeTemplate = initialTemplate || DEFAULT_PHYSICAL_TEST_TEMPLATE
-    const resolvedTemplate = typeof activeTemplate === "string" ? JSON.parse(activeTemplate) : activeTemplate
-    resolvedTemplate.forEach((q: any) => {
-      initialValues[q.key] = q.defaultValue
-    })
+    try {
+      const activeTemplate = initialTemplate || DEFAULT_PHYSICAL_TEST_TEMPLATE
+      const resolvedTemplate = typeof activeTemplate === "string" ? JSON.parse(activeTemplate) : activeTemplate
+      const finalTemplate = Array.isArray(resolvedTemplate) ? resolvedTemplate : DEFAULT_PHYSICAL_TEST_TEMPLATE
+      finalTemplate.forEach((q: any) => {
+        initialValues[q.key] = q.defaultValue
+      })
+    } catch (e) {
+      console.error("Error initializing form values:", e)
+      DEFAULT_PHYSICAL_TEST_TEMPLATE.forEach((q) => {
+        initialValues[q.key] = q.defaultValue
+      })
+    }
     return initialValues
   })
 
