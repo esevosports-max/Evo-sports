@@ -31,10 +31,13 @@ export default async function TestPage() {
   let clubId = ""
   let playerProfile: any = null
 
+  let physicalTestTemplate: any = null
+
   if (isStaff) {
     const staff = await db.staff.findUnique({
       where: { userId }
     })
+    physicalTestTemplate = staff?.physicalTestTemplate || null
     const club = await db.club.findFirst({
       where: {
         OR: [
@@ -53,6 +56,13 @@ export default async function TestPage() {
       }
     })
     clubId = playerProfile?.clubId || ""
+    if (clubId) {
+      const staffList = await db.staff.findMany({
+        where: { clubId }
+      })
+      const staffTemplate = staffList.find((s) => s.physicalTestTemplate !== null)
+      physicalTestTemplate = staffTemplate?.physicalTestTemplate || null
+    }
   }
 
   if (!clubId) {
@@ -166,6 +176,7 @@ export default async function TestPage() {
     sj: t.sj,
     illinois: t.illinois,
     fat: t.fat,
+    customValues: t.customValues,
     date: t.date.toISOString(),
     createdAt: t.createdAt.toISOString()
   }))
@@ -187,6 +198,7 @@ export default async function TestPage() {
       players={clientPlayers}
       tests={clientTests}
       playerProfile={clientPlayerProfile}
+      initialTemplate={physicalTestTemplate}
     />
   )
 }

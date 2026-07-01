@@ -4,6 +4,63 @@ import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
+export const DEFAULT_PHYSICAL_TEST_TEMPLATE = [
+  { key: "vma", label: "VMA", icon: "⚡", unit: "km/h", min: 10, max: 25, defaultValue: 16.5, isDefault: true },
+  { key: "vo2Max", label: "VO2 Max", icon: "🫁", unit: "ml/kg", min: 30, max: 90, defaultValue: 62.0, isDefault: true },
+  { key: "sprint10m", label: "Sprint 10m", icon: "🏃", unit: "s", min: 1.3, max: 3.0, defaultValue: 1.85, isDefault: true },
+  { key: "sprint30m", label: "Sprint 30m", icon: "⚡", unit: "s", min: 3.0, max: 6.5, defaultValue: 3.90, isDefault: true },
+  { key: "cmj", label: "CMJ (Détente)", icon: "🦘", unit: "cm", min: 15, max: 80, defaultValue: 42.0, isDefault: true },
+  { key: "sj", label: "SJ (Détente)", icon: "🚀", unit: "cm", min: 10, max: 75, defaultValue: 38.0, isDefault: true },
+  { key: "illinois", label: "Illinois (Agilité)", icon: "🔄", unit: "s", min: 11, max: 25, defaultValue: 16.2, isDefault: true },
+  { key: "fat", label: "Masse grasse", icon: "⚖️", unit: "%", min: 5, max: 25, defaultValue: 11.5, isDefault: true }
+]
+
+export async function savePhysicalTestTemplateAction(template: any) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    const userRole = session.user.role?.name
+
+    const ALLOWED_STAFF_ROLES = [
+      "PRESIDENT",
+      "MANAGER_EVO_SPORTS",
+      "ENTRAINEUR_PRINCIPAL",
+      "ENTRAINEUR_ADJOINT",
+      "PREPARATEUR_PHYSIQUE"
+    ]
+
+    if (!userRole || !ALLOWED_STAFF_ROLES.includes(userRole)) {
+      throw new Error("Action réservée aux membres autorisés du staff")
+    }
+
+    // Verify staff profile exists
+    const staff = await db.staff.findUnique({
+      where: { userId }
+    })
+
+    if (!staff) {
+      throw new Error("Profil technique introuvable")
+    }
+
+    await db.staff.update({
+      where: { userId },
+      data: {
+        physicalTestTemplate: template
+      }
+    })
+
+    revalidatePath("/dashboard/test")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error saving physical test template:", e)
+    return { success: false, error: e.message || "Erreur d'enregistrement du modèle" }
+  }
+}
+
 export async function createPhysicalTest(
   playerId: string,
   vma: number,
@@ -13,7 +70,8 @@ export async function createPhysicalTest(
   cmj: number,
   sj: number,
   illinois: number,
-  fat: number
+  fat: number,
+  customValues?: any
 ) {
   try {
     const session = await auth()
@@ -72,7 +130,8 @@ export async function createPhysicalTest(
         cmj,
         sj,
         illinois,
-        fat
+        fat,
+        customValues: customValues || null
       }
     })
 

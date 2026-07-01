@@ -1,8 +1,24 @@
 "use client"
 
-import { useState, useTransition, useMemo } from "react"
+import { useState, useTransition, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { createPhysicalTest, deletePhysicalTest } from "@/app/dashboard/test/actions"
+import {
+  createPhysicalTest,
+  deletePhysicalTest,
+  DEFAULT_PHYSICAL_TEST_TEMPLATE,
+  savePhysicalTestTemplateAction
+} from "@/app/dashboard/test/actions"
+
+interface PhysicalQuality {
+  key: string
+  label: string
+  icon: string
+  unit: string
+  min: number
+  max: number
+  defaultValue: number
+  isDefault: boolean
+}
 
 interface ClientPlayer {
   id: string
@@ -25,6 +41,7 @@ interface PhysicalTest {
   sj: number
   illinois: number
   fat: number
+  customValues?: any
   date: string
   createdAt: string
 }
@@ -43,48 +60,61 @@ interface TestClientProps {
   players: ClientPlayer[]
   tests: PhysicalTest[]
   playerProfile: PlayerProfile | null
+  initialTemplate?: any
 }
 
-// Global score calculation based on typical football physical benchmarks
-function calculatePhysicalScore(t: {
-  vma: number
-  vo2Max: number
-  sprint10m: number
-  sprint30m: number
-  cmj: number
-  sj: number
-  illinois: number
-  fat: number
-}) {
-  // Normalize each metric to a score from 0 to 100
-  // VMA: 12 km/h is 0%, 22 km/h is 100%
-  const vmaScore = Math.max(0, Math.min(100, ((t.vma - 12) / 10) * 100))
-  // VO2 Max: 40 ml/kg is 0%, 80 ml/kg is 100%
-  const vo2Score = Math.max(0, Math.min(100, ((t.vo2Max - 40) / 40) * 100))
-  // Sprint 10m: lower is better. 2.4s is 0%, 1.5s is 100%
-  const sprint10Score = Math.max(0, Math.min(100, ((2.4 - t.sprint10m) / 0.9) * 100))
-  // Sprint 30m: lower is better. 4.8s is 0%, 3.5s is 100%
-  const sprint30Score = Math.max(0, Math.min(100, ((4.8 - t.sprint30m) / 1.3) * 100))
-  // CMJ: 20 cm is 0%, 65 cm is 100%
-  const cmjScore = Math.max(0, Math.min(100, ((t.cmj - 20) / 45) * 100))
-  // SJ: 15 cm is 0%, 60 cm is 100%
-  const sjScore = Math.max(0, Math.min(100, ((t.sj - 15) / 45) * 100))
-  // Illinois: lower is better. 21s is 0%, 13.5s is 100%
-  const illinoisScore = Math.max(0, Math.min(100, ((21 - t.illinois) / 7.5) * 100))
-  // Body fat: ideal is 10%. Subtract 10 points for each 1% deviation.
-  const fatScore = Math.max(0, Math.min(100, 100 - Math.abs(t.fat - 10) * 10))
+// Global score calculation based on physical test template
+function calculatePhysicalScore(t: any, template: PhysicalQuality[]) {
+  const values = {
+    vma: t.vma,
+    vo2Max: t.vo2Max,
+    sprint10m: t.sprint10m,
+    sprint30m: t.sprint30m,
+    cmj: t.cmj,
+    sj: t.sj,
+    illinois: t.illinois,
+    fat: t.fat,
+    ...(t.customValues || {})
+  }
 
-  const total =
-    vmaScore * 0.15 +
-    vo2Score * 0.15 +
-    sprint10Score * 0.10 +
-    sprint30Score * 0.15 +
-    cmjScore * 0.10 +
-    sjScore * 0.10 +
-    illinoisScore * 0.15 +
-    fatScore * 0.10
+  if (!template || template.length === 0) return 0
 
-  return Math.round(total)
+  const scores: number[] = []
+
+  template.forEach((q) => {
+    const val = values[q.key]
+    if (val === undefined || val === null) return
+
+    if (q.key === "vma") {
+      scores.push(Math.max(0, Math.min(100, ((val - 12) / 10) * 100)))
+    } else if (q.key === "vo2Max") {
+      scores.push(Math.max(0, Math.min(100, ((val - 40) / 40) * 100)))
+    } else if (q.key === "sprint10m") {
+      scores.push(Math.max(0, Math.min(100, ((2.4 - val) / 0.9) * 100)))
+    } else if (q.key === "sprint30m") {
+      scores.push(Math.max(0, Math.min(100, ((4.8 - val) / 1.3) * 100)))
+    } else if (q.key === "cmj") {
+      scores.push(Math.max(0, Math.min(100, ((val - 20) / 45) * 100)))
+    } else if (q.key === "sj") {
+      scores.push(Math.max(0, Math.min(100, ((val - 15) / 45) * 100)))
+    } else if (q.key === "illinois") {
+      scores.push(Math.max(0, Math.min(100, ((21 - val) / 7.5) * 100)))
+    } else if (q.key === "fat") {
+      scores.push(Math.max(0, Math.min(100, 100 - Math.abs(val - 10) * 10)))
+    } else {
+      const range = q.max - q.min
+      if (range > 0) {
+        const pct = ((val - q.min) / range) * 100
+        scores.push(Math.max(0, Math.min(100, pct)))
+      } else {
+        scores.push(50)
+      }
+    }
+  })
+
+  if (scores.length === 0) return 0
+  const avg = scores.reduce((sum, s) => sum + s, 0) / scores.length
+  return Math.round(avg)
 }
 
 function getScoreDefinition(score: number) {
@@ -125,7 +155,8 @@ export default function TestClient({
   categories,
   players,
   tests,
-  playerProfile
+  playerProfile,
+  initialTemplate
 }: TestClientProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -137,15 +168,37 @@ export default function TestClient({
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("Tous")
   const [searchQuery, setSearchQuery] = useState("")
 
-  // Form parameters
-  const [vma, setVma] = useState(16.5)
-  const [vo2Max, setVo2Max] = useState(62.0)
-  const [sprint10m, setSprint10m] = useState(1.85)
-  const [sprint30m, setSprint30m] = useState(3.90)
-  const [cmj, setCmj] = useState(42.0)
-  const [sj, setSj] = useState(38.0)
-  const [illinois, setIllinois] = useState(16.2)
-  const [fat, setFat] = useState(11.5)
+  // --- Physical Test Customization States ---
+  const [isCustomizingTemplate, setIsCustomizingTemplate] = useState(false)
+  const [template, setTemplate] = useState<PhysicalQuality[]>(() => {
+    if (initialTemplate) {
+      try {
+        return typeof initialTemplate === "string" ? JSON.parse(initialTemplate) : initialTemplate
+      } catch (e) {
+        console.error("Error parsing template:", e)
+      }
+    }
+    return DEFAULT_PHYSICAL_TEST_TEMPLATE
+  })
+
+  // Dynamic values state for form inputs
+  const [formValues, setFormValues] = useState<Record<string, number>>(() => {
+    const initialValues: Record<string, number> = {}
+    const activeTemplate = initialTemplate || DEFAULT_PHYSICAL_TEST_TEMPLATE
+    const resolvedTemplate = typeof activeTemplate === "string" ? JSON.parse(activeTemplate) : activeTemplate
+    resolvedTemplate.forEach((q: any) => {
+      initialValues[q.key] = q.defaultValue
+    })
+    return initialValues
+  })
+
+  // Dynamic customization form states
+  const [newQualityLabel, setNewQualityLabel] = useState("")
+  const [newQualityIcon, setNewQualityIcon] = useState("💪")
+  const [newQualityUnit, setNewQualityUnit] = useState("")
+  const [newQualityMin, setNewQualityMin] = useState(0)
+  const [newQualityMax, setNewQualityMax] = useState(100)
+  const [newQualityDefault, setNewQualityDefault] = useState(50)
 
   // --- Actions Handlers ---
   const handleAddTest = async (e: React.FormEvent) => {
@@ -161,28 +214,29 @@ export default function TestClient({
     startTransition(async () => {
       const res = await createPhysicalTest(
         selectedPlayerId,
-        Number(vma),
-        Number(vo2Max),
-        Number(sprint10m),
-        Number(sprint30m),
-        Number(cmj),
-        Number(sj),
-        Number(illinois),
-        Number(fat)
+        Number(formValues["vma"] || 0),
+        Number(formValues["vo2Max"] || 0),
+        Number(formValues["sprint10m"] || 0),
+        Number(formValues["sprint30m"] || 0),
+        Number(formValues["cmj"] || 0),
+        Number(formValues["sj"] || 0),
+        Number(formValues["illinois"] || 0),
+        Number(formValues["fat"] || 0),
+        formValues
       )
 
       if (res.success) {
         const playerObj = players.find((p) => p.id === selectedPlayerId)
         setSuccessMsg(`Test physique enregistré avec succès pour ${playerObj?.name || "le joueur"} !`)
         setSelectedPlayerId("")
-        setVma(16.5)
-        setVo2Max(62.0)
-        setSprint10m(1.85)
-        setSprint30m(3.90)
-        setCmj(42.0)
-        setSj(38.0)
-        setIllinois(16.2)
-        setFat(11.5)
+        
+        // Reset form to template default values
+        const resetValues: Record<string, number> = {}
+        template.forEach(q => {
+          resetValues[q.key] = q.defaultValue
+        })
+        setFormValues(resetValues)
+        
         router.refresh()
         setTimeout(() => setSuccessMsg(""), 4000)
       } else {
@@ -208,37 +262,83 @@ export default function TestClient({
     })
   }
 
+  // --- Template Customization Handlers ---
+  const handleRemoveQuality = (key: string) => {
+    setTemplate((prev) => prev.filter((q) => q.key !== key))
+  }
+
+  const handleAddQuality = () => {
+    if (!newQualityLabel) return
+    const key = `custom_${newQualityLabel.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "_")}`
+    if (template.some((q) => q.key === key)) {
+      alert("Une qualité avec ce nom existe déjà.")
+      return
+    }
+    const newQ: PhysicalQuality = {
+      key,
+      label: newQualityLabel,
+      icon: newQualityIcon,
+      unit: newQualityUnit || "unit",
+      min: Number(newQualityMin),
+      max: Number(newQualityMax),
+      defaultValue: Number(newQualityDefault),
+      isDefault: false
+    }
+    setTemplate((prev) => [...prev, newQ])
+    setNewQualityLabel("")
+    setNewQualityUnit("")
+    setNewQualityMin(0)
+    setNewQualityMax(100)
+    setNewQualityDefault(50)
+  }
+
+  const handleSaveTemplate = async () => {
+    setErrorMsg("")
+    setSuccessMsg("")
+    startTransition(async () => {
+      const res = await savePhysicalTestTemplateAction(template)
+      if (res.success) {
+        setSuccessMsg("Modèle de test physique enregistré avec succès !")
+        setIsCustomizingTemplate(false)
+        router.refresh()
+        setTimeout(() => setSuccessMsg(""), 4000)
+      } else {
+        setErrorMsg(res.error || "Erreur lors de l'enregistrement du modèle.")
+      }
+    })
+  }
+
   // --- Export to CSV ---
   const handleExportCSV = () => {
     const headers = [
       "Date",
       "Joueur",
       "Equipe",
-      "VMA (km/h)",
-      "VO2 Max (ml/kg/min)",
-      "Sprint 10m (s)",
-      "Sprint 30m (s)",
-      "CMJ (cm)",
-      "SJ (cm)",
-      "Illinois (s)",
-      "Masse Grasse (%)",
+      ...template.map(q => `${q.label} (${q.unit})`),
       "Note Globale (/100)"
     ]
 
-    const rows = filteredTests.map((t) => [
-      formatDate(t.createdAt),
-      t.playerName,
-      t.playerCategoryName,
-      t.vma.toString(),
-      t.vo2Max.toString(),
-      t.sprint10m.toString(),
-      t.sprint30m.toString(),
-      t.cmj.toString(),
-      t.sj.toString(),
-      t.illinois.toString(),
-      t.fat.toString(),
-      calculatePhysicalScore(t).toString()
-    ])
+    const rows = filteredTests.map((t) => {
+      const values = {
+        vma: t.vma,
+        vo2Max: t.vo2Max,
+        sprint10m: t.sprint10m,
+        sprint30m: t.sprint30m,
+        cmj: t.cmj,
+        sj: t.sj,
+        illinois: t.illinois,
+        fat: t.fat,
+        ...(t.customValues || {})
+      } as Record<string, any>
+
+      return [
+        formatDate(t.createdAt),
+        t.playerName,
+        t.playerCategoryName,
+        ...template.map(q => (values[q.key] !== undefined ? values[q.key].toString() : "")),
+        calculatePhysicalScore(t, template).toString()
+      ]
+    })
 
     const csvContent =
       "data:text/csv;charset=utf-8,\uFEFF" +
@@ -280,8 +380,8 @@ export default function TestClient({
 
   const playerPhysicalScore = useMemo(() => {
     if (!latestTest) return 0
-    return calculatePhysicalScore(latestTest)
-  }, [latestTest])
+    return calculatePhysicalScore(latestTest, template)
+  }, [latestTest, template])
 
   const scoreDefinition = useMemo(() => {
     return getScoreDefinition(playerPhysicalScore)
@@ -320,16 +420,24 @@ export default function TestClient({
                 Tests Physiques & Aptitudes (Staff)
               </h1>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Saisie et suivi des 5 catégories de tests athlétiques avec calcul de note globale.
+                Saisie et suivi des tests athlétiques personnalisables avec calcul de note globale.
               </p>
             </div>
-            <button
-              onClick={handleExportCSV}
-              disabled={filteredTests.length === 0}
-              className="rounded-xl bg-zinc-200 hover:bg-zinc-300 disabled:opacity-50 text-emerald-600 border border-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-emerald-400 dark:border-zinc-700 font-black uppercase text-[10px] tracking-wider px-4 py-2.5 transition-all cursor-pointer"
-            >
-              Exporter vers Excel
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsCustomizingTemplate(true)}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 transition-all cursor-pointer shadow-md active:scale-95 flex items-center gap-1.5"
+              >
+                ⚙️ Personnaliser
+              </button>
+              <button
+                onClick={handleExportCSV}
+                disabled={filteredTests.length === 0}
+                className="rounded-xl bg-zinc-200 hover:bg-zinc-300 disabled:opacity-50 text-emerald-600 border border-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-emerald-400 dark:border-zinc-700 font-black uppercase text-[10px] tracking-wider px-4 py-2.5 transition-all cursor-pointer"
+              >
+                Exporter vers Excel
+              </button>
+            </div>
           </section>
 
           {/* Grid Layout */}
@@ -376,7 +484,7 @@ export default function TestClient({
               ) : (
                 <div className="space-y-4">
                   {filteredTests.map((t) => {
-                    const score = calculatePhysicalScore(t)
+                    const score = calculatePhysicalScore(t, template)
                     const def = getScoreDefinition(score)
                     return (
                       <div
@@ -398,30 +506,31 @@ export default function TestClient({
                           </div>
 
                           {/* Grid of parameters */}
-                          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-[10px] font-bold text-zinc-400 pt-1">
-                            <div>
-                              <p className="text-[8px] text-zinc-450 uppercase">Endurance</p>
-                              <p className="text-zinc-850 dark:text-zinc-200 font-extrabold">VMA: {t.vma} km/h</p>
-                              <p className="text-zinc-500 font-medium">VO2: {t.vo2Max} ml/kg</p>
-                            </div>
-                            <div>
-                              <p className="text-[8px] text-zinc-450 uppercase">Vitesse</p>
-                              <p className="text-zinc-850 dark:text-zinc-200 font-extrabold">10m: {t.sprint10m}s</p>
-                              <p className="text-zinc-500 font-medium">30m: {t.sprint30m}s</p>
-                            </div>
-                            <div>
-                              <p className="text-[8px] text-zinc-450 uppercase">Explosivité</p>
-                              <p className="text-zinc-850 dark:text-zinc-200 font-extrabold">CMJ: {t.cmj} cm</p>
-                              <p className="text-zinc-500 font-medium">SJ: {t.sj} cm</p>
-                            </div>
-                            <div>
-                              <p className="text-[8px] text-zinc-450 uppercase">Agilité</p>
-                              <p className="text-zinc-850 dark:text-zinc-200 font-extrabold">Illinois: {t.illinois}s</p>
-                            </div>
-                            <div>
-                              <p className="text-[8px] text-zinc-450 uppercase">Morphologie</p>
-                              <p className="text-zinc-850 dark:text-zinc-200 font-extrabold">Masse gr.: {t.fat}%</p>
-                            </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3 text-[10px] font-bold text-zinc-400 pt-1">
+                            {template.map((q) => {
+                              const valuesObj = {
+                                vma: t.vma,
+                                vo2Max: t.vo2Max,
+                                sprint10m: t.sprint10m,
+                                sprint30m: t.sprint30m,
+                                cmj: t.cmj,
+                                sj: t.sj,
+                                illinois: t.illinois,
+                                fat: t.fat,
+                                ...(t.customValues || {})
+                              } as Record<string, any>
+                              const val = valuesObj[q.key]
+                              return (
+                                <div key={q.key}>
+                                  <p className="text-[8px] text-zinc-450 uppercase flex items-center gap-0.5">
+                                    <span>{q.icon}</span> {q.label}
+                                  </p>
+                                  <p className="text-zinc-850 dark:text-zinc-200 font-extrabold">
+                                    {val !== undefined && val !== null ? `${val} ${q.unit}` : "-"}
+                                  </p>
+                                </div>
+                              )
+                            })}
                           </div>
                         </div>
 
@@ -449,7 +558,7 @@ export default function TestClient({
                   Enregistrer une Évaluation
                 </h3>
                 <p className="text-[9px] text-zinc-400 mt-1">
-                  Saisie des tests physiques pour les 5 catégories athlétiques.
+                  Saisie des tests physiques pour les aptitudes configurées.
                 </p>
               </div>
 
@@ -493,141 +602,36 @@ export default function TestClient({
 
                 {/* Categories blocks */}
                 <div className="space-y-4">
-                  {/* 1. Endurance */}
-                  <div className="p-3 bg-zinc-50/50 dark:bg-zinc-950/40 rounded-xl space-y-2 border border-zinc-100 dark:border-zinc-850">
-                    <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">⚡ 1. Endurance</p>
-                    <div className="grid grid-cols-2 gap-2">
+                  {template.map((q) => (
+                    <div
+                      key={q.key}
+                      className="p-3 bg-zinc-50/50 dark:bg-zinc-950/40 rounded-xl space-y-2 border border-zinc-100 dark:border-zinc-850 animate-in fade-in duration-200"
+                    >
+                      <p className="text-[9px] font-black text-blue-500 dark:text-blue-450 uppercase tracking-widest flex items-center gap-1.5">
+                        <span>{q.icon}</span> {q.label}
+                      </p>
                       <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">VMA (km/h) :</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          required
-                          min="10"
-                          max="25"
-                          value={vma}
-                          onChange={(e) => setVma(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">VO2 Max (ml/kg) :</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          required
-                          min="30"
-                          max="90"
-                          value={vo2Max}
-                          onChange={(e) => setVo2Max(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2. Vitesse */}
-                  <div className="p-3 bg-zinc-50/50 dark:bg-zinc-950/40 rounded-xl space-y-2 border border-zinc-100 dark:border-zinc-850">
-                    <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest">🏃 2. Vitesse</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">Sprint 10m (s) :</label>
+                        <label className="text-[8px] font-bold text-zinc-400 uppercase">
+                          Valeur ({q.unit}) :
+                        </label>
                         <input
                           type="number"
                           step="0.01"
                           required
-                          min="1.3"
-                          max="3.0"
-                          value={sprint10m}
-                          onChange={(e) => setSprint10m(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">Sprint 30m (s) :</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          required
-                          min="3.0"
-                          max="6.5"
-                          value={sprint30m}
-                          onChange={(e) => setSprint30m(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
+                          min={q.min}
+                          max={q.max}
+                          value={formValues[q.key] !== undefined ? formValues[q.key] : q.defaultValue}
+                          onChange={(e) =>
+                            setFormValues((prev) => ({
+                              ...prev,
+                              [q.key]: Number(e.target.value)
+                            }))
+                          }
+                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 dark:text-white font-bold"
                         />
                       </div>
                     </div>
-                  </div>
-
-                  {/* 3. Explosivité */}
-                  <div className="p-3 bg-zinc-50/50 dark:bg-zinc-950/40 rounded-xl space-y-2 border border-zinc-100 dark:border-zinc-850">
-                    <p className="text-[9px] font-black text-purple-500 uppercase tracking-widest">🦘 3. Explosivité</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">CMJ (cm) :</label>
-                        <input
-                          type="number"
-                          step="0.5"
-                          required
-                          min="15"
-                          max="80"
-                          value={cmj}
-                          onChange={(e) => setCmj(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">SJ (cm) :</label>
-                        <input
-                          type="number"
-                          step="0.5"
-                          required
-                          min="10"
-                          max="75"
-                          value={sj}
-                          onChange={(e) => setSj(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4 & 5. Agilité & Morphologie */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-zinc-50/50 dark:bg-zinc-950/40 rounded-xl space-y-2 border border-zinc-100 dark:border-zinc-850">
-                      <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest">🔄 4. Agilité</p>
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">Illinois (s) :</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          required
-                          min="11"
-                          max="25"
-                          value={illinois}
-                          onChange={(e) => setIllinois(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="p-3 bg-zinc-50/50 dark:bg-zinc-950/40 rounded-xl space-y-2 border border-zinc-100 dark:border-zinc-850">
-                      <p className="text-[9px] font-black text-cyan-500 uppercase tracking-widest">📊 5. Morphologie</p>
-                      <div className="space-y-1">
-                        <label className="text-[8px] font-bold text-zinc-400 uppercase">Masse grasse (%) :</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          required
-                          min="5"
-                          max="25"
-                          value={fat}
-                          onChange={(e) => setFat(Number(e.target.value))}
-                          className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-900 font-bold"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
 
                 <button
@@ -749,92 +753,47 @@ export default function TestClient({
             </div>
           </div>
 
-          {/* Detailed parameter breakdown cards (5 categories) */}
+          {/* Detailed parameter breakdown cards */}
           {latestTest && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* 1. Endurance */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-3">
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-2">
-                  <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">⚡ 1. Endurance</h4>
-                  <span className="text-xs">🫁</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">VMA</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.vma} km/h</span>
+              {template.map((q) => {
+                const valuesObj = {
+                  vma: latestTest.vma,
+                  vo2Max: latestTest.vo2Max,
+                  sprint10m: latestTest.sprint10m,
+                  sprint30m: latestTest.sprint30m,
+                  cmj: latestTest.cmj,
+                  sj: latestTest.sj,
+                  illinois: latestTest.illinois,
+                  fat: latestTest.fat,
+                  ...(latestTest.customValues || {})
+                } as Record<string, any>
+                const val = valuesObj[q.key]
+                return (
+                  <div
+                    key={q.key}
+                    className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-3"
+                  >
+                    <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-2">
+                      <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <span>{q.icon}</span> {q.label}
+                      </h4>
+                      <span className="text-xs">{q.icon}</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[10px] text-zinc-450 font-bold uppercase">Valeur</span>
+                        <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">
+                          {val !== undefined && val !== null ? `${val} ${q.unit}` : "-"}
+                        </span>
+                      </div>
+                      <p className="text-[8px] text-zinc-450 font-medium">
+                        Cible min: {q.min} | max: {q.max}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">VO2 Max</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.vo2Max} ml/kg/min</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. Vitesse */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-3">
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-2">
-                  <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-widest">🏃 2. Vitesse</h4>
-                  <span className="text-xs">⚡</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">Sprint 10m</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.sprint10m} s</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">Sprint 30m</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.sprint30m} s</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Explosivité */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-3">
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-2">
-                  <h4 className="text-[10px] font-black text-purple-500 uppercase tracking-widest">🦘 3. Explosivité</h4>
-                  <span className="text-xs">🚀</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">CMJ (Détente)</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.cmj} cm</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">SJ (Détente)</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.sj} cm</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 4. Agilité */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-3">
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-2">
-                  <h4 className="text-[10px] font-black text-amber-500 uppercase tracking-widest">🔄 4. Agilité</h4>
-                  <span className="text-xs">🔄</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">Test Illinois</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.illinois} s</span>
-                  </div>
-                  <p className="text-[8px] text-zinc-450 font-medium">Mobilité multidirectionnelle.</p>
-                </div>
-              </div>
-
-              {/* 5. Morphologie */}
-              <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-3">
-                <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-850 pb-2">
-                  <h4 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest">📊 5. Morphologie</h4>
-                  <span className="text-xs">⚖️</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] text-zinc-450 font-bold uppercase">Masse grasse</span>
-                    <span className="text-sm font-black text-zinc-850 dark:text-zinc-200">{latestTest.fat} %</span>
-                  </div>
-                  <p className="text-[8px] text-zinc-450 font-medium">Calculée par mesure des plis cutanés.</p>
-                </div>
-              </div>
+                )
+              })}
             </div>
           )}
 
@@ -855,17 +814,28 @@ export default function TestClient({
                     <tr className="bg-zinc-50 dark:bg-zinc-950 text-[9px] font-black text-zinc-500 uppercase tracking-wider border-b border-zinc-250 dark:border-zinc-800">
                       <th className="py-3 px-4">Date de l&apos;évaluation</th>
                       <th className="py-3 px-4 text-center">Note Globale</th>
-                      <th className="py-3 px-4 text-center">Endurance</th>
-                      <th className="py-3 px-4 text-center">Vitesse</th>
-                      <th className="py-3 px-4 text-center">Explosivité</th>
-                      <th className="py-3 px-4 text-center">Agilité</th>
-                      <th className="py-3 px-4 text-center">Morphologie</th>
+                      {template.map((q) => (
+                        <th key={q.key} className="py-3 px-4 text-center">
+                          {q.icon} {q.label}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850 text-zinc-700 dark:text-zinc-300 font-medium">
                     {tests.map((t) => {
-                      const score = calculatePhysicalScore(t)
+                      const score = calculatePhysicalScore(t, template)
                       const def = getScoreDefinition(score)
+                      const valuesObj = {
+                        vma: t.vma,
+                        vo2Max: t.vo2Max,
+                        sprint10m: t.sprint10m,
+                        sprint30m: t.sprint30m,
+                        cmj: t.cmj,
+                        sj: t.sj,
+                        illinois: t.illinois,
+                        fat: t.fat,
+                        ...(t.customValues || {})
+                      } as Record<string, any>
                       return (
                         <tr key={t.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/20">
                           <td className="py-3 px-4 font-bold text-zinc-900 dark:text-white">
@@ -876,21 +846,14 @@ export default function TestClient({
                               {score}/100
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-center">
-                            VMA: {t.vma} | VO2: {t.vo2Max}
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            10m: {t.sprint10m}s | 30m: {t.sprint30m}s
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            CMJ: {t.cmj}cm | SJ: {t.sj}cm
-                          </td>
-                          <td className="py-3 px-4 text-center font-bold">
-                            {t.illinois}s
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            {t.fat}%
-                          </td>
+                          {template.map((q) => {
+                            const val = valuesObj[q.key]
+                            return (
+                              <td key={q.key} className="py-3 px-4 text-center">
+                                {val !== undefined && val !== null ? `${val} ${q.unit}` : "-"}
+                              </td>
+                            )
+                          })}
                         </tr>
                       )
                     })}
@@ -898,6 +861,180 @@ export default function TestClient({
                 </table>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Customize Physical Test Form */}
+      {isCustomizingTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-6 flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-850 pb-4">
+              <div>
+                <h2 className="text-sm font-black uppercase text-zinc-900 dark:text-white flex items-center gap-2">
+                  ⚙️ Personnaliser le Test Physique
+                </h2>
+                <p className="text-[10px] text-zinc-400 mt-0.5">
+                  Configurez le formulaire et l&apos;historique de votre club en gérant les qualités évaluées.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsCustomizingTemplate(false)}
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors text-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content - List of current qualities */}
+            <div className="flex-1 space-y-4">
+              <div>
+                <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2">
+                  Qualités Actuelles ({template.length})
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {template.map((q) => (
+                    <div
+                      key={q.key}
+                      className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/50 rounded-xl border border-zinc-150 dark:border-zinc-800"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{q.icon}</span>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-900 dark:text-white">{q.label}</p>
+                          <p className="text-[9px] text-zinc-400">
+                            Unité: {q.unit} | Cible: {q.min} - {q.max} | Def: {q.defaultValue}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveQuality(q.key)}
+                        className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-500/10 dark:hover:bg-red-500/5 rounded transition-colors text-xs font-bold"
+                        title="Supprimer cette qualité"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Form to add a new custom quality */}
+              <div className="border-t border-zinc-100 dark:border-zinc-850 pt-4 space-y-3">
+                <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                  ➕ Ajouter une nouvelle qualité
+                </h3>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-zinc-400 uppercase">Nom de la qualité :</label>
+                    <input
+                      type="text"
+                      placeholder="ex: Souplesse"
+                      value={newQualityLabel}
+                      onChange={(e) => setNewQualityLabel(e.target.value)}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-zinc-400 uppercase">Icone / Emoji :</label>
+                    <select
+                      value={newQualityIcon}
+                      onChange={(e) => setNewQualityIcon(e.target.value)}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    >
+                      <option value="💪">💪 Force</option>
+                      <option value="⚡">⚡ Vitesse</option>
+                      <option value="🫁">🫁 Endurance</option>
+                      <option value="🏃">🏃 Course</option>
+                      <option value="🦘">🦘 Saut/CMJ</option>
+                      <option value="🚀">🚀 Explosivité</option>
+                      <option value="🔄">🔄 Agilité</option>
+                      <option value="⚖️">⚖️ Poids</option>
+                      <option value="🎯">🎯 Précision</option>
+                      <option value="⏱️">⏱️ Chrono</option>
+                      <option value="📐">📐 Souplesse</option>
+                      <option value="🩹">🩹 Récupération</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-zinc-400 uppercase">Unité (ex: s, cm, %) :</label>
+                    <input
+                      type="text"
+                      placeholder="ex: cm"
+                      value={newQualityUnit}
+                      onChange={(e) => setNewQualityUnit(e.target.value)}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-zinc-400 uppercase">Valeur Min :</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={newQualityMin}
+                      onChange={(e) => setNewQualityMin(Number(e.target.value))}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-zinc-400 uppercase">Valeur Max :</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={newQualityMax}
+                      onChange={(e) => setNewQualityMax(Number(e.target.value))}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-zinc-400 uppercase">Valeur par défaut :</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={newQualityDefault}
+                      onChange={(e) => setNewQualityDefault(Number(e.target.value))}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddQuality}
+                  className="w-full rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900 font-bold uppercase text-[9px] tracking-wider py-2 transition-colors cursor-pointer"
+                >
+                  + Ajouter à la liste
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 border-t border-zinc-100 dark:border-zinc-850 pt-4">
+              <button
+                type="button"
+                onClick={() => setIsCustomizingTemplate(false)}
+                className="rounded-xl border border-zinc-200 dark:border-zinc-800 px-4 py-2.5 text-xs font-bold text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-950 transition-colors cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveTemplate}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 text-xs font-black uppercase tracking-wider transition-colors cursor-pointer shadow-md"
+              >
+                Enregistrer le Modèle
+              </button>
+            </div>
+
           </div>
         </div>
       )}

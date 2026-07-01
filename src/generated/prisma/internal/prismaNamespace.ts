@@ -3057,7 +3057,8 @@ export const StaffScalarFieldEnum = {
   nationality: 'nationality',
   birthDate: 'birthDate',
   medicalTreatment: 'medicalTreatment',
-  medication: 'medication'
+  medication: 'medication',
+  physicalTestTemplate: 'physicalTestTemplate'
 } as const
 
 export type StaffScalarFieldEnum = (typeof StaffScalarFieldEnum)[keyof typeof StaffScalarFieldEnum]
@@ -3177,6 +3178,7 @@ export const PhysicalTestScalarFieldEnum = {
   sj: 'sj',
   illinois: 'illinois',
   fat: 'fat',
+  customValues: 'customValues',
   date: 'date',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

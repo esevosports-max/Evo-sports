@@ -91,6 +91,7 @@ export type PhysicalTestCountAggregateOutputType = {
   sj: number
   illinois: number
   fat: number
+  customValues: number
   date: number
   createdAt: number
   updatedAt: number
@@ -163,6 +164,7 @@ export type PhysicalTestCountAggregateInputType = {
   sj?: true
   illinois?: true
   fat?: true
+  customValues?: true
   date?: true
   createdAt?: true
   updatedAt?: true
@@ -266,6 +268,7 @@ export type PhysicalTestGroupByOutputType = {
   sj: number
   illinois: number
   fat: number
+  customValues: runtime.JsonValue | null
   date: Date
   createdAt: Date
   updatedAt: Date
@@ -305,6 +308,7 @@ export type PhysicalTestWhereInput = {
   sj?: Prisma.FloatFilter<"PhysicalTest"> | number
   illinois?: Prisma.FloatFilter<"PhysicalTest"> | number
   fat?: Prisma.FloatFilter<"PhysicalTest"> | number
+  customValues?: Prisma.JsonNullableFilter<"PhysicalTest">
   date?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
@@ -322,6 +326,7 @@ export type PhysicalTestOrderByWithRelationInput = {
   sj?: Prisma.SortOrder
   illinois?: Prisma.SortOrder
   fat?: Prisma.SortOrder
+  customValues?: Prisma.SortOrderInput | Prisma.SortOrder
   date?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -342,6 +347,7 @@ export type PhysicalTestWhereUniqueInput = Prisma.AtLeast<{
   sj?: Prisma.FloatFilter<"PhysicalTest"> | number
   illinois?: Prisma.FloatFilter<"PhysicalTest"> | number
   fat?: Prisma.FloatFilter<"PhysicalTest"> | number
+  customValues?: Prisma.JsonNullableFilter<"PhysicalTest">
   date?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
@@ -359,6 +365,7 @@ export type PhysicalTestOrderByWithAggregationInput = {
   sj?: Prisma.SortOrder
   illinois?: Prisma.SortOrder
   fat?: Prisma.SortOrder
+  customValues?: Prisma.SortOrderInput | Prisma.SortOrder
   date?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -383,6 +390,7 @@ export type PhysicalTestScalarWhereWithAggregatesInput = {
   sj?: Prisma.FloatWithAggregatesFilter<"PhysicalTest"> | number
   illinois?: Prisma.FloatWithAggregatesFilter<"PhysicalTest"> | number
   fat?: Prisma.FloatWithAggregatesFilter<"PhysicalTest"> | number
+  customValues?: Prisma.JsonNullableWithAggregatesFilter<"PhysicalTest">
   date?: Prisma.DateTimeWithAggregatesFilter<"PhysicalTest"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PhysicalTest"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PhysicalTest"> | Date | string
@@ -398,6 +406,7 @@ export type PhysicalTestCreateInput = {
   sj: number
   illinois: number
   fat: number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -415,6 +424,7 @@ export type PhysicalTestUncheckedCreateInput = {
   sj: number
   illinois: number
   fat: number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -430,6 +440,7 @@ export type PhysicalTestUpdateInput = {
   sj?: Prisma.FloatFieldUpdateOperationsInput | number
   illinois?: Prisma.FloatFieldUpdateOperationsInput | number
   fat?: Prisma.FloatFieldUpdateOperationsInput | number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -447,6 +458,7 @@ export type PhysicalTestUncheckedUpdateInput = {
   sj?: Prisma.FloatFieldUpdateOperationsInput | number
   illinois?: Prisma.FloatFieldUpdateOperationsInput | number
   fat?: Prisma.FloatFieldUpdateOperationsInput | number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -463,6 +475,7 @@ export type PhysicalTestCreateManyInput = {
   sj: number
   illinois: number
   fat: number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -478,6 +491,7 @@ export type PhysicalTestUpdateManyMutationInput = {
   sj?: Prisma.FloatFieldUpdateOperationsInput | number
   illinois?: Prisma.FloatFieldUpdateOperationsInput | number
   fat?: Prisma.FloatFieldUpdateOperationsInput | number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -494,6 +508,7 @@ export type PhysicalTestUncheckedUpdateManyInput = {
   sj?: Prisma.FloatFieldUpdateOperationsInput | number
   illinois?: Prisma.FloatFieldUpdateOperationsInput | number
   fat?: Prisma.FloatFieldUpdateOperationsInput | number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -520,6 +535,7 @@ export type PhysicalTestCountOrderByAggregateInput = {
   sj?: Prisma.SortOrder
   illinois?: Prisma.SortOrder
   fat?: Prisma.SortOrder
+  customValues?: Prisma.SortOrder
   date?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -639,6 +655,7 @@ export type PhysicalTestCreateWithoutPlayerInput = {
   sj: number
   illinois: number
   fat: number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -654,6 +671,7 @@ export type PhysicalTestUncheckedCreateWithoutPlayerInput = {
   sj: number
   illinois: number
   fat: number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -699,6 +717,7 @@ export type PhysicalTestScalarWhereInput = {
   sj?: Prisma.FloatFilter<"PhysicalTest"> | number
   illinois?: Prisma.FloatFilter<"PhysicalTest"> | number
   fat?: Prisma.FloatFilter<"PhysicalTest"> | number
+  customValues?: Prisma.JsonNullableFilter<"PhysicalTest">
   date?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PhysicalTest"> | Date | string
@@ -714,6 +733,7 @@ export type PhysicalTestCreateManyPlayerInput = {
   sj: number
   illinois: number
   fat: number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -729,6 +749,7 @@ export type PhysicalTestUpdateWithoutPlayerInput = {
   sj?: Prisma.FloatFieldUpdateOperationsInput | number
   illinois?: Prisma.FloatFieldUpdateOperationsInput | number
   fat?: Prisma.FloatFieldUpdateOperationsInput | number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -744,6 +765,7 @@ export type PhysicalTestUncheckedUpdateWithoutPlayerInput = {
   sj?: Prisma.FloatFieldUpdateOperationsInput | number
   illinois?: Prisma.FloatFieldUpdateOperationsInput | number
   fat?: Prisma.FloatFieldUpdateOperationsInput | number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -759,6 +781,7 @@ export type PhysicalTestUncheckedUpdateManyWithoutPlayerInput = {
   sj?: Prisma.FloatFieldUpdateOperationsInput | number
   illinois?: Prisma.FloatFieldUpdateOperationsInput | number
   fat?: Prisma.FloatFieldUpdateOperationsInput | number
+  customValues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -777,6 +800,7 @@ export type PhysicalTestSelect<ExtArgs extends runtime.Types.Extensions.Internal
   sj?: boolean
   illinois?: boolean
   fat?: boolean
+  customValues?: boolean
   date?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -794,6 +818,7 @@ export type PhysicalTestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   sj?: boolean
   illinois?: boolean
   fat?: boolean
+  customValues?: boolean
   date?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -811,6 +836,7 @@ export type PhysicalTestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   sj?: boolean
   illinois?: boolean
   fat?: boolean
+  customValues?: boolean
   date?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -828,12 +854,13 @@ export type PhysicalTestSelectScalar = {
   sj?: boolean
   illinois?: boolean
   fat?: boolean
+  customValues?: boolean
   date?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PhysicalTestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "playerId" | "vma" | "vo2Max" | "sprint10m" | "sprint30m" | "cmj" | "sj" | "illinois" | "fat" | "date" | "createdAt" | "updatedAt", ExtArgs["result"]["physicalTest"]>
+export type PhysicalTestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "playerId" | "vma" | "vo2Max" | "sprint10m" | "sprint30m" | "cmj" | "sj" | "illinois" | "fat" | "customValues" | "date" | "createdAt" | "updatedAt", ExtArgs["result"]["physicalTest"]>
 export type PhysicalTestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
 }
@@ -860,6 +887,7 @@ export type $PhysicalTestPayload<ExtArgs extends runtime.Types.Extensions.Intern
     sj: number
     illinois: number
     fat: number
+    customValues: runtime.JsonValue | null
     date: Date
     createdAt: Date
     updatedAt: Date
@@ -1297,6 +1325,7 @@ export interface PhysicalTestFieldRefs {
   readonly sj: Prisma.FieldRef<"PhysicalTest", 'Float'>
   readonly illinois: Prisma.FieldRef<"PhysicalTest", 'Float'>
   readonly fat: Prisma.FieldRef<"PhysicalTest", 'Float'>
+  readonly customValues: Prisma.FieldRef<"PhysicalTest", 'Json'>
   readonly date: Prisma.FieldRef<"PhysicalTest", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"PhysicalTest", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PhysicalTest", 'DateTime'>
