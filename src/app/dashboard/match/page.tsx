@@ -45,11 +45,41 @@ export default async function MatchPage() {
   const matchesResult = await getMatches()
   const initialMatches = matchesResult.success && matchesResult.matches ? matchesResult.matches : []
 
+  // Fetch all compositions and players for the club's team categories
+  let initialCompositions: any[] = []
+  let clubPlayers: any[] = []
+  try {
+    const clubId = await getClubIdForUser(userId, roleName)
+    if (clubId) {
+      initialCompositions = await db.composition.findMany({
+        where: {
+          teamCategory: { clubId }
+        },
+        include: {
+          teamCategory: true
+        }
+      })
+      clubPlayers = await db.player.findMany({
+        where: { clubId },
+        include: {
+          user: {
+            select: { name: true }
+          },
+          teamCategory: true
+        }
+      })
+    }
+  } catch (error) {
+    console.error("Error fetching compositions/players in MatchPage:", error)
+  }
+
   return (
     <MatchClient
       initialMatches={initialMatches as any[]}
       roleName={roleName}
       clubName={clubName}
+      initialCompositions={initialCompositions}
+      clubPlayers={clubPlayers}
     />
   )
 }

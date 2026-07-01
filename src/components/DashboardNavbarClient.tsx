@@ -241,7 +241,7 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
       ]
 
   const isFeatureEnabled = (href: string) => {
-    if (isManager || user.roleName === "PRESIDENT") return true
+    if (isManager) return true
 
     if (href === "/dashboard") {
       return club.hasDashboard !== false

@@ -36,6 +36,9 @@ interface ActivityItem {
   id: string
   name: string
   duration: number // in minutes
+  rpe: number
+  ua: number
+  inm: number
 }
 
 interface PlayerPresence {
@@ -146,24 +149,54 @@ export default function EntrainementClient({
   // 'select' | 'live' | 'sheet'
   const [activeView, setActiveView] = useState<"select" | "live" | "sheet">("select")
   const [selectedTraining, setSelectedTraining] = useState<TrainingEvent | null>(null)
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PROGRAMME" | "TERMINE" | "EXPIRE">("ALL")
 
   // Live session states
   const [activities, setActivities] = useState<ActivityItem[]>([
-    { id: "1", name: "Échauffement cohésion", duration: 15 },
-    { id: "2", name: "Rondo conservation (une touche)", duration: 20 },
+    { id: "1", name: "Échauffement cohésion", duration: 15, rpe: 3, ua: 45, inm: 1 },
+    { id: "2", name: "Rondo conservation (une touche)", duration: 20, rpe: 4, ua: 80, inm: 2 },
   ])
   const [newActivityName, setNewActivityName] = useState("")
   const [newActivityDuration, setNewActivityDuration] = useState("15")
+  const [newActivityRpe, setNewActivityRpe] = useState("5")
+  const [newActivityInm, setNewActivityInm] = useState("2")
 
   // Presence sheet states
   const [roster, setRoster] = useState<PlayerPresence[]>([])
+
+  // Sort and filter trainings by date and selected status
+  const sortedTrainings = [...trainingsList].sort((a, b) => {
+    const dateA = new Date(`${a.date}T${a.time}`).getTime()
+    const dateB = new Date(`${b.date}T${b.time}`).getTime()
+    return dateB - dateA
+  })
+
+  const filteredTrainings = sortedTrainings.filter((train) => {
+    const eventDateTime = new Date(`${train.date}T${train.time}`)
+    const isExpired = train.status === "EXPIRE" || (
+      !isNaN(eventDateTime.getTime()) &&
+      (new Date().getTime() - eventDateTime.getTime() > 24 * 60 * 60 * 1000) &&
+      !train.completed && train.status !== "TERMINE" && train.status !== "EN_COURS"
+    )
+
+    if (statusFilter === "TERMINE") {
+      return train.completed
+    }
+    if (statusFilter === "EXPIRE") {
+      return isExpired && !train.completed
+    }
+    if (statusFilter === "PROGRAMME") {
+      return !train.completed && !isExpired
+    }
+    return true
+  })
 
   // Selection Handler for starting a new session
   const handleStartSession = (event: TrainingEvent) => {
     setSelectedTraining(event)
     setActivities([
-      { id: "1", name: "Échauffement cohésion", duration: 15 },
-      { id: "2", name: "Rondo conservation (une touche)", duration: 20 },
+      { id: "1", name: "Échauffement cohésion", duration: 15, rpe: 3, ua: 45, inm: 1 },
+      { id: "2", name: "Rondo conservation (une touche)", duration: 20, rpe: 4, ua: 80, inm: 2 },
     ])
     const preRoster = clubRosters[event.assignedTeam] || CLUB_ROSTERS[event.assignedTeam] || []
     setRoster(preRoster.map((player) => ({ ...player, present: true } as PlayerPresence)))
@@ -204,15 +237,28 @@ export default function EntrainementClient({
     e.preventDefault()
     if (!newActivityName.trim() || !newActivityDuration) return
 
+    const rpeVal = parseInt(newActivityRpe) || 1
+    const inmVal = parseInt(newActivityInm) || 1
+    if (inmVal < 1 || inmVal > 4) {
+      alert("La valeur de l'INM doit être comprise entre 1 et 4.")
+      return
+    }
+
+    const durationVal = parseInt(newActivityDuration) || 10
     const newItem: ActivityItem = {
       id: Date.now().toString(),
       name: newActivityName.trim(),
-      duration: parseInt(newActivityDuration) || 10,
+      duration: durationVal,
+      rpe: rpeVal,
+      ua: durationVal * rpeVal,
+      inm: inmVal,
     }
 
     setActivities((prev) => [...prev, newItem])
     setNewActivityName("")
     setNewActivityDuration("15")
+    setNewActivityRpe("5")
+    setNewActivityInm("2")
   }
 
   const handleDeleteActivity = (id: string) => {
@@ -229,6 +275,9 @@ export default function EntrainementClient({
 
   // Calculate stats
   const totalDuration = activities.reduce((acc, curr) => acc + curr.duration, 0)
+  const totalUa = activities.reduce((acc, curr) => acc + (curr.ua || 0), 0)
+  const totalRpe = activities.reduce((acc, curr) => acc + (curr.rpe || 0), 0)
+  const totalInm = activities.reduce((acc, curr) => acc + (curr.inm || 0), 0)
   const totalPlayers = roster.length
   const presentCount = roster.filter((p) => p.present).length
   const absentCount = totalPlayers - presentCount
@@ -321,28 +370,35 @@ export default function EntrainementClient({
         <p><span class="meta-label">Équipe :</span> ${teamStr}</p>
         <p><span class="meta-label">Thème :</span> ${themeStr}</p>
         <p><span class="meta-label">Durée totale :</span> ${totalDuration} minutes</p>
+        <p><span class="meta-label">Charge totale :</span> ${totalUa} UA</p>
 
-        <h3>1. TABLEAU DES EXERCICES & DURÉES</h3>
+        <h3>EXERCICES RÉALISÉS</h3>
         <table>
           <thead>
             <tr>
-              <th style="width: 10%">Ordre</th>
-              <th style="width: 60%">Activité / Exercice</th>
-              <th style="width: 30%">Durée</th>
+              <th style="width: 40%">Activité / Exercice</th>
+              <th style="width: 15%">Durée</th>
+              <th style="width: 15%">RPE</th>
+              <th style="width: 15%">Charge (UA)</th>
+              <th style="width: 15%">INM</th>
             </tr>
           </thead>
           <tbody>
-            ${activities.map((act, i) => `
+            ${activities.map((act) => `
               <tr>
-                <td>${i + 1}</td>
                 <td>${act.name}</td>
                 <td>${act.duration} minutes</td>
+                <td>${act.rpe}</td>
+                <td>${act.ua} UA</td>
+                <td>${act.inm}</td>
               </tr>
             `).join("")}
             <tr style="font-weight: bold; background-color: #f9fafb;">
-              <td>-</td>
-              <td>DURÉE TOTALE</td>
+              <td>TOTAL</td>
               <td>${totalDuration} minutes</td>
+              <td>${totalRpe}</td>
+              <td>${totalUa} UA</td>
+              <td>${totalInm}</td>
             </tr>
           </tbody>
         </table>
@@ -426,13 +482,52 @@ export default function EntrainementClient({
             </span>
           </section>
 
-          <div className="space-y-3 select-none">
-            <h3 className="text-xs font-black uppercase tracking-wider text-zinc-850 dark:text-white pb-2 border-b border-zinc-150/70">
-              Séances Disponibles (Planning Importé)
-            </h3>
+          <div className="space-y-4 select-none">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-2 border-b border-zinc-150/70 dark:border-zinc-800">
+              <h3 className="text-xs font-black uppercase tracking-wider text-zinc-850 dark:text-white">
+                Séances Disponibles (Planning Importé)
+              </h3>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase">Filtrer par statut :</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  className="rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-wider text-zinc-700 outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                >
+                  <option value="ALL">Tous ({trainingsList.length})</option>
+                  <option value="PROGRAMME">Planifiés ({trainingsList.filter(t => {
+                    const eventDateTime = new Date(`${t.date}T${t.time}`)
+                    const isExpired = t.status === "EXPIRE" || (
+                      !isNaN(eventDateTime.getTime()) &&
+                      (new Date().getTime() - eventDateTime.getTime() > 24 * 60 * 60 * 1000) &&
+                      !t.completed && t.status !== "TERMINE" && t.status !== "EN_COURS"
+                    )
+                    return !t.completed && !isExpired
+                  }).length})</option>
+                  <option value="TERMINE">Réalisés ({trainingsList.filter(t => t.completed).length})</option>
+                  <option value="EXPIRE">Expirés ({trainingsList.filter(t => {
+                    const eventDateTime = new Date(`${t.date}T${t.time}`)
+                    const isExpired = t.status === "EXPIRE" || (
+                      !isNaN(eventDateTime.getTime()) &&
+                      (new Date().getTime() - eventDateTime.getTime() > 24 * 60 * 60 * 1000) &&
+                      !t.completed && t.status !== "TERMINE" && t.status !== "EN_COURS"
+                    )
+                    return isExpired && !t.completed
+                  }).length})</option>
+                </select>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {trainingsList.map((train) => {
+              {filteredTrainings.length === 0 ? (
+                <div className="md:col-span-2 rounded-2xl border border-zinc-200 bg-white p-12 text-center shadow-sm dark:border-zinc-850 dark:bg-zinc-950">
+                  <span className="text-3xl">🏃‍♂️</span>
+                  <p className="mt-4 text-sm font-black uppercase text-zinc-400">Aucune séance trouvée</p>
+                  <p className="mt-1 text-xs text-zinc-500 font-bold">Aucune séance d&apos;entraînement ne correspond au filtre sélectionné.</p>
+                </div>
+              ) : (
+                filteredTrainings.map((train) => {
                 const eventDateTime = new Date(`${train.date}T${train.time}`)
                 const isExpired = train.status === "EXPIRE" || (
                   !isNaN(eventDateTime.getTime()) &&
@@ -527,7 +622,7 @@ export default function EntrainementClient({
                     )}
                   </div>
                 )
-              })}
+              }))}
             </div>
           </div>
         </div>
@@ -585,17 +680,56 @@ export default function EntrainementClient({
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[9px] font-black text-zinc-450 uppercase mb-1">Durée (Minutes)</label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      placeholder="Ex: 20"
-                      value={newActivityDuration}
-                      onChange={(e) => setNewActivityDuration(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-450 uppercase mb-1">Durée (Minutes)</label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        placeholder="Ex: 20"
+                        value={newActivityDuration}
+                        onChange={(e) => setNewActivityDuration(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-450 uppercase mb-1">RPE (1 à 10)</label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        max="10"
+                        placeholder="Ex: 5"
+                        value={newActivityRpe}
+                        onChange={(e) => setNewActivityRpe(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-450 uppercase mb-1">Charge (UA)</label>
+                      <div className="w-full rounded-xl border border-emerald-100 bg-emerald-50/50 px-3 py-2.5 text-xs font-black text-emerald-700 dark:border-emerald-950/20 dark:bg-emerald-950/10 dark:text-emerald-450 select-none">
+                        {(parseInt(newActivityDuration) || 0) * (parseInt(newActivityRpe) || 0)} UA
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] font-black text-zinc-450 uppercase mb-1">INM (1 à 4)</label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        max="4"
+                        placeholder="Ex: 2"
+                        value={newActivityInm}
+                        onChange={(e) => setNewActivityInm(e.target.value)}
+                        className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                      />
+                    </div>
                   </div>
 
                   <button
@@ -634,7 +768,12 @@ export default function EntrainementClient({
                           <p className="text-xs font-black text-zinc-800 dark:text-white uppercase tracking-wide">
                             {act.name}
                           </p>
-                          <p className="text-[10px] text-zinc-500 font-semibold">⏱ Durée : {act.duration} minutes</p>
+                          <div className="flex flex-wrap items-center gap-2 text-[9px] text-zinc-550 font-bold mt-1">
+                            <span>⏱ {act.duration} min</span>
+                            <span>• RPE: {act.rpe}</span>
+                            <span className="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 px-1 py-0.5 rounded font-black">UA: {act.ua}</span>
+                            <span>• INM: {act.inm}</span>
+                          </div>
                         </div>
 
                         <button
@@ -826,30 +965,36 @@ export default function EntrainementClient({
                 {/* Table 1: Drills list */}
                 <div className="space-y-3">
                   <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-800 dark:text-white border-b pb-1">
-                    1. Exercices Réalisés & Durée par Bloc
+                    Exercices Réalisés
                   </h5>
 
                   <div className="rounded-xl border border-zinc-150 overflow-hidden dark:border-zinc-800">
                     <table className="w-full text-left border-collapse text-[10px] font-semibold">
                       <thead>
                         <tr className="bg-emerald-700 text-white font-black uppercase select-none">
-                          <th className="p-2.5">Ordre</th>
-                          <th className="p-2.5">Activité / Exercice</th>
-                          <th className="p-2.5 text-right">Durée</th>
+                          <th className="p-2.5">Exercice</th>
+                          <th className="p-2.5 text-center">Durée</th>
+                          <th className="p-2.5 text-center">RPE</th>
+                          <th className="p-2.5 text-center">Charge (UA)</th>
+                          <th className="p-2.5 text-center">INM</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {activities.map((act, i) => (
+                        {activities.map((act) => (
                           <tr key={act.id} className="border-b border-zinc-150 dark:border-zinc-800 last:border-0 hover:bg-zinc-50/50">
-                            <td className="p-2.5 text-zinc-400">{i + 1}</td>
                             <td className="p-2.5 text-zinc-800 dark:text-zinc-200 uppercase font-black">{act.name}</td>
-                            <td className="p-2.5 text-right text-zinc-650 font-bold">{act.duration} minutes</td>
+                            <td className="p-2.5 text-center text-zinc-650 font-bold">{act.duration} minutes</td>
+                            <td className="p-2.5 text-center text-zinc-650 font-bold">{act.rpe}</td>
+                            <td className="p-2.5 text-center text-emerald-600 font-extrabold">{act.ua}</td>
+                            <td className="p-2.5 text-center text-zinc-650 font-bold">{act.inm}</td>
                           </tr>
                         ))}
                         <tr className="bg-zinc-50 font-black dark:bg-zinc-950">
-                          <td className="p-2.5"></td>
-                          <td className="p-2.5 text-zinc-850 dark:text-white">DURÉE TOTALE</td>
-                          <td className="p-2.5 text-right text-emerald-600 font-extrabold">{totalDuration} minutes</td>
+                          <td className="p-2.5 text-zinc-850 dark:text-white">TOTAL</td>
+                          <td className="p-2.5 text-center text-emerald-600 font-extrabold">{totalDuration} minutes</td>
+                          <td className="p-2.5 text-center text-emerald-600 font-extrabold">{totalRpe}</td>
+                          <td className="p-2.5 text-center text-emerald-600 font-extrabold">{totalUa} UA</td>
+                          <td className="p-2.5 text-center text-emerald-600 font-extrabold">{totalInm}</td>
                         </tr>
                       </tbody>
                     </table>

@@ -28,34 +28,7 @@ export async function getClubSubscriptionFeatures(club: {
   subscriptionPlan: string | null
   subscriptionFeatures: any
 }): Promise<ClubSubscriptionFeatures> {
-  // If the club has snapshotted features, use them
-  if (club.subscriptionFeatures && typeof club.subscriptionFeatures === "object") {
-    const f = club.subscriptionFeatures as any
-    return {
-      maxTeams: typeof f.maxTeams === "number" ? f.maxTeams : -1,
-      staffLimits: f.staffLimits || null,
-      hasDashboard: f.hasDashboard ?? true,
-      hasPayment: f.hasPayment ?? true,
-      hasPlanning: f.hasPlanning ?? true,
-      hasMessaging: f.hasMessaging ?? true,
-      hasPolls: f.hasPolls ?? true,
-      hasStructure: f.hasStructure ?? true,
-      hasStaff: f.hasStaff ?? true,
-      hasPlayers: f.hasPlayers ?? true,
-      hasTactical: f.hasTactical ?? true,
-      hasTrainings: f.hasTrainings ?? true,
-      hasMatches: f.hasMatches ?? true,
-      hasInjuries: f.hasInjuries ?? true,
-      hasMedical: f.hasMedical ?? true,
-      hasTests: f.hasTests ?? true,
-      hasWelfare: f.hasWelfare ?? true,
-      hasGPS: f.hasGPS ?? false,
-      hasRbac: f.hasRbac ?? true,
-      hasSupport: f.hasSupport ?? true,
-    }
-  }
-
-  // Fallback: Query the database for the active plan
+  // 1. Query the database for the active plan first to ensure real-time settings
   const planName = club.subscriptionPlan || "Club"
   const plan = await db.subscriptionPlan.findFirst({
     where: { name: planName }
@@ -98,7 +71,34 @@ export async function getClubSubscriptionFeatures(club: {
     return features
   }
 
-  // Final fallback (default unlimited/basic features)
+  // 2. Fallback: If the plan is not found in the db, use the snapshotted features
+  if (club.subscriptionFeatures && typeof club.subscriptionFeatures === "object") {
+    const f = club.subscriptionFeatures as any
+    return {
+      maxTeams: typeof f.maxTeams === "number" ? f.maxTeams : -1,
+      staffLimits: f.staffLimits || null,
+      hasDashboard: f.hasDashboard ?? true,
+      hasPayment: f.hasPayment ?? true,
+      hasPlanning: f.hasPlanning ?? true,
+      hasMessaging: f.hasMessaging ?? true,
+      hasPolls: f.hasPolls ?? true,
+      hasStructure: f.hasStructure ?? true,
+      hasStaff: f.hasStaff ?? true,
+      hasPlayers: f.hasPlayers ?? true,
+      hasTactical: f.hasTactical ?? true,
+      hasTrainings: f.hasTrainings ?? true,
+      hasMatches: f.hasMatches ?? true,
+      hasInjuries: f.hasInjuries ?? true,
+      hasMedical: f.hasMedical ?? true,
+      hasTests: f.hasTests ?? true,
+      hasWelfare: f.hasWelfare ?? true,
+      hasGPS: f.hasGPS ?? false,
+      hasRbac: f.hasRbac ?? true,
+      hasSupport: f.hasSupport ?? true,
+    }
+  }
+
+  // 3. Final fallback (default unlimited/basic features)
   return {
     maxTeams: -1,
     staffLimits: null,

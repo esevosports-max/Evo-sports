@@ -152,7 +152,12 @@ export async function startMatch(matchId: string) {
   }
 }
 
-export async function recordMatchResult(matchId: string, score: string) {
+export async function recordMatchResult(
+  matchId: string,
+  score: string,
+  opponentName?: string,
+  attendances?: { playerId: string; status: "PRESENT" | "ABSENT" }[]
+) {
   try {
     const session = await auth()
     if (!session || !session.user) {
@@ -172,16 +177,42 @@ export async function recordMatchResult(matchId: string, score: string) {
       throw new Error("Ce match a expiré et ne peut plus être modifié.")
     }
 
+    // Determine the new title
+    let newTitle = match.title
+    if (opponentName) {
+      newTitle = `Match contre ${opponentName.trim()}`
+    }
+
     const updated = await db.calendarEvent.update({
       where: { id: matchId },
       data: {
         status: "TERMINE",
-        score
+        score,
+        title: newTitle
       }
     })
 
-    // Automatically generate presence records for this match
-    if (match.assignedTeam) {
+    // Delete existing match presences to avoid duplicates
+    await db.presence.deleteMany({
+      where: {
+        eventId: match.id,
+        eventType: "MATCH"
+      }
+    })
+
+    if (attendances && attendances.length > 0) {
+      // Insert custom presence records
+      await db.presence.createMany({
+        data: attendances.map((att) => ({
+          playerId: att.playerId,
+          eventId: match.id,
+          eventType: "MATCH",
+          status: att.status,
+          date: new Date(match.date)
+        }))
+      })
+    } else if (match.assignedTeam) {
+      // Fallback: default to PRESENT for all squad players
       const teamCategory = await db.teamCategory.findFirst({
         where: { name: match.assignedTeam, clubId: match.clubId }
       })
@@ -191,15 +222,6 @@ export async function recordMatchResult(matchId: string, score: string) {
         })
 
         if (players.length > 0) {
-          // Delete existing match presences to avoid duplicates
-          await db.presence.deleteMany({
-            where: {
-              eventId: match.id,
-              eventType: "MATCH"
-            }
-          })
-
-          // Insert presence records, default to PRESENT
           await db.presence.createMany({
             data: players.map((p) => ({
               playerId: p.id,
