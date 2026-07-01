@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { logAccountAction } from "@/lib/actionLogger"
+import { getClubSubscriptionFeatures } from "@/lib/subscription"
 
 export async function createStaffMember(data: {
   firstName: string
@@ -65,55 +66,78 @@ export async function createStaffMember(data: {
       throw new Error("Club introuvable")
     }
 
-    // Check subscription plan limits for 1 Équipe
-    const plan = club.subscriptionPlan || "Club"
-    const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
-    
-    if (isOneTeamPlan && userRole !== "PRESIDENT" && userRole !== "DIRECTEUR_SPORTIF" && userRole !== "SECRETAIRE_GENERAL" && userRole !== "MANAGER_EVO_SPORTS") {
-      const forbiddenRoles = ["ENTRAINEUR_ADJOINT", "SECRETAIRE_GENERAL", "ENTRAINEUR_GARDIENS", "PREPARATEUR_PHYSIQUE"]
-      if (forbiddenRoles.includes(data.roleTag)) {
-        throw new Error("Votre forfait '1 Équipe' ne permet pas de créer ce type de compte.")
-      }
+    // Check subscription plan limits dynamically from snapshotted features or fallback
+    const subPlan = await getClubSubscriptionFeatures(club)
 
-      if (data.roleTag === "ENTRAINEUR_PRINCIPAL") {
-        const headCoachCount = await db.staff.count({
+    if (subPlan && subPlan.staffLimits) {
+      const limits = subPlan.staffLimits as Record<string, number>
+      const roleLimit = limits[data.roleTag]
+      if (typeof roleLimit === "number") {
+        if (roleLimit === 0) {
+          throw new Error(`Votre forfait '${club.subscriptionPlan || "Club"}' ne permet pas de créer ce type de compte (${data.roleTag.replace(/_/g, ' ')}).`)
+        }
+        const currentCount = await db.staff.count({
           where: {
             clubId: club.id,
             user: {
-              role: { name: "ENTRAINEUR_PRINCIPAL" }
+              role: { name: data.roleTag }
             }
           }
         })
-        if (headCoachCount >= 1) {
-          throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Entraîneur Principal.")
+        if (currentCount >= roleLimit) {
+          throw new Error(`Votre forfait '${club.subscriptionPlan || "Club"}' ne permet de créer que ${roleLimit} ${data.roleTag.replace(/_/g, ' ')}(s).`)
         }
       }
-
-      if (data.roleTag === "DIRECTEUR_SPORTIF") {
-        const dirSportifCount = await db.staff.count({
-          where: {
-            clubId: club.id,
-            user: {
-              role: { name: "DIRECTEUR_SPORTIF" }
-            }
-          }
-        })
-        if (dirSportifCount >= 1) {
-          throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Directeur Sportif.")
+    } else {
+      // Fallback to original hardcoded checks
+      const planName = club.subscriptionPlan || "Club"
+      const isOneTeamPlan = planName === "1 Équipe" || planName === "1 equipe" || planName === "Standard"
+      if (isOneTeamPlan) {
+        const forbiddenRoles = ["ENTRAINEUR_ADJOINT", "SECRETAIRE_GENERAL", "ENTRAINEUR_GARDIENS", "PREPARATEUR_PHYSIQUE"]
+        if (forbiddenRoles.includes(data.roleTag)) {
+          throw new Error("Votre forfait '1 Équipe' ne permet pas de créer ce type de compte.")
         }
-      }
 
-      if (data.roleTag === "MEDECIN") {
-        const medecinCount = await db.staff.count({
-          where: {
-            clubId: club.id,
-            user: {
-              role: { name: "MEDECIN" }
+        if (data.roleTag === "ENTRAINEUR_PRINCIPAL") {
+          const headCoachCount = await db.staff.count({
+            where: {
+              clubId: club.id,
+              user: {
+                role: { name: "ENTRAINEUR_PRINCIPAL" }
+              }
             }
+          })
+          if (headCoachCount >= 1) {
+            throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Entraîneur Principal.")
           }
-        })
-        if (medecinCount >= 1) {
-          throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Médecin du Club.")
+        }
+
+        if (data.roleTag === "DIRECTEUR_SPORTIF") {
+          const dirSportifCount = await db.staff.count({
+            where: {
+              clubId: club.id,
+              user: {
+                role: { name: "DIRECTEUR_SPORTIF" }
+              }
+            }
+          })
+          if (dirSportifCount >= 1) {
+            throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Directeur Sportif.")
+          }
+        }
+
+        if (data.roleTag === "MEDECIN") {
+          const medecinCount = await db.staff.count({
+            where: {
+              clubId: club.id,
+              user: {
+                role: { name: "MEDECIN" }
+              }
+            }
+          })
+          if (medecinCount >= 1) {
+            throw new Error("Votre forfait '1 Équipe' ne permet de créer qu'un seul Médecin du Club.")
+          }
         }
       }
     }
@@ -371,8 +395,8 @@ export async function updateStaffMember(
       throw new Error("Club introuvable")
     }
 
-    const plan = club.subscriptionPlan || "Club"
-    const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
+    const subPlan = await getClubSubscriptionFeatures(club)
+    const isOneTeamPlan = subPlan?.maxTeams === 1
     
     if (isOneTeamPlan && userRole !== "PRESIDENT" && userRole !== "DIRECTEUR_SPORTIF" && userRole !== "SECRETAIRE_GENERAL" && userRole !== "MANAGER_EVO_SPORTS") {
       const forbiddenRoles = ["ENTRAINEUR_ADJOINT", "SECRETAIRE_GENERAL", "ENTRAINEUR_GARDIENS", "PREPARATEUR_PHYSIQUE"]

@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import ManagerPaymentsClient from "@/components/ManagerPaymentsClient"
+import { createPlanFeaturesSnapshot } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -53,7 +54,7 @@ export default async function ManagerPaiementsPage() {
     createdAt: s.createdAt.toISOString(),
   }))
 
-  // Server Action to update Billing status/plan/name/expiration/method
+    // Server Action to update Billing status/plan/name/expiration/method
   async function updateClubBillingAction(
     clubId: string,
     data: {
@@ -66,6 +67,11 @@ export default async function ManagerPaiementsPage() {
     }
   ) {
     "use server"
+    const plan = await db.subscriptionPlan.findFirst({
+      where: { name: data.subscriptionPlan }
+    })
+    const features = plan ? createPlanFeaturesSnapshot(plan) : null
+
     await db.club.update({
       where: { id: clubId },
       data: {
@@ -75,6 +81,7 @@ export default async function ManagerPaiementsPage() {
         subscriptionPaid: data.subscriptionPaid,
         subscriptionExpires: data.subscriptionExpires ? new Date(data.subscriptionExpires) : null,
         subscriptionMethod: data.subscriptionMethod,
+        subscriptionFeatures: (features as any) || undefined,
       }
     })
   }
@@ -147,6 +154,11 @@ export default async function ManagerPaiementsPage() {
       expiresDate.setMonth(baseDate.getMonth() + 1)
     }
 
+    const plan = await db.subscriptionPlan.findFirst({
+      where: { name: submission.plan }
+    })
+    const features = plan ? createPlanFeaturesSnapshot(plan) : null
+
     await db.$transaction([
       db.paymentSubmission.update({
         where: { id: submissionId },
@@ -159,7 +171,8 @@ export default async function ManagerPaiementsPage() {
           subscriptionStatus: "Actif",
           subscriptionPaid: true,
           subscriptionExpires: expiresDate,
-          subscriptionMethod: submission.method
+          subscriptionMethod: submission.method,
+          subscriptionFeatures: (features as any) || undefined,
         }
       })
     ])

@@ -415,7 +415,8 @@ export const ModelName = {
   GpsDevice: 'GpsDevice',
   Telemetry: 'Telemetry',
   PaymentConfig: 'PaymentConfig',
-  PushToken: 'PushToken'
+  PushToken: 'PushToken',
+  SubscriptionPlan: 'SubscriptionPlan'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView" | "announcement" | "systemSetting" | "notification" | "deletedAccount" | "accountActionLog" | "playerGPSData" | "gpsDevice" | "telemetry" | "paymentConfig" | "pushToken"
+    modelProps: "user" | "clubRegistrationRequest" | "role" | "permission" | "club" | "calendarEvent" | "teamCategory" | "staff" | "player" | "physicalIndex" | "composition" | "dailyQuestionnaire" | "dailyResponse" | "physicalTest" | "serialCode" | "paymentSubmission" | "poll" | "pollOption" | "pollVote" | "chatChannel" | "chatMessage" | "chatMessageView" | "announcement" | "systemSetting" | "notification" | "deletedAccount" | "accountActionLog" | "playerGPSData" | "gpsDevice" | "telemetry" | "paymentConfig" | "pushToken" | "subscriptionPlan"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2803,6 +2804,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SubscriptionPlan: {
+      payload: Prisma.$SubscriptionPlanPayload<ExtArgs>
+      fields: Prisma.SubscriptionPlanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SubscriptionPlanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SubscriptionPlanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        findFirst: {
+          args: Prisma.SubscriptionPlanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SubscriptionPlanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        findMany: {
+          args: Prisma.SubscriptionPlanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>[]
+        }
+        create: {
+          args: Prisma.SubscriptionPlanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        createMany: {
+          args: Prisma.SubscriptionPlanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SubscriptionPlanCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>[]
+        }
+        delete: {
+          args: Prisma.SubscriptionPlanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        update: {
+          args: Prisma.SubscriptionPlanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        deleteMany: {
+          args: Prisma.SubscriptionPlanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SubscriptionPlanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SubscriptionPlanUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>[]
+        }
+        upsert: {
+          args: Prisma.SubscriptionPlanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPlanPayload>
+        }
+        aggregate: {
+          args: Prisma.SubscriptionPlanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSubscriptionPlan>
+        }
+        groupBy: {
+          args: Prisma.SubscriptionPlanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubscriptionPlanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SubscriptionPlanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubscriptionPlanCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2924,6 +2999,7 @@ export const ClubScalarFieldEnum = {
   subscriptionExpires: 'subscriptionExpires',
   subscriptionPaid: 'subscriptionPaid',
   subscriptionMethod: 'subscriptionMethod',
+  subscriptionFeatures: 'subscriptionFeatures',
   questionnaireTemplate: 'questionnaireTemplate'
 } as const
 
@@ -3201,6 +3277,7 @@ export const ChatChannelScalarFieldEnum = {
   targetTeams: 'targetTeams',
   targetRoles: 'targetRoles',
   targetUserIds: 'targetUserIds',
+  deletedByUserIds: 'deletedByUserIds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3217,6 +3294,7 @@ export const ChatMessageScalarFieldEnum = {
   senderClubName: 'senderClubName',
   senderClubLogo: 'senderClubLogo',
   content: 'content',
+  deletedByUserIds: 'deletedByUserIds',
   createdAt: 'createdAt'
 } as const
 
@@ -3393,6 +3471,51 @@ export const PushTokenScalarFieldEnum = {
 } as const
 
 export type PushTokenScalarFieldEnum = (typeof PushTokenScalarFieldEnum)[keyof typeof PushTokenScalarFieldEnum]
+
+
+export const SubscriptionPlanScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  type: 'type',
+  durationYears: 'durationYears',
+  durationMonths: 'durationMonths',
+  durationDays: 'durationDays',
+  durationHours: 'durationHours',
+  durationMinutes: 'durationMinutes',
+  durationSeconds: 'durationSeconds',
+  billingPeriodType: 'billingPeriodType',
+  priceMonthly: 'priceMonthly',
+  priceYearly: 'priceYearly',
+  paymentMethods: 'paymentMethods',
+  maxTeams: 'maxTeams',
+  staffLimits: 'staffLimits',
+  hasDashboard: 'hasDashboard',
+  hasPayment: 'hasPayment',
+  hasPlanning: 'hasPlanning',
+  hasMessaging: 'hasMessaging',
+  hasPolls: 'hasPolls',
+  hasStructure: 'hasStructure',
+  hasStaff: 'hasStaff',
+  hasPlayers: 'hasPlayers',
+  hasTactical: 'hasTactical',
+  hasTrainings: 'hasTrainings',
+  hasMatches: 'hasMatches',
+  hasInjuries: 'hasInjuries',
+  hasMedical: 'hasMedical',
+  hasTests: 'hasTests',
+  hasWelfare: 'hasWelfare',
+  hasGPS: 'hasGPS',
+  hasRbac: 'hasRbac',
+  hasSupport: 'hasSupport',
+  featuresList: 'featuresList',
+  popular: 'popular',
+  colorTheme: 'colorTheme',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubscriptionPlanScalarFieldEnum = (typeof SubscriptionPlanScalarFieldEnum)[keyof typeof SubscriptionPlanScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3667,6 +3790,7 @@ export type GlobalOmitConfig = {
   telemetry?: Prisma.TelemetryOmit
   paymentConfig?: Prisma.PaymentConfigOmit
   pushToken?: Prisma.PushTokenOmit
+  subscriptionPlan?: Prisma.SubscriptionPlanOmit
 }
 
 /* Types for Logging */

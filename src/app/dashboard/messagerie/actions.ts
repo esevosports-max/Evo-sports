@@ -139,6 +139,10 @@ export async function getChannels() {
 
     // Filter accessible channels in JS
     const accessible = allChannels.filter(channel => {
+      // Check if user has deleted this channel
+      const deletedByUserIds = (channel.deletedByUserIds as string[]) || []
+      if (deletedByUserIds.includes(userId)) return false
+
       // Creator sees their own
       if (channel.creatorId === userId) return true
       // President and SuperAdmin see everything
@@ -251,8 +255,13 @@ export async function getChannelMessages(channelId: string) {
       }
     }
 
-    const formatted = messages.map(m => {
-      const hasVoted = m.views.some(v => v.userId === userId)
+    const formatted = messages
+      .filter(m => {
+        const deletedByUserIds = (m.deletedByUserIds as string[]) || []
+        return !deletedByUserIds.includes(userId)
+      })
+      .map(m => {
+        const hasVoted = m.views.some(v => v.userId === userId)
       return {
         id: m.id,
         senderId: m.senderId,
@@ -306,6 +315,11 @@ export async function sendMessage(channelId: string, content: string) {
     // Check if channel is read-only for recipients
     if (!channel.canReply && channel.creatorId !== userId) {
       throw new Error("Ce canal n'autorise pas les réponses des destinataires")
+    }
+
+    const deletedByUserIds = (channel.deletedByUserIds as string[]) || []
+    if (deletedByUserIds.length > 0) {
+      throw new Error("Ce canal a été supprimé par l'un des participants. Vous devez créer un nouveau canal pour envoyer un message.")
     }
 
     // Get club name & logo
@@ -721,5 +735,79 @@ async function getChannelRecipientUserIds(channel: any, senderId: string): Promi
   userIds.delete(senderId)
 
   return Array.from(userIds)
+}
+
+export async function deleteChannelAction(channelId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+
+    const channel = await db.chatChannel.findUnique({
+      where: { id: channelId }
+    })
+
+    if (!channel) {
+      throw new Error("Canal introuvable")
+    }
+
+    const deletedByUserIds = (channel.deletedByUserIds as string[]) || []
+    if (!deletedByUserIds.includes(userId)) {
+      deletedByUserIds.push(userId)
+    }
+
+    await db.chatChannel.update({
+      where: { id: channelId },
+      data: {
+        deletedByUserIds
+      }
+    })
+
+    revalidatePath("/dashboard/messagerie")
+    return { success: true }
+  } catch (error: any) {
+    console.error("Error in deleteChannelAction:", error)
+    return { success: false, error: error.message || "Erreur de suppression" }
+  }
+}
+
+export async function deleteMessageAction(messageId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+
+    const message = await db.chatMessage.findUnique({
+      where: { id: messageId }
+    })
+
+    if (!message) {
+      throw new Error("Message introuvable")
+    }
+
+    const deletedByUserIds = (message.deletedByUserIds as string[]) || []
+    if (!deletedByUserIds.includes(userId)) {
+      deletedByUserIds.push(userId)
+    }
+
+    await db.chatMessage.update({
+      where: { id: messageId },
+      data: {
+        deletedByUserIds
+      }
+    })
+
+    revalidatePath("/dashboard/messagerie")
+    return { success: true }
+  } catch (error: any) {
+    console.error("Error in deleteMessageAction:", error)
+    return { success: false, error: error.message || "Erreur de suppression" }
+  }
 }
 

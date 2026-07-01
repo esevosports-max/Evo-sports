@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { createPlanFeaturesSnapshot } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -191,13 +192,61 @@ export async function PATCH(req: Request) {
       let subStatus = "Bloqué"
       let isPaid = false
 
+      // Fetch the plan details from the DB
+      const plan = await db.subscriptionPlan.findFirst({
+        where: { name: updatedRequest.chosenPlan }
+      })
+
       if (updatedRequest.trialSelected) {
-        expiresDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        // Find the "Gratuit" plan or default to 7 days
+        const freePlan = await db.subscriptionPlan.findFirst({
+          where: { type: "GRATUIT" }
+        })
+        const durationYears = freePlan?.durationYears ?? 0
+        const durationMonths = freePlan?.durationMonths ?? 0
+        const durationDays = freePlan?.durationDays ?? 7
+        const durationHours = freePlan?.durationHours ?? 0
+        const durationMinutes = freePlan?.durationMinutes ?? 0
+        const durationSeconds = freePlan?.durationSeconds ?? 0
+
+        const expireTime = new Date()
+        expireTime.setFullYear(expireTime.getFullYear() + durationYears)
+        expireTime.setMonth(expireTime.getMonth() + durationMonths)
+        expireTime.setDate(expireTime.getDate() + durationDays)
+        expireTime.setHours(expireTime.getHours() + durationHours)
+        expireTime.setMinutes(expireTime.getMinutes() + durationMinutes)
+        expireTime.setSeconds(expireTime.getSeconds() + durationSeconds)
+
+        expiresDate = expireTime
         subStatus = "Essai"
+      } else if (plan && plan.type === "GRATUIT") {
+        const durationYears = plan.durationYears
+        const durationMonths = plan.durationMonths
+        const durationDays = plan.durationDays
+        const durationHours = plan.durationHours
+        const durationMinutes = plan.durationMinutes
+        const durationSeconds = plan.durationSeconds
+
+        const expireTime = new Date()
+        expireTime.setFullYear(expireTime.getFullYear() + durationYears)
+        expireTime.setMonth(expireTime.getMonth() + durationMonths)
+        expireTime.setDate(expireTime.getDate() + durationDays)
+        expireTime.setHours(expireTime.getHours() + durationHours)
+        expireTime.setMinutes(expireTime.getMinutes() + durationMinutes)
+        expireTime.setSeconds(expireTime.getSeconds() + durationSeconds)
+
+        expiresDate = expireTime
+        subStatus = "Actif"
+        isPaid = true
       } else {
         expiresDate = now // already expired, must pay
         subStatus = "Bloqué"
       }
+
+      const planObj = await db.subscriptionPlan.findFirst({
+        where: { name: updatedRequest.chosenPlan || "Club" }
+      })
+      const features = planObj ? createPlanFeaturesSnapshot(planObj) : null
 
       if (!existingClub) {
         await db.club.create({
@@ -215,6 +264,7 @@ export async function PATCH(req: Request) {
             subscriptionExpires: expiresDate,
             subscriptionPaid: isPaid,
             subscriptionMethod: updatedRequest.trialSelected ? "Gratuit" : "En attente",
+            subscriptionFeatures: (features as any) || undefined,
           }
         })
       } else {
@@ -232,6 +282,7 @@ export async function PATCH(req: Request) {
             subscriptionExpires: expiresDate,
             subscriptionPaid: isPaid,
             subscriptionMethod: updatedRequest.trialSelected ? "Gratuit" : "En attente",
+            subscriptionFeatures: (features as any) || undefined,
           }
         })
       }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useLanguage } from "@/components/LanguageProvider"
-import { getNotificationsAction, markAsReadAction, markAllAsReadAction } from "@/app/dashboard/notifications/actions"
+import { getNotificationsAction, markAsReadAction, markAllAsReadAction, deleteNotificationAction } from "@/app/dashboard/notifications/actions"
 
 interface NavbarProps {
   user: {
@@ -17,6 +17,24 @@ interface NavbarProps {
   club: {
     name: string
     logo: string | null
+    hasDashboard?: boolean
+    hasPayment?: boolean
+    hasPlanning?: boolean
+    hasMessaging?: boolean
+    hasPolls?: boolean
+    hasStructure?: boolean
+    hasStaff?: boolean
+    hasPlayers?: boolean
+    hasTactical?: boolean
+    hasTrainings?: boolean
+    hasMatches?: boolean
+    hasInjuries?: boolean
+    hasMedical?: boolean
+    hasTests?: boolean
+    hasWelfare?: boolean
+    hasGPS?: boolean
+    hasRbac?: boolean
+    hasSupport?: boolean
   }
   isRestricted?: boolean
   signOutAction: () => Promise<void>
@@ -70,6 +88,22 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
     }
   }
 
+  const handleDeleteNotification = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      const res = await deleteNotificationAction(id)
+      if (res.success) {
+        setNotifications((prev) => prev.filter((n) => n.id !== id))
+        setUnreadCount((prev) => {
+          const wasUnread = notifications.find((n) => n.id === id && !n.read)
+          return wasUnread ? Math.max(0, prev - 1) : prev
+        })
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
   useEffect(() => {
     loadNotifications()
     const interval = setInterval(loadNotifications, 10000)
@@ -94,11 +128,12 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
         { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠", description: t("desc_dashboard") },
         { href: "/dashboard/planning", label: t("db_general_planning"), icon: "📅", description: t("desc_planning_gen") },
         { href: "/dashboard/manager/annonces", label: t("db_announcements"), icon: "📢", description: t("desc_announcements") },
+        { href: "/dashboard/manager/forfaits", label: language === "EN" ? "Subscription Plans" : language === "AR" ? "إدارة الاشتراكات" : "Gestion des Forfaits", icon: "💎", description: language === "EN" ? "Configure platform plans, pricing and options" : language === "AR" ? "إعداد الباقات والأسعار والخيارات" : "Configurer les forfaits, prix et options" },
         { href: "/dashboard/roles", label: t("db_roles_permissions"), icon: "🔑", description: t("desc_roles") },
         { href: "/dashboard/manager/demandes", label: t("db_reg_requests"), icon: "📥", description: t("desc_requests") },
         { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️", description: t("desc_clubs") },
         { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳", description: t("desc_payments") },
-        { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️", description: language === "EN" ? "Restore or purge deleted user accounts" : language === "AR" ? "استعادة أو مسح حسابات المستخدمين المحذوفة" : "Restaurer ou purger des comptes utilisateurs supprimés" },
+        { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️", description: language === "EN" ? "Restore or purge deleted user accounts" : language === "AR" ? "استعادة أو مسح حسابات المستخدمين محذوفة" : "Restaurer ou purger des comptes utilisateurs supprimés" },
       ]
     : isPlayer
     ? [
@@ -119,6 +154,13 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
           label: t("db_subscription_payment"), 
           icon: "💳", 
           description: t("desc_subscription"),
+          requiredRoles: ["PRESIDENT"]
+        },
+        { 
+          href: "/dashboard/roles", 
+          label: t("db_roles_permissions"), 
+          icon: "🔑", 
+          description: t("desc_roles"),
           requiredRoles: ["PRESIDENT"]
         },
         { href: "/dashboard/planning", label: t("feat_planning_title"), icon: "📅", description: t("desc_planning_gen") },
@@ -191,14 +233,73 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
         },
       ]
 
-  const visibleMenuItems = (isRestricted && user.roleName === "PRESIDENT")
-    ? menuItems.filter(item => item.href === "/dashboard/paiement")
-    : menuItems
+  const isFeatureEnabled = (href: string) => {
+    if (isManager) return true
+
+    if (href === "/dashboard") {
+      return club.hasDashboard !== false
+    }
+    if (href === "/dashboard/paiement") {
+      return club.hasPayment !== false
+    }
+    if (href === "/dashboard/planning") {
+      return club.hasPlanning !== false
+    }
+    if (href === "/dashboard/messagerie") {
+      return club.hasMessaging !== false
+    }
+    if (href === "/dashboard/sondage") {
+      return club.hasPolls !== false
+    }
+    if (href === "/dashboard/equipe") {
+      return club.hasStructure !== false
+    }
+    if (href === "/dashboard/staff") {
+      return club.hasStaff !== false
+    }
+    if (href === "/dashboard/effectifs") {
+      return club.hasPlayers !== false
+    }
+    if (href === "/dashboard/composition") {
+      return club.hasTactical !== false
+    }
+    if (href === "/dashboard/entrainement") {
+      return club.hasTrainings !== false
+    }
+    if (href === "/dashboard/match") {
+      return club.hasMatches !== false
+    }
+    if (href === "/dashboard/medical/blessures") {
+      return club.hasInjuries !== false
+    }
+    if (href === "/dashboard/medical/dossier-medical") {
+      return club.hasMedical !== false
+    }
+    if (href === "/dashboard/test") {
+      return club.hasTests !== false
+    }
+    if (href === "/dashboard/quotidienne") {
+      return club.hasWelfare !== false
+    }
+    if (href === "/dashboard/gps") {
+      return club.hasGPS === true
+    }
+    return true
+  }
 
   const isRoleAuthorized = (allowed?: string[]) => {
     if (!allowed) return true
     return allowed.includes(user.roleName)
   }
+
+  const allowedMenuItems = menuItems.filter(item => {
+    if (!isRoleAuthorized(item.requiredRoles)) return false
+    return isFeatureEnabled(item.href)
+  })
+
+  const visibleMenuItems = (isRestricted && user.roleName === "PRESIDENT")
+    ? allowedMenuItems.filter(item => item.href === "/dashboard/paiement")
+    : allowedMenuItems
 
   const handleLinkClick = () => {
     setIsOpen(false)
@@ -326,7 +427,7 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
               </button>
 
               {notifMenuOpen && (
-                <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-[#0B1528]/95 border border-white/10 shadow-2xl p-4 z-50 backdrop-blur-xl space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+                <div className={`fixed md:absolute left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 md:top-auto md:mt-2 w-[calc(100vw-2rem)] md:w-80 max-w-[360px] md:max-w-none rounded-2xl bg-[#0B1528]/95 border border-white/10 shadow-2xl p-4 z-50 backdrop-blur-xl space-y-3 max-h-96 overflow-y-auto custom-scrollbar ${isScrolled ? 'top-[70px]' : 'top-[80px]'}`}>
                   <div className="flex items-center justify-between border-b border-white/5 pb-2">
                     <span className="text-[10px] font-black text-white/50 uppercase tracking-wider">
                       Notifications ({unreadCount} non lues)
@@ -351,13 +452,13 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
                         <div
                           key={notif.id}
                           onClick={() => handleMarkAsRead(notif.id)}
-                          className={`p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer text-left ${
+                          className={`p-2.5 rounded-xl border text-[11px] transition-all cursor-pointer text-left relative group ${
                             notif.read
                               ? "bg-white/[0.02] border-white/5 text-white/60"
                               : "bg-emerald-500/[0.05] border-emerald-500/20 text-white font-bold"
                           }`}
                         >
-                          <div className="flex justify-between items-baseline gap-2 mb-0.5">
+                          <div className="flex justify-between items-baseline gap-2 mb-0.5 pr-5">
                             <span className={notif.read ? "text-white/60" : "text-emerald-400"}>
                               {notif.title}
                             </span>
@@ -368,6 +469,13 @@ export default function DashboardNavbarClient({ user, club, isRestricted = false
                           <p className="text-[10px] text-white/70 font-medium leading-relaxed">
                             {notif.message}
                           </p>
+                          <button
+                            onClick={(e) => handleDeleteNotification(notif.id, e)}
+                            className="absolute top-2.5 right-2.5 text-white/40 hover:text-white/80 bg-white/5 hover:bg-white/10 rounded-full w-4.5 h-4.5 flex items-center justify-center text-[8px] font-black transition-all cursor-pointer"
+                            title="Supprimer la notification"
+                          >
+                            ✕
+                          </button>
                         </div>
                       ))
                     )}

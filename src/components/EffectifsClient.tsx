@@ -785,9 +785,15 @@ export default function EffectifsClient({ initialPlayers, categories, userRole, 
 
                         {/* Sleep */}
                         <td className="py-3 px-4 text-center">
-                          {idx?.sleepHours ? (
+                          {idx?.sleepHours !== undefined && idx?.sleepHours !== null ? (
                             <span className="text-zinc-850 dark:text-zinc-200 font-black">
-                              {idx.sleepHours}h <span className="text-[8px] text-zinc-400">({idx.sleepQuality}/7)</span>
+                              {idx.sleepHours}h {idx.sleepQuality !== undefined && idx.sleepQuality !== null && (
+                                <span className="text-[8px] text-zinc-400">({idx.sleepQuality}/7)</span>
+                              )}
+                            </span>
+                          ) : idx?.sleepQuality !== undefined && idx?.sleepQuality !== null ? (
+                            <span className="text-zinc-850 dark:text-zinc-200 font-black">
+                              {idx.sleepQuality}/7
                             </span>
                           ) : (
                             <span className="text-zinc-400 font-bold">N/A</span>

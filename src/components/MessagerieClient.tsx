@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from "react"
 import { useLanguage } from "@/components/LanguageProvider"
-import { getChannelMessages, createCustomChannel, getChannelRecipients } from "@/app/dashboard/messagerie/actions"
+import { getChannelMessages, createCustomChannel, getChannelRecipients, sendMessage, deleteChannelAction, deleteMessageAction } from "@/app/dashboard/messagerie/actions"
 
 const dict = {
   FR: {
@@ -155,6 +155,7 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
   
   // Search state
   const [searchQuery, setSearchQuery] = useState("")
+  const [replyText, setReplyText] = useState("")
 
   // Form states
   const [isPending, startTransition] = useTransition()
@@ -314,6 +315,49 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
     })
   }
 
+  const handleSendMessage = async () => {
+    if (!replyText.trim() || !activeChannelId) return
+    const content = replyText.trim()
+    setReplyText("")
+    try {
+      const res = await sendMessage(activeChannelId, content)
+      if (res.success) {
+        const resMsg = await getChannelMessages(activeChannelId)
+        if (resMsg.success && resMsg.messages) {
+          setMessages(resMsg.messages)
+          setTimeout(scrollToBottom, 100)
+        }
+      } else {
+        alert(res.error || "Erreur d'envoi")
+      }
+    } catch (e: any) {
+      alert(e.message || "Erreur d'envoi")
+    }
+  }
+
+  const handleDeleteChannel = async (chanId: string) => {
+    const res = await deleteChannelAction(chanId)
+    if (res.success) {
+      setChannels(prev => prev.filter(c => c.id !== chanId))
+      if (activeChannelId === chanId) {
+        const remaining = channels.filter(c => c.id !== chanId)
+        setActiveChannelId(remaining[0]?.id || null)
+      }
+    } else {
+      alert(res.error || "Erreur de suppression du canal")
+    }
+  }
+
+  const handleDeleteMessage = async (msgId: string) => {
+    const res = await deleteMessageAction(msgId)
+    if (res.success) {
+      setMessages(prev => prev.filter(m => m.id !== msgId))
+      setSelectedMessageDetails(null)
+    } else {
+      alert(res.error || "Erreur de suppression du message")
+    }
+  }
+
   // Filter channels based on search
   const filteredChannels = channels.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -409,6 +453,18 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
                       {!c.canReply && (
                         <span className="text-xs" title="Diffusion seule (sans réponses)">🔇</span>
                       )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm("Voulez-vous supprimer ce canal pour vous-même ? Vous ne le verrez plus.")) {
+                            handleDeleteChannel(c.id)
+                          }
+                        }}
+                        className="text-[10px] text-zinc-400 hover:text-red-555 p-1 rounded transition cursor-pointer"
+                        title="Supprimer le canal"
+                      >
+                        🗑️
+                      </button>
                     </div>
                   </div>
                 )
@@ -490,13 +546,13 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
                           <div className={`text-xs p-3 rounded-2xl border leading-relaxed font-semibold transition hover:brightness-95 shadow-sm ${
                             isOwnMessage
                               ? "bg-emerald-600 border-emerald-700 text-white"
-                              : "bg-white dark:bg-zinc-950/40 border-zinc-150/60 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200"
+                              : "bg-blue-50/80 dark:bg-slate-900 border-blue-100 dark:border-slate-800 text-blue-900 dark:text-blue-100"
                           }`}>
                             <p className="whitespace-pre-line">{msg.content}</p>
 
                             {/* SIGNATURE CARD (UNDER THE MESSAGE) */}
                             <div className={`mt-3 pt-2 border-t text-[8px] font-black uppercase tracking-widest flex items-center gap-2 select-none ${
-                              isOwnMessage ? "border-emerald-500 text-emerald-100" : "border-zinc-150 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500"
+                              isOwnMessage ? "border-emerald-500 text-emerald-100" : "border-blue-200/50 dark:border-slate-800 text-blue-800/60 dark:text-slate-400"
                             }`}>
                               <span>✍️ Signature :</span>
                               <span className="font-bold">{msg.senderName}</span>
@@ -528,6 +584,37 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Chat Composer */}
+              <div className="p-3 border-t border-zinc-150/60 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                {!activeChannel.canReply && activeChannel.creatorId !== userSession.id ? (
+                  <div className="text-center py-2 text-xs font-bold text-red-500 bg-red-500/10 rounded-xl">
+                    {tLoc.replies_disabled}
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      handleSendMessage()
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder={tLoc.placeholder_msg}
+                      className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-xs font-semibold text-zinc-800 outline-none focus:border-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isPending || !replyText.trim()}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition active:scale-95 disabled:opacity-50 disabled:scale-100 cursor-pointer"
+                    >
+                      {tLoc.send}
+                    </button>
+                  </form>
+                )}
+              </div>
 
             </>
           ) : (
@@ -835,8 +922,22 @@ export default function MessagerieClient({ initialChannels, recipientStructure, 
 
               </div>
 
-              {/* Close Button */}
-              <div className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800">
+              {/* Close Button & Actions */}
+              <div className="flex justify-between items-center pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                {selectedMessageDetails.id ? (
+                  <button
+                    onClick={() => {
+                      if (confirm("Voulez-vous supprimer ce message pour vous-même uniquement ?")) {
+                        handleDeleteMessage(selectedMessageDetails.id)
+                      }
+                    }}
+                    className="px-4 py-2 bg-red-650 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow cursor-pointer active:scale-95 flex items-center gap-1.5"
+                  >
+                    🗑️ Supprimer pour moi
+                  </button>
+                ) : (
+                  <div />
+                )}
                 <button
                   onClick={() => setSelectedMessageDetails(null)}
                   className="px-5 py-2.5 bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 rounded-xl text-xs font-bold transition shadow cursor-pointer active:scale-95"

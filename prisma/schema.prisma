@@ -92,6 +92,7 @@ model Club {
   subscriptionExpires   DateTime?
   subscriptionPaid      Boolean              @default(true)
   subscriptionMethod    String?              @default("Gratuit")
+  subscriptionFeatures  Json?
   questionnaireTemplate Json?
   calendarEvents        CalendarEvent[]
   chatChannels          ChatChannel[]
@@ -359,36 +360,38 @@ model PollVote {
 }
 
 model ChatChannel {
-  id            String        @id @default(cuid())
-  clubId        String
-  name          String
-  description   String?
-  isPrivate     Boolean       @default(false)
-  isCustom      Boolean       @default(false)
-  canReply      Boolean       @default(true)
-  creatorId     String
-  creatorName   String
-  targetTeams   Json?
-  targetRoles   Json?
-  targetUserIds Json?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  club          Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  messages      ChatMessage[]
+  id               String        @id @default(cuid())
+  clubId           String
+  name             String
+  description      String?
+  isPrivate        Boolean       @default(false)
+  isCustom         Boolean       @default(false)
+  canReply         Boolean       @default(true)
+  creatorId        String
+  creatorName      String
+  targetTeams      Json?
+  targetRoles      Json?
+  targetUserIds    Json?
+  deletedByUserIds Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  club             Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  messages         ChatMessage[]
 }
 
 model ChatMessage {
-  id             String            @id @default(cuid())
-  channelId      String
-  senderId       String
-  senderName     String
-  senderRole     String?
-  senderClubName String?
-  senderClubLogo String?
-  content        String
-  createdAt      DateTime          @default(now())
-  channel        ChatChannel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  views          ChatMessageView[]
+  id               String            @id @default(cuid())
+  channelId        String
+  senderId         String
+  senderName       String
+  senderRole       String?
+  senderClubName   String?
+  senderClubLogo   String?
+  content          String
+  deletedByUserIds Json?
+  createdAt        DateTime          @default(now())
+  channel          ChatChannel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  views            ChatMessageView[]
 }
 
 model ChatMessageView {
@@ -548,5 +551,65 @@ model PushToken {
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model SubscriptionPlan {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  description     String?
+  type            String   // "GRATUIT" or "PAYANT"
+  
+  // Free plan duration details (years, months, days, hours, minutes, seconds)
+  durationYears   Int      @default(0)
+  durationMonths  Int      @default(0)
+  durationDays    Int      @default(0)
+  durationHours   Int      @default(0)
+  durationMinutes Int      @default(0)
+  durationSeconds Int      @default(0)
+  
+  // Paid plans billing choices: "BOTH" (both), "MONTHLY" (monthly only), "ANNUAL" (annual only)
+  billingPeriodType String @default("BOTH")
+  priceMonthly    Float    @default(0.0)
+  priceYearly     Float    @default(0.0)
+  
+  // Payment methods: comma separated values
+  paymentMethods  String   @default("CCP, BaridiMob, Virement")
+  
+  // Limits
+  maxTeams        Int      @default(-1) // -1 for unlimited
+  
+  // Staff limits (JSON representation like { "ENTRAINEUR_PRINCIPAL": 1, "MEDECIN": 1 } etc.)
+  staffLimits     Json?
+  
+  // Club options / features (checklist of true/false choices)
+  hasDashboard    Boolean  @default(true)
+  hasPayment      Boolean  @default(true)
+  hasPlanning     Boolean  @default(true)
+  hasMessaging    Boolean  @default(true)
+  hasPolls        Boolean  @default(true)
+  hasStructure    Boolean  @default(true)
+  hasStaff        Boolean  @default(true)
+  hasPlayers      Boolean  @default(true)
+  hasTactical     Boolean  @default(true)
+  hasTrainings    Boolean  @default(true)
+  hasMatches      Boolean  @default(true)
+  hasInjuries     Boolean  @default(true)
+  hasMedical      Boolean  @default(true)
+  hasTests        Boolean  @default(true)
+  hasWelfare      Boolean  @default(true)
+  hasGPS          Boolean  @default(false)
+  hasRbac         Boolean  @default(true)
+  hasSupport      Boolean  @default(true)
+  
+  // Custom features list (JSON array of strings)
+  featuresList    Json?
+  
+  // Styling / Presentation for pricing page
+  popular         Boolean  @default(false)
+  colorTheme      String   @default("sky") // "sky", "indigo", "emerald", "amber", "rose", etc.
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 
 

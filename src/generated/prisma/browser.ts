@@ -177,3 +177,8 @@ export type PaymentConfig = Prisma.PaymentConfigModel
  * 
  */
 export type PushToken = Prisma.PushTokenModel
+/**
+ * Model SubscriptionPlan
+ * 
+ */
+export type SubscriptionPlan = Prisma.SubscriptionPlanModel

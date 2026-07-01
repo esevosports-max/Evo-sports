@@ -9,6 +9,24 @@ interface SubscriptionGuardProps {
   isRestricted: boolean
   roleName: string
   clubName: string
+  hasDashboard?: boolean
+  hasPayment?: boolean
+  hasPlanning?: boolean
+  hasMessaging?: boolean
+  hasPolls?: boolean
+  hasStructure?: boolean
+  hasStaff?: boolean
+  hasPlayers?: boolean
+  hasTactical?: boolean
+  hasTrainings?: boolean
+  hasMatches?: boolean
+  hasInjuries?: boolean
+  hasMedical?: boolean
+  hasTests?: boolean
+  hasWelfare?: boolean
+  hasGPS?: boolean
+  hasRbac?: boolean
+  hasSupport?: boolean
 }
 
 const blockDict = {
@@ -32,7 +50,29 @@ const blockDict = {
   }
 }
 
-export default function SubscriptionGuard({ isRestricted, roleName, clubName }: SubscriptionGuardProps) {
+export default function SubscriptionGuard({
+  isRestricted,
+  roleName,
+  clubName,
+  hasDashboard = true,
+  hasPayment = true,
+  hasPlanning = true,
+  hasMessaging = true,
+  hasPolls = true,
+  hasStructure = true,
+  hasStaff = true,
+  hasPlayers = true,
+  hasTactical = true,
+  hasTrainings = true,
+  hasMatches = true,
+  hasInjuries = true,
+  hasMedical = true,
+  hasTests = true,
+  hasWelfare = true,
+  hasGPS = false,
+  hasRbac = true,
+  hasSupport = true,
+}: SubscriptionGuardProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { language } = useLanguage()
@@ -45,8 +85,73 @@ export default function SubscriptionGuard({ isRestricted, roleName, clubName }: 
     // Only redirect President to payment page
     if (isRestricted && isPresident && pathname !== "/dashboard/paiement") {
       router.replace("/dashboard/paiement")
+      return
     }
-  }, [isRestricted, isPresident, pathname, router])
+
+    // Check if the current module is locked by subscription
+    if (!isManager && !isRestricted) {
+      let isLocked = false
+      if (pathname === "/dashboard" && hasDashboard === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/paiement" && hasPayment === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/planning" && hasPlanning === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/messagerie" && hasMessaging === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/sondage" && hasPolls === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/equipe" && hasStructure === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/staff" && hasStaff === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/effectifs" && hasPlayers === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/composition" && hasTactical === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/entrainement" && hasTrainings === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/match" && hasMatches === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/medical/blessures" && hasInjuries === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/medical/dossier-medical" && hasMedical === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/test" && hasTests === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/quotidienne" && hasWelfare === false) {
+        isLocked = true
+      } else if (pathname === "/dashboard/gps" && hasGPS === false) {
+        isLocked = true
+      }
+
+      if (isLocked) {
+        router.replace("/dashboard")
+      }
+    }
+  }, [
+    isRestricted,
+    isPresident,
+    isManager,
+    pathname,
+    router,
+    hasDashboard,
+    hasPayment,
+    hasPlanning,
+    hasMessaging,
+    hasPolls,
+    hasStructure,
+    hasStaff,
+    hasPlayers,
+    hasTactical,
+    hasTrainings,
+    hasMatches,
+    hasInjuries,
+    hasMedical,
+    hasTests,
+    hasWelfare,
+    hasGPS
+  ])
 
   // If restricted and NOT President/Manager, block screen with stunning overlay
   if (isRestricted && !isPresident && !isManager) {

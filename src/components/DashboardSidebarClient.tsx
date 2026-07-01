@@ -37,7 +37,8 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
         { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt"), icon: "🛡️", description: t("desc_clubs") },
         { href: "/dashboard/manager/paiements", label: t("db_clubs_payments"), icon: "💳", description: t("desc_payments") },
         { href: "/dashboard/manager/annonces", label: t("db_announcements"), icon: "📢", description: t("desc_announcements") },
-        { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️", description: language === "EN" ? "Restore or purge deleted user accounts" : language === "AR" ? "استعادة أو مسح حسابات المستخدمين المحذوفة" : "Restaurer ou purger des comptes utilisateurs supprimés" },
+        { href: "/dashboard/manager/forfaits", label: language === "EN" ? "Subscription Plans" : language === "AR" ? "إدارة الاشتراكات" : "Gestion des Forfaits", icon: "💎", description: language === "EN" ? "Configure platform plans, pricing and options" : language === "AR" ? "إعداد الباقات والأسعار والخيارات" : "Configurer les forfaits, prix et options" },
+        { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés", icon: "🗑️", description: language === "EN" ? "Restore or purge deleted user accounts" : language === "AR" ? "استعادة ou purger des comptes utilisateurs supprimés" : "Restaurer ou purger des comptes utilisateurs supprimés" },
       ]
     : [
         { href: "/dashboard", label: t("nav_dashboard"), icon: "🏠", description: t("desc_dashboard") },
@@ -46,6 +47,13 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
           label: t("db_subscription_payment"), 
           icon: "💳", 
           description: t("desc_subscription"),
+          requiredRoles: ["PRESIDENT"]
+        },
+        { 
+          href: "/dashboard/roles", 
+          label: t("db_roles_permissions"), 
+          icon: "🔑", 
+          description: t("desc_roles"),
           requiredRoles: ["PRESIDENT"]
         },
         { href: "/dashboard/planning", label: t("feat_planning_title"), icon: "📅", description: t("desc_planning_gen") },

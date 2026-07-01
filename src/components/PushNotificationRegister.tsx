@@ -74,9 +74,13 @@ export default function PushNotificationRegister() {
             console.log("Push notification tapped by user:", action)
             const data = action.notification.data
             
-            if (data && data.type === "chat" && data.channelId) {
-              // Redirect the user directly to the message channel inside the webview
-              window.location.href = `/dashboard/messagerie?channelId=${data.channelId}`
+            if (data) {
+              if (data.url) {
+                window.location.href = data.url
+              } else if (data.type === "chat" && data.channelId) {
+                // Redirect the user directly to the message channel inside the webview
+                window.location.href = `/dashboard/messagerie?channelId=${data.channelId}`
+              }
             }
           }
         )

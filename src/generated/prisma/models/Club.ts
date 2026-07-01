@@ -79,6 +79,7 @@ export type ClubCountAggregateOutputType = {
   subscriptionExpires: number
   subscriptionPaid: number
   subscriptionMethod: number
+  subscriptionFeatures: number
   questionnaireTemplate: number
   _all: number
 }
@@ -139,6 +140,7 @@ export type ClubCountAggregateInputType = {
   subscriptionExpires?: true
   subscriptionPaid?: true
   subscriptionMethod?: true
+  subscriptionFeatures?: true
   questionnaireTemplate?: true
   _all?: true
 }
@@ -232,6 +234,7 @@ export type ClubGroupByOutputType = {
   subscriptionExpires: Date | null
   subscriptionPaid: boolean
   subscriptionMethod: string | null
+  subscriptionFeatures: runtime.JsonValue | null
   questionnaireTemplate: runtime.JsonValue | null
   _count: ClubCountAggregateOutputType | null
   _min: ClubMinAggregateOutputType | null
@@ -273,6 +276,7 @@ export type ClubWhereInput = {
   subscriptionExpires?: Prisma.DateTimeNullableFilter<"Club"> | Date | string | null
   subscriptionPaid?: Prisma.BoolFilter<"Club"> | boolean
   subscriptionMethod?: Prisma.StringNullableFilter<"Club"> | string | null
+  subscriptionFeatures?: Prisma.JsonNullableFilter<"Club">
   questionnaireTemplate?: Prisma.JsonNullableFilter<"Club">
   calendarEvents?: Prisma.CalendarEventListRelationFilter
   chatChannels?: Prisma.ChatChannelListRelationFilter
@@ -301,6 +305,7 @@ export type ClubOrderByWithRelationInput = {
   subscriptionExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   subscriptionPaid?: Prisma.SortOrder
   subscriptionMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  subscriptionFeatures?: Prisma.SortOrderInput | Prisma.SortOrder
   questionnaireTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   calendarEvents?: Prisma.CalendarEventOrderByRelationAggregateInput
   chatChannels?: Prisma.ChatChannelOrderByRelationAggregateInput
@@ -332,6 +337,7 @@ export type ClubWhereUniqueInput = Prisma.AtLeast<{
   subscriptionExpires?: Prisma.DateTimeNullableFilter<"Club"> | Date | string | null
   subscriptionPaid?: Prisma.BoolFilter<"Club"> | boolean
   subscriptionMethod?: Prisma.StringNullableFilter<"Club"> | string | null
+  subscriptionFeatures?: Prisma.JsonNullableFilter<"Club">
   questionnaireTemplate?: Prisma.JsonNullableFilter<"Club">
   calendarEvents?: Prisma.CalendarEventListRelationFilter
   chatChannels?: Prisma.ChatChannelListRelationFilter
@@ -360,6 +366,7 @@ export type ClubOrderByWithAggregationInput = {
   subscriptionExpires?: Prisma.SortOrderInput | Prisma.SortOrder
   subscriptionPaid?: Prisma.SortOrder
   subscriptionMethod?: Prisma.SortOrderInput | Prisma.SortOrder
+  subscriptionFeatures?: Prisma.SortOrderInput | Prisma.SortOrder
   questionnaireTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ClubCountOrderByAggregateInput
   _max?: Prisma.ClubMaxOrderByAggregateInput
@@ -386,6 +393,7 @@ export type ClubScalarWhereWithAggregatesInput = {
   subscriptionExpires?: Prisma.DateTimeNullableWithAggregatesFilter<"Club"> | Date | string | null
   subscriptionPaid?: Prisma.BoolWithAggregatesFilter<"Club"> | boolean
   subscriptionMethod?: Prisma.StringNullableWithAggregatesFilter<"Club"> | string | null
+  subscriptionFeatures?: Prisma.JsonNullableWithAggregatesFilter<"Club">
   questionnaireTemplate?: Prisma.JsonNullableWithAggregatesFilter<"Club">
 }
 
@@ -405,6 +413,7 @@ export type ClubCreateInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
@@ -433,6 +442,7 @@ export type ClubUncheckedCreateInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
@@ -459,6 +469,7 @@ export type ClubUpdateInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
@@ -487,6 +498,7 @@ export type ClubUncheckedUpdateInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
@@ -514,6 +526,7 @@ export type ClubCreateManyInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -533,6 +546,7 @@ export type ClubUpdateManyMutationInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -553,6 +567,7 @@ export type ClubUncheckedUpdateManyInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -578,6 +593,7 @@ export type ClubCountOrderByAggregateInput = {
   subscriptionExpires?: Prisma.SortOrder
   subscriptionPaid?: Prisma.SortOrder
   subscriptionMethod?: Prisma.SortOrder
+  subscriptionFeatures?: Prisma.SortOrder
   questionnaireTemplate?: Prisma.SortOrder
 }
 
@@ -770,6 +786,7 @@ export type ClubCreateWithoutPresidentInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
@@ -796,6 +813,7 @@ export type ClubUncheckedCreateWithoutPresidentInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
@@ -838,6 +856,7 @@ export type ClubUpdateWithoutPresidentInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
@@ -864,6 +883,7 @@ export type ClubUncheckedUpdateWithoutPresidentInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
@@ -890,6 +910,7 @@ export type ClubCreateWithoutCalendarEventsInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
   president?: Prisma.UserCreateNestedOneWithoutClubInput
@@ -917,6 +938,7 @@ export type ClubUncheckedCreateWithoutCalendarEventsInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedCreateNestedManyWithoutClubInput
@@ -958,6 +980,7 @@ export type ClubUpdateWithoutCalendarEventsInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
   president?: Prisma.UserUpdateOneWithoutClubNestedInput
@@ -985,6 +1008,7 @@ export type ClubUncheckedUpdateWithoutCalendarEventsInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedUpdateManyWithoutClubNestedInput
@@ -1010,6 +1034,7 @@ export type ClubCreateWithoutCategoriesInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
@@ -1037,6 +1062,7 @@ export type ClubUncheckedCreateWithoutCategoriesInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
@@ -1078,6 +1104,7 @@ export type ClubUpdateWithoutCategoriesInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
@@ -1105,6 +1132,7 @@ export type ClubUncheckedUpdateWithoutCategoriesInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
@@ -1130,6 +1158,7 @@ export type ClubCreateWithoutStaffInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
@@ -1157,6 +1186,7 @@ export type ClubUncheckedCreateWithoutStaffInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
@@ -1198,6 +1228,7 @@ export type ClubUpdateWithoutStaffInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
@@ -1225,6 +1256,7 @@ export type ClubUncheckedUpdateWithoutStaffInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
@@ -1250,6 +1282,7 @@ export type ClubCreateWithoutPlayersInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
@@ -1277,6 +1310,7 @@ export type ClubUncheckedCreateWithoutPlayersInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
@@ -1318,6 +1352,7 @@ export type ClubUpdateWithoutPlayersInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
@@ -1345,6 +1380,7 @@ export type ClubUncheckedUpdateWithoutPlayersInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
@@ -1370,6 +1406,7 @@ export type ClubCreateWithoutDailyQuestionnairesInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
@@ -1397,6 +1434,7 @@ export type ClubUncheckedCreateWithoutDailyQuestionnairesInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
@@ -1438,6 +1476,7 @@ export type ClubUpdateWithoutDailyQuestionnairesInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
@@ -1465,6 +1504,7 @@ export type ClubUncheckedUpdateWithoutDailyQuestionnairesInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
@@ -1490,6 +1530,7 @@ export type ClubCreateWithoutPollsInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelCreateNestedManyWithoutClubInput
@@ -1517,6 +1558,7 @@ export type ClubUncheckedCreateWithoutPollsInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   chatChannels?: Prisma.ChatChannelUncheckedCreateNestedManyWithoutClubInput
@@ -1558,6 +1600,7 @@ export type ClubUpdateWithoutPollsInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUpdateManyWithoutClubNestedInput
@@ -1585,6 +1628,7 @@ export type ClubUncheckedUpdateWithoutPollsInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   chatChannels?: Prisma.ChatChannelUncheckedUpdateManyWithoutClubNestedInput
@@ -1610,6 +1654,7 @@ export type ClubCreateWithoutChatChannelsInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventCreateNestedManyWithoutClubInput
   president?: Prisma.UserCreateNestedOneWithoutClubInput
@@ -1637,6 +1682,7 @@ export type ClubUncheckedCreateWithoutChatChannelsInput = {
   subscriptionExpires?: Date | string | null
   subscriptionPaid?: boolean
   subscriptionMethod?: string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedCreateNestedManyWithoutClubInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedCreateNestedManyWithoutClubInput
@@ -1678,6 +1724,7 @@ export type ClubUpdateWithoutChatChannelsInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUpdateManyWithoutClubNestedInput
   president?: Prisma.UserUpdateOneWithoutClubNestedInput
@@ -1705,6 +1752,7 @@ export type ClubUncheckedUpdateWithoutChatChannelsInput = {
   subscriptionExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subscriptionPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   subscriptionMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subscriptionFeatures?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   questionnaireTemplate?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calendarEvents?: Prisma.CalendarEventUncheckedUpdateManyWithoutClubNestedInput
   dailyQuestionnaires?: Prisma.DailyQuestionnaireUncheckedUpdateManyWithoutClubNestedInput
@@ -1816,6 +1864,7 @@ export type ClubSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   subscriptionExpires?: boolean
   subscriptionPaid?: boolean
   subscriptionMethod?: boolean
+  subscriptionFeatures?: boolean
   questionnaireTemplate?: boolean
   calendarEvents?: boolean | Prisma.Club$calendarEventsArgs<ExtArgs>
   chatChannels?: boolean | Prisma.Club$chatChannelsArgs<ExtArgs>
@@ -1845,6 +1894,7 @@ export type ClubSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   subscriptionExpires?: boolean
   subscriptionPaid?: boolean
   subscriptionMethod?: boolean
+  subscriptionFeatures?: boolean
   questionnaireTemplate?: boolean
   president?: boolean | Prisma.Club$presidentArgs<ExtArgs>
 }, ExtArgs["result"]["club"]>
@@ -1866,6 +1916,7 @@ export type ClubSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   subscriptionExpires?: boolean
   subscriptionPaid?: boolean
   subscriptionMethod?: boolean
+  subscriptionFeatures?: boolean
   questionnaireTemplate?: boolean
   president?: boolean | Prisma.Club$presidentArgs<ExtArgs>
 }, ExtArgs["result"]["club"]>
@@ -1887,10 +1938,11 @@ export type ClubSelectScalar = {
   subscriptionExpires?: boolean
   subscriptionPaid?: boolean
   subscriptionMethod?: boolean
+  subscriptionFeatures?: boolean
   questionnaireTemplate?: boolean
 }
 
-export type ClubOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "logo" | "creationDate" | "address" | "stadiumName" | "stadiumCapacity" | "phone" | "presidentId" | "createdAt" | "updatedAt" | "subscriptionPlan" | "subscriptionStatus" | "subscriptionExpires" | "subscriptionPaid" | "subscriptionMethod" | "questionnaireTemplate", ExtArgs["result"]["club"]>
+export type ClubOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "logo" | "creationDate" | "address" | "stadiumName" | "stadiumCapacity" | "phone" | "presidentId" | "createdAt" | "updatedAt" | "subscriptionPlan" | "subscriptionStatus" | "subscriptionExpires" | "subscriptionPaid" | "subscriptionMethod" | "subscriptionFeatures" | "questionnaireTemplate", ExtArgs["result"]["club"]>
 export type ClubInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   calendarEvents?: boolean | Prisma.Club$calendarEventsArgs<ExtArgs>
   chatChannels?: boolean | Prisma.Club$chatChannelsArgs<ExtArgs>
@@ -1938,6 +1990,7 @@ export type $ClubPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     subscriptionExpires: Date | null
     subscriptionPaid: boolean
     subscriptionMethod: string | null
+    subscriptionFeatures: runtime.JsonValue | null
     questionnaireTemplate: runtime.JsonValue | null
   }, ExtArgs["result"]["club"]>
   composites: {}
@@ -2386,6 +2439,7 @@ export interface ClubFieldRefs {
   readonly subscriptionExpires: Prisma.FieldRef<"Club", 'DateTime'>
   readonly subscriptionPaid: Prisma.FieldRef<"Club", 'Boolean'>
   readonly subscriptionMethod: Prisma.FieldRef<"Club", 'String'>
+  readonly subscriptionFeatures: Prisma.FieldRef<"Club", 'Json'>
   readonly questionnaireTemplate: Prisma.FieldRef<"Club", 'Json'>
 }
     

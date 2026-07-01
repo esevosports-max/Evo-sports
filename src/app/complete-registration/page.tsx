@@ -11,22 +11,20 @@ export default function CompleteRegistration() {
   const [address, setAddress] = useState("")
   const [stadiumName, setStadiumName] = useState("")
   const [phone, setPhone] = useState("")
+  const [plans, setPlans] = useState<any[]>([])
   const [chosenPlan, setChosenPlan] = useState("Club")
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("monthly")
-  
   const [logoBase64, setLogoBase64] = useState<string | null>(null)
   const [logoName, setLogoName] = useState("")
-  
   const [pdfBase64, setPdfBase64] = useState<string | null>(null)
   const [pdfName, setPdfName] = useState("")
-  
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
-
-  // Fetch session on load
+  
+  // Fetch session & plans on load
   useEffect(() => {
     async function checkSession() {
       try {
@@ -40,6 +38,17 @@ export default function CompleteRegistration() {
             setBillingPeriod(storedBilling)
           }
         }
+        
+        // Fetch plans
+        fetch("/api/public/plans")
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.success && res.data) {
+              setPlans(res.data)
+            }
+          })
+          .catch((e) => console.error("Error loading plans in complete registration:", e))
+
         const res = await fetch("/api/club-request")
         if (res.status === 401) {
           setIsAuthenticated(false)
@@ -203,6 +212,15 @@ export default function CompleteRegistration() {
     }
   }
 
+  const getPlanDisplayName = (p: any) => {
+    const norm = p.name.toLowerCase().trim()
+    if (norm === "1 équipe" || norm === "1 equipe" || norm === "1 team") return t("pricing_1eq")
+    if (norm === "club") return t("pricing_club")
+    if (norm === "professionnel" || norm === "pro") return t("pricing_pro")
+    if (norm === "elite") return "Elite"
+    return p.name
+  }
+
   if (isAuthenticated === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
@@ -248,8 +266,8 @@ export default function CompleteRegistration() {
         <div className="rounded-2xl border border-zinc-200/50 bg-white/70 backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/70 p-6 sm:p-10 shadow-xl space-y-8">
           
           {rejectionReason && (
-            <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-xs font-bold text-red-650 dark:text-red-400 space-y-1 animate-pulse">
-              <span className="uppercase text-[9px] tracking-wider block font-black text-red-650 dark:text-red-300">
+            <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-xs font-bold text-red-655 dark:text-red-400 space-y-1 animate-pulse">
+              <span className="uppercase text-[9px] tracking-wider block font-black text-red-655 dark:text-red-300">
                 {t("comp_refused_title")}
               </span>
               <p className="leading-relaxed font-semibold">{rejectionReason}</p>
@@ -419,22 +437,38 @@ export default function CompleteRegistration() {
                   onChange={(e) => setChosenPlan(e.target.value)}
                   className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 shadow-inner outline-none transition-all duration-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white font-bold"
                 >
-                  <option value="1 Équipe">
-                    {language === "FR" ? "1 Équipe" : language === "EN" ? "1 Team" : "فريق واحد"}{" "}
-                    ({billingPeriod === "monthly" ? "10 000 DA/mois" : "100 000 DA/an"})
-                  </option>
-                  <option value="Club">
-                    {language === "FR" ? "Club" : language === "EN" ? "Club" : "نادي"}{" "}
-                    ({billingPeriod === "monthly" ? "15 000 DA/mois" : "144 000 DA/an"})
-                  </option>
-                  <option value="Professionnel">
-                    {language === "FR" ? "Professionnel" : language === "EN" ? "Professional" : "احترافي"}{" "}
-                    ({billingPeriod === "monthly" ? "20 000 DA/mois" : "192 000 DA/an"})
-                  </option>
-                  <option value="Elite">
-                    Elite{" "}
-                    ({billingPeriod === "monthly" ? "25 000 DA/mois" : "240 000 DA/an"})
-                  </option>
+                  {plans
+                    .filter((p) => p.type === "PAYANT")
+                    .map((p) => {
+                      const displayPlanName = getPlanDisplayName(p)
+                      const hasMonthly = p.billingPeriodType === "BOTH" || p.billingPeriodType === "MONTHLY"
+                      const hasYearly = p.billingPeriodType === "BOTH" || p.billingPeriodType === "ANNUAL"
+                      
+                      let priceStr = ""
+                      if (billingPeriod === "monthly" && hasMonthly) {
+                        priceStr = `${p.priceMonthly.toLocaleString()} DA/mois`
+                      } else if (billingPeriod === "yearly" && hasYearly) {
+                        priceStr = `${p.priceYearly.toLocaleString()} DA/an`
+                      } else {
+                        priceStr = hasMonthly 
+                          ? `${p.priceMonthly.toLocaleString()} DA/mois`
+                          : `${p.priceYearly.toLocaleString()} DA/an`
+                      }
+
+                      return (
+                        <option key={p.id} value={p.name}>
+                          {displayPlanName} ({priceStr})
+                        </option>
+                      )
+                    })}
+                  {plans.filter((p) => p.type === "PAYANT").length === 0 && (
+                    <>
+                      <option value="1 Équipe">1 Équipe</option>
+                      <option value="Club">Club</option>
+                      <option value="Professionnel">Professionnel</option>
+                      <option value="Elite">Elite</option>
+                    </>
+                  )}
                 </select>
               </div>
 

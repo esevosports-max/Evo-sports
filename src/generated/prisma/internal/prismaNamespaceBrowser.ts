@@ -82,7 +82,8 @@ export const ModelName = {
   GpsDevice: 'GpsDevice',
   Telemetry: 'Telemetry',
   PaymentConfig: 'PaymentConfig',
-  PushToken: 'PushToken'
+  PushToken: 'PushToken',
+  SubscriptionPlan: 'SubscriptionPlan'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -183,6 +184,7 @@ export const ClubScalarFieldEnum = {
   subscriptionExpires: 'subscriptionExpires',
   subscriptionPaid: 'subscriptionPaid',
   subscriptionMethod: 'subscriptionMethod',
+  subscriptionFeatures: 'subscriptionFeatures',
   questionnaireTemplate: 'questionnaireTemplate'
 } as const
 
@@ -460,6 +462,7 @@ export const ChatChannelScalarFieldEnum = {
   targetTeams: 'targetTeams',
   targetRoles: 'targetRoles',
   targetUserIds: 'targetUserIds',
+  deletedByUserIds: 'deletedByUserIds',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -476,6 +479,7 @@ export const ChatMessageScalarFieldEnum = {
   senderClubName: 'senderClubName',
   senderClubLogo: 'senderClubLogo',
   content: 'content',
+  deletedByUserIds: 'deletedByUserIds',
   createdAt: 'createdAt'
 } as const
 
@@ -652,6 +656,51 @@ export const PushTokenScalarFieldEnum = {
 } as const
 
 export type PushTokenScalarFieldEnum = (typeof PushTokenScalarFieldEnum)[keyof typeof PushTokenScalarFieldEnum]
+
+
+export const SubscriptionPlanScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  type: 'type',
+  durationYears: 'durationYears',
+  durationMonths: 'durationMonths',
+  durationDays: 'durationDays',
+  durationHours: 'durationHours',
+  durationMinutes: 'durationMinutes',
+  durationSeconds: 'durationSeconds',
+  billingPeriodType: 'billingPeriodType',
+  priceMonthly: 'priceMonthly',
+  priceYearly: 'priceYearly',
+  paymentMethods: 'paymentMethods',
+  maxTeams: 'maxTeams',
+  staffLimits: 'staffLimits',
+  hasDashboard: 'hasDashboard',
+  hasPayment: 'hasPayment',
+  hasPlanning: 'hasPlanning',
+  hasMessaging: 'hasMessaging',
+  hasPolls: 'hasPolls',
+  hasStructure: 'hasStructure',
+  hasStaff: 'hasStaff',
+  hasPlayers: 'hasPlayers',
+  hasTactical: 'hasTactical',
+  hasTrainings: 'hasTrainings',
+  hasMatches: 'hasMatches',
+  hasInjuries: 'hasInjuries',
+  hasMedical: 'hasMedical',
+  hasTests: 'hasTests',
+  hasWelfare: 'hasWelfare',
+  hasGPS: 'hasGPS',
+  hasRbac: 'hasRbac',
+  hasSupport: 'hasSupport',
+  featuresList: 'featuresList',
+  popular: 'popular',
+  colorTheme: 'colorTheme',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubscriptionPlanScalarFieldEnum = (typeof SubscriptionPlanScalarFieldEnum)[keyof typeof SubscriptionPlanScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -6,6 +6,7 @@ import DashboardNavbarClient from "@/components/DashboardNavbarClient"
 import SubscriptionGuard from "@/components/SubscriptionGuard"
 import DashboardHeaderClient from "@/components/DashboardHeaderClient"
 import PushNotificationRegister from "@/components/PushNotificationRegister"
+import { getClubSubscriptionFeatures } from "@/lib/subscription"
 
 export default async function DashboardLayout({
   children,
@@ -47,8 +48,30 @@ export default async function DashboardLayout({
   let clubName = "EVO SPORTS CLUB"
   let clubLogo: string | null = null
   let isRestricted = false
+  let planFeatures = {
+    hasDashboard: true,
+    hasPayment: true,
+    hasPlanning: true,
+    hasMessaging: true,
+    hasPolls: true,
+    hasStructure: true,
+    hasStaff: true,
+    hasPlayers: true,
+    hasTactical: true,
+    hasTrainings: true,
+    hasMatches: true,
+    hasInjuries: true,
+    hasMedical: true,
+    hasTests: true,
+    hasWelfare: true,
+    hasGPS: true,
+    hasRbac: true,
+    hasSupport: true,
+  }
 
   try {
+    let activeClub = null
+
     if (roleName === "PRESIDENT") {
       const request = await db.clubRegistrationRequest.findUnique({
         where: { userId: user.id },
@@ -63,33 +86,19 @@ export default async function DashboardLayout({
       clubName = request.clubName
       clubLogo = request.clubLogo
 
-      const userClub = await db.club.findUnique({
+      activeClub = await db.club.findUnique({
         where: { presidentId: user.id }
       })
-      if (userClub) {
-        const status = userClub.subscriptionStatus || ""
-        const expires = userClub.subscriptionExpires
-        const now = new Date()
-        
-        const isExpired = expires && new Date(expires) < now
-        const isBlocked = status === "Bloqué" || status === "Expiré"
-        const isPending = status === "EnAttente" || status === "En attente"
-        
-        if (isBlocked || isExpired || isPending) {
-          isRestricted = true
-        }
-      }
     } else if (roleName === "MANAGER_EVO_SPORTS") {
       clubName = "EVO SPORTS ADMIN"
     } else {
       // For Staff roles (DIRECTEUR_SPORTIF, ENTRAINEUR_PRINCIPAL, ENTRAINEUR_ADJOINT, PREPARATEUR_PHYSIQUE, ENTRAINEUR_GARDIENS, MEDECIN)
-      let userClub = null
       const staffMember = await db.staff.findUnique({
         where: { userId: user.id },
         include: { club: true }
       })
       if (staffMember && staffMember.club) {
-        userClub = staffMember.club
+        activeClub = staffMember.club
       } else {
         // For players
         const playerMember = await db.player.findUnique({
@@ -97,25 +106,30 @@ export default async function DashboardLayout({
           include: { club: true }
         })
         if (playerMember && playerMember.club) {
-          userClub = playerMember.club
+          activeClub = playerMember.club
         }
       }
+    }
 
-      if (userClub) {
-        clubName = userClub.name
-        clubLogo = userClub.logo
+    if (activeClub) {
+      clubName = activeClub.name
+      clubLogo = activeClub.logo
 
-        const status = userClub.subscriptionStatus || ""
-        const expires = userClub.subscriptionExpires
-        const now = new Date()
-        
-        const isExpired = expires && new Date(expires) < now
-        const isBlocked = status === "Bloqué" || status === "Expiré"
-        const isPending = status === "EnAttente" || status === "En attente"
-        
-        if (isBlocked || isExpired || isPending) {
-          isRestricted = true
-        }
+      const status = activeClub.subscriptionStatus || ""
+      const expires = activeClub.subscriptionExpires
+      const now = new Date()
+      
+      const isExpired = expires && new Date(expires) < now
+      const isBlocked = status === "Bloqué" || status === "Expiré"
+      const isPending = status === "EnAttente" || status === "En attente"
+      
+      if (isBlocked || isExpired || isPending) {
+        isRestricted = true
+      }
+
+      // Fetch subscription plan features
+      if (activeClub.subscriptionPlan) {
+        planFeatures = await getClubSubscriptionFeatures(activeClub)
       }
     }
   } catch (error) {
@@ -160,6 +174,7 @@ export default async function DashboardLayout({
         club={{
           name: clubName,
           logo: clubLogo,
+          ...planFeatures,
         }}
         isRestricted={isRestricted}
         signOutAction={async () => {
@@ -175,6 +190,7 @@ export default async function DashboardLayout({
             isRestricted={isRestricted} 
             roleName={roleName} 
             clubName={clubName} 
+            {...planFeatures}
           />
           <div className="max-w-7xl mx-auto w-full bg-white space-y-6">
             

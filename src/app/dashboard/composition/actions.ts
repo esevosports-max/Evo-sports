@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
+import { sendPushNotificationToUsers } from "@/lib/pushNotifications"
 
 export async function saveCompositionAction(data: {
   teamCategoryId: string
@@ -139,6 +140,7 @@ export async function communicateCompositionAction(teamCategoryId: string) {
       where: { id: teamCategoryId }
     })
     const categoryName = category?.name || "votre équipe"
+    const clubId = category?.clubId
 
     // Create notifications for selected starters and substitutes
     const starterPlayerIds = slots.map((s: any) => s.playerId).filter(Boolean) as string[]
@@ -155,7 +157,7 @@ export async function communicateCompositionAction(teamCategoryId: string) {
       select: { userId: true }
     })
 
-    // Create notifications in database
+    // Create notifications in database for starters
     for (const player of starterPlayers) {
       if (player.userId) {
         await db.notification.create({
@@ -169,6 +171,7 @@ export async function communicateCompositionAction(teamCategoryId: string) {
       }
     }
 
+    // Create notifications in database for substitutes
     for (const player of substitutePlayers) {
       if (player.userId) {
         await db.notification.create({
@@ -180,6 +183,82 @@ export async function communicateCompositionAction(teamCategoryId: string) {
           }
         })
       }
+    }
+
+    const starterUserIds = starterPlayers.map(p => p.userId).filter(Boolean) as string[]
+    if (starterUserIds.length > 0) {
+      await sendPushNotificationToUsers(starterUserIds, {
+        title: "Sélection Match : Titulaire 🟢",
+        body: `Félicitations, vous êtes sélectionné comme TITULAIRE dans la composition pour l'équipe ${categoryName} !`,
+        data: { url: "/dashboard/composition" }
+      })
+    }
+
+    const substituteUserIds = substitutePlayers.map(p => p.userId).filter(Boolean) as string[]
+    if (substituteUserIds.length > 0) {
+      await sendPushNotificationToUsers(substituteUserIds, {
+        title: "Sélection Match : Remplaçant 🟡",
+        body: `Vous êtes sélectionné sur le BANC des remplaçants pour le match de l'équipe ${categoryName} !`,
+        data: { url: "/dashboard/composition" }
+      })
+    }
+
+    // Send general composition notification to everyone else who has access to the planning of this team category
+    try {
+      const [staff, categoryPlayers, club] = await Promise.all([
+        clubId ? db.staff.findMany({
+          where: { clubId },
+          select: { userId: true }
+        }) : Promise.resolve([]),
+        db.player.findMany({
+          where: { teamCategoryId },
+          select: { userId: true }
+        }),
+        clubId ? db.club.findUnique({
+          where: { id: clubId },
+          select: { presidentId: true }
+        }) : Promise.resolve(null)
+      ])
+
+      const planningAccessUserIds = new Set<string>()
+      if (club?.presidentId) {
+        planningAccessUserIds.add(club.presidentId)
+      }
+      staff.forEach(s => {
+        if (s.userId) planningAccessUserIds.add(s.userId)
+      })
+      categoryPlayers.forEach(p => {
+        if (p.userId) planningAccessUserIds.add(p.userId)
+      })
+
+      // Exclude the composer (current user) and selected players (starters & substitutes)
+      planningAccessUserIds.delete(userId)
+      starterUserIds.forEach(id => planningAccessUserIds.delete(id))
+      substituteUserIds.forEach(id => planningAccessUserIds.delete(id))
+
+      if (planningAccessUserIds.size > 0) {
+        const generalRecList = Array.from(planningAccessUserIds)
+        const titleGeneral = "📋 Composition Publiée"
+        const messageGeneral = `La composition d'équipe pour ${categoryName} a été publiée.`
+
+        await db.notification.createMany({
+          data: generalRecList.map(recId => ({
+            userId: recId,
+            title: titleGeneral,
+            message: messageGeneral,
+            type: "COMPOSITION",
+            read: false
+          }))
+        })
+
+        await sendPushNotificationToUsers(generalRecList, {
+          title: titleGeneral,
+          body: messageGeneral,
+          data: { url: "/dashboard/composition" }
+        })
+      }
+    } catch (generalNotifErr) {
+      console.error("Error sending general composition notifications:", generalNotifErr)
     }
 
     revalidatePath("/dashboard")

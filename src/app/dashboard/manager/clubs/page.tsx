@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import ManagerClubsClient from "@/components/ManagerClubsClient"
+import { createPlanFeaturesSnapshot } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -65,6 +66,11 @@ export default async function ManagerClubsPage() {
     subscriptionPaid: boolean
   ) {
     "use server"
+    const plan = await db.subscriptionPlan.findFirst({
+      where: { name: subscriptionPlan }
+    })
+    const features = plan ? createPlanFeaturesSnapshot(plan) : null
+
     await db.club.update({
       where: { id: clubId },
       data: { 
@@ -75,6 +81,7 @@ export default async function ManagerClubsPage() {
         subscriptionStatus,
         subscriptionExpires: new Date(subscriptionExpires),
         subscriptionPaid,
+        subscriptionFeatures: (features as any) || undefined,
       },
     })
   }

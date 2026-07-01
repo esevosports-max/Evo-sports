@@ -45,7 +45,7 @@ const ROLE_LABELS_DICT: Record<string, Record<string, string>> = {
 const pageDict = {
   FR: {
     unauthorizedTitle: "Accès Non Autorisé",
-    unauthorizedDesc: "Seul le Manager EVO Sports est autorisé à gérer les habilitations, les rôles et la matrice des permissions d'accès globale.",
+    unauthorizedDesc: "Seul le Manager EVO Sports et le Président de club sont autorisés à gérer les habilitations, les rôles et les accès du personnel.",
     toastTitle: "Habilitation Modifiée",
     toastSuccess: "Rôle de {name} changé en « {role} » avec succès !",
     toastError: "Erreur lors de la mise à jour du rôle.",
@@ -71,7 +71,7 @@ const pageDict = {
   },
   EN: {
     unauthorizedTitle: "Access Denied",
-    unauthorizedDesc: "Only the EVO Sports Manager is authorized to manage credentials, roles, and the global permissions matrix.",
+    unauthorizedDesc: "Only the EVO Sports Manager and the Club President are authorized to manage credentials, roles, and staff permissions.",
     toastTitle: "Credentials Modified",
     toastSuccess: "Role of {name} changed to \"{role}\" successfully!",
     toastError: "Error updating the role.",
@@ -97,7 +97,7 @@ const pageDict = {
   },
   AR: {
     unauthorizedTitle: "غير مصرح بالدخول",
-    unauthorizedDesc: "يسمح فقط لمدير إيفو سبورتس بإدارة الصلاحيات والأدوار ومصفوفة الأذونات العامة.",
+    unauthorizedDesc: "يسمح فقط لمدير إيفو سبورتس ورئيس النادي بإدارة الصلاحيات والأدوار وأذونات الموظفين.",
     toastTitle: "تعديل الصلاحية",
     toastSuccess: "تم تغيير دور {name} إلى « {role} » بنجاح!",
     toastError: "خطأ أثناء تحديث الدور.",
@@ -151,6 +151,7 @@ interface PermissionItem {
 
 interface RolesManagerProps {
   isAuthorized: boolean
+  isManager: boolean
   initialUsers: UserItem[]
   initialRoles: RoleItem[]
   allPermissions: PermissionItem[]
@@ -160,6 +161,7 @@ interface RolesManagerProps {
 
 export default function RolesManagerClient({
   isAuthorized,
+  isManager,
   initialUsers,
   initialRoles,
   allPermissions,
@@ -401,7 +403,13 @@ export default function RolesManagerClient({
               {tLoc.matrixTitle}
             </h3>
             <p className="text-[11px] text-zinc-500 leading-relaxed font-semibold mt-1">
-              {tLoc.matrixSubtitle}
+              {isManager 
+                ? tLoc.matrixSubtitle 
+                : (language === "EN" 
+                    ? "View the access permissions granted to each technical or medical role of the club (read-only)."
+                    : language === "AR"
+                    ? "عرض أذونات الدخول الممنوحة لكل دور فني أو طبي في النادي (وضع القراءة فقط)."
+                    : "Visualisez les permissions d'accès accordées à chaque rôle technique ou médical du club (mode lecture seule).")}
             </p>
           </div>
 
@@ -435,8 +443,9 @@ export default function RolesManagerClient({
                           <input
                              type="checkbox"
                              checked={isEnabled}
+                             disabled={!isManager}
                              onChange={() => handleTogglePermission(role.id, perm.action, isEnabled)}
-                             className="h-4.5 w-4.5 rounded border-zinc-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
+                             className="h-4.5 w-4.5 rounded border-zinc-300 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </td>
                       )

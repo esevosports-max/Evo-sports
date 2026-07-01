@@ -335,10 +335,12 @@ export default function DynamicNavbar({
                                 { href: "/dashboard/manager/demandes", label: t("db_reg_requests") },
                                 { href: "/dashboard/manager/clubs", label: t("db_clubs_mgmt") },
                                 { href: "/dashboard/manager/paiements", label: t("db_clubs_payments") },
+                                { href: "/dashboard/manager/forfaits", label: language === "EN" ? "Subscription Plans" : language === "AR" ? "إدارة الاشتراكات" : "Gestion des Forfaits" },
                                 { href: "/dashboard/manager/comptes-supprimes", label: language === "EN" ? "Deleted Accounts" : language === "AR" ? "الحسابات المحذوفة" : "Comptes Supprimés" },
                               ]
                             : [
                                 { href: "/dashboard", label: t("nav_dashboard") },
+                                { href: "/dashboard/roles", label: t("db_roles_permissions"), requiredRoles: ["PRESIDENT"] },
                                 { href: "/dashboard/planning", label: t("feat_planning_title") },
                                 { href: "/dashboard/messagerie", label: t("feat_messaging_title") },
                                 { href: "/dashboard/sondage", label: t("feat_polls_title") },

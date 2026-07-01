@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { auth } from "@/auth"
 import { revalidatePath } from "next/cache"
 import { logAccountAction } from "@/lib/actionLogger"
+import { sendPushNotificationToUsers } from "@/lib/pushNotifications"
 
 export async function createPlayer(data: {
   name: string
@@ -508,6 +509,15 @@ export async function convoquerPlayersAction(data: {
         expiresAt
       }))
     })
+
+    const userIds = players.map(p => p.userId).filter(Boolean) as string[]
+    if (userIds.length > 0) {
+      await sendPushNotificationToUsers(userIds, {
+        title,
+        body: fullMessage,
+        data: { url: "/dashboard" }
+      })
+    }
 
     revalidatePath("/dashboard")
     return { success: true }

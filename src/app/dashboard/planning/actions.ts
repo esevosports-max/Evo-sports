@@ -3,6 +3,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
+import { sendPushNotificationToUsers } from "@/lib/pushNotifications"
 
 // Shared helper to retrieve the clubId for any logged-in user
 export async function getClubIdForUser(userId: string, roleName: string): Promise<string | null> {
@@ -187,7 +188,12 @@ export async function createEvent(data: {
           select: { userId: true }
         }),
         db.player.findMany({
-          where: { clubId },
+          where: {
+            clubId,
+            ...(data.assignedTeam
+              ? { teamCategory: { name: data.assignedTeam } }
+              : {})
+          },
           select: { userId: true }
         }),
         db.club.findUnique({
@@ -253,6 +259,18 @@ export async function createEvent(data: {
             expiresAt
           }))
         })
+
+        const recList = Array.from(recipientIds)
+        if (recList.length > 0) {
+          await sendPushNotificationToUsers(recList, {
+            title: notificationTitle,
+            body: `Un nouvel événement "${data.title}" est programmé le ${formattedDate} à ${data.time}.`,
+            data: {
+              url: "/dashboard/planning",
+              eventId: newEvent.id
+            }
+          })
+        }
       }
     } catch (notificationError) {
       console.error("Error creating notifications for calendar event:", notificationError)

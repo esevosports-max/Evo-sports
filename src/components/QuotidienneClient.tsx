@@ -122,9 +122,11 @@ export default function QuotidienneClient({
   const [templateQuestions, setTemplateQuestions] = useState<any[]>(() => {
     return clubTemplate || [
       { id: "sleep", text: "Qualité du sommeil (cette nuit)", type: "SCALE", key: "sleepQuality", active: true },
+      { id: "sleepHours", text: "Sommeil (heures de sommeil)", type: "NUMBER", key: "sleepHours", active: true },
       { id: "fatigue", text: "Niveau de Fatigue Générale", type: "SCALE", key: "fatigue", active: true },
       { id: "stress", text: "Niveau de Stress / Anxiété", type: "SCALE", key: "stress", active: true },
       { id: "soreness", text: "Douleurs Musculaires / Courbatures", type: "SCALE", key: "soreness", active: true },
+      { id: "rpe", text: "Indice RPE (Intensité de l'effort)", type: "SCALE_10", key: "rpe", active: true },
       { id: "heartRate", text: "Fréquence cardiaque au repos", type: "NUMBER", key: "heartRate", active: true }
     ]
   })

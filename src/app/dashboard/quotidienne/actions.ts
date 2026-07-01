@@ -75,9 +75,11 @@ export async function createQuestionnaire(
 
     const defaultTemplate = [
       { id: "sleep", text: "Qualité du sommeil (cette nuit)", type: "SCALE", key: "sleepQuality", active: true },
+      { id: "sleepHours", text: "Sommeil (heures de sommeil)", type: "NUMBER", key: "sleepHours", active: true },
       { id: "fatigue", text: "Niveau de Fatigue Générale", type: "SCALE", key: "fatigue", active: true },
       { id: "stress", text: "Niveau de Stress / Anxiété", type: "SCALE", key: "stress", active: true },
       { id: "soreness", text: "Douleurs Musculaires / Courbatures", type: "SCALE", key: "soreness", active: true },
+      { id: "rpe", text: "Indice RPE (Intensité de l'effort)", type: "SCALE_10", key: "rpe", active: true },
       { id: "heartRate", text: "Fréquence cardiaque au repos", type: "NUMBER", key: "heartRate", active: true }
     ]
 
@@ -277,16 +279,78 @@ export async function applyQuestionnaireIndices(questionnaireId: string) {
       throw new Error("Les indices de ce questionnaire ont déjà été appliqués")
     }
 
+    const questions = (questionnaire.questions as any[]) || []
+    let rpeKey = ""
+    let sleepHoursKey = ""
+
+    questions.forEach((q) => {
+      const text = (q.text || "").toLowerCase()
+      const key = q.key || q.id
+      if (text.includes("rpe") || key.toLowerCase() === "rpe") {
+        rpeKey = key
+      }
+      if (
+        (text.includes("sommeil") && text.includes("heure")) ||
+        text.includes("sleep hour") ||
+        key.toLowerCase() === "sleephours"
+      ) {
+        sleepHoursKey = key
+      }
+    })
+
     // Insert a PhysicalIndex for each player who responded
     const promises = questionnaire.responses.map((resp) => {
+      const answers = (resp.answers as Record<string, any>) || {}
+      
+      let rpe: number | null = null
+      let sleepHours: number | null = null
+      
+      // Look up via keys
+      if (rpeKey && answers[rpeKey] !== undefined) {
+        const val = parseInt(answers[rpeKey])
+        if (!isNaN(val)) rpe = val
+      }
+      if (sleepHoursKey && answers[sleepHoursKey] !== undefined) {
+        const val = parseFloat(answers[sleepHoursKey])
+        if (!isNaN(val)) sleepHours = val
+      }
+      
+      // Fallback: search all keys in answers for any containing "rpe" or "sleep_hour"/"sommeil_heure"
+      if (rpe === null) {
+        for (const [k, v] of Object.entries(answers)) {
+          if (k.toLowerCase().includes("rpe")) {
+            const val = parseInt(v as string)
+            if (!isNaN(val)) {
+              rpe = val
+              break
+            }
+          }
+        }
+      }
+
+      if (sleepHours === null) {
+        for (const [k, v] of Object.entries(answers)) {
+          const lk = k.toLowerCase()
+          if (lk.includes("sleep") && lk.includes("hour")) {
+            const val = parseFloat(v as string)
+            if (!isNaN(val)) {
+              sleepHours = val
+              break
+            }
+          }
+        }
+      }
+
       return db.physicalIndex.create({
         data: {
           playerId: resp.playerId,
           questionnaireId: questionnaire.id,
           sleepQuality: resp.sleepQuality,
+          sleepHours,
           fatigue: resp.fatigue,
           stress: resp.stress,
           soreness: resp.soreness,
+          rpe,
           heartRate: resp.heartRate,
           date: new Date()
         }

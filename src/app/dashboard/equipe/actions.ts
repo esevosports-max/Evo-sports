@@ -3,6 +3,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
+import { getClubSubscriptionFeatures } from "@/lib/subscription"
 
 export async function updateClubSettings(data: {
   name: string
@@ -130,17 +131,17 @@ export async function createTeamCategory(data: {
       throw new Error("Club introuvable")
     }
 
-    // Check subscription plan limits for 1 Équipe
-    const plan = club.subscriptionPlan || "Club"
-    const isOneTeamPlan = plan === "1 Équipe" || plan === "1 equipe" || plan === "Standard"
-    if (isOneTeamPlan) {
+    // Check subscription plan limits dynamically from snapshotted features or fallback
+    const subPlan = await getClubSubscriptionFeatures(club)
+
+    if (subPlan) {
       const existingCategoriesCount = await db.teamCategory.count({
         where: { clubId: club.id }
       })
-      if (existingCategoriesCount >= 1) {
-        throw new Error("Votre forfait '1 Équipe' ne vous permet de créer qu'une seule équipe.")
+      if (subPlan.maxTeams !== -1 && existingCategoriesCount >= subPlan.maxTeams) {
+        throw new Error(`Votre forfait '${club.subscriptionPlan || "Club"}' ne vous permet de créer que ${subPlan.maxTeams} équipe(s).`)
       }
-      if (data.maxPlayers > 30) {
+      if (subPlan.maxTeams === 1 && data.maxPlayers > 30) {
         throw new Error("Le nombre maximum de joueurs par équipe est limité à 30 pour votre forfait.")
       }
     }

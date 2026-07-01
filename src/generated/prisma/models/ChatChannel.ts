@@ -65,6 +65,7 @@ export type ChatChannelCountAggregateOutputType = {
   targetTeams: number
   targetRoles: number
   targetUserIds: number
+  deletedByUserIds: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -112,6 +113,7 @@ export type ChatChannelCountAggregateInputType = {
   targetTeams?: true
   targetRoles?: true
   targetUserIds?: true
+  deletedByUserIds?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -202,6 +204,7 @@ export type ChatChannelGroupByOutputType = {
   targetTeams: runtime.JsonValue | null
   targetRoles: runtime.JsonValue | null
   targetUserIds: runtime.JsonValue | null
+  deletedByUserIds: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: ChatChannelCountAggregateOutputType | null
@@ -240,6 +243,7 @@ export type ChatChannelWhereInput = {
   targetTeams?: Prisma.JsonNullableFilter<"ChatChannel">
   targetRoles?: Prisma.JsonNullableFilter<"ChatChannel">
   targetUserIds?: Prisma.JsonNullableFilter<"ChatChannel">
+  deletedByUserIds?: Prisma.JsonNullableFilter<"ChatChannel">
   createdAt?: Prisma.DateTimeFilter<"ChatChannel"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ChatChannel"> | Date | string
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
@@ -259,6 +263,7 @@ export type ChatChannelOrderByWithRelationInput = {
   targetTeams?: Prisma.SortOrderInput | Prisma.SortOrder
   targetRoles?: Prisma.SortOrderInput | Prisma.SortOrder
   targetUserIds?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedByUserIds?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   club?: Prisma.ClubOrderByWithRelationInput
@@ -281,6 +286,7 @@ export type ChatChannelWhereUniqueInput = Prisma.AtLeast<{
   targetTeams?: Prisma.JsonNullableFilter<"ChatChannel">
   targetRoles?: Prisma.JsonNullableFilter<"ChatChannel">
   targetUserIds?: Prisma.JsonNullableFilter<"ChatChannel">
+  deletedByUserIds?: Prisma.JsonNullableFilter<"ChatChannel">
   createdAt?: Prisma.DateTimeFilter<"ChatChannel"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ChatChannel"> | Date | string
   club?: Prisma.XOR<Prisma.ClubScalarRelationFilter, Prisma.ClubWhereInput>
@@ -300,6 +306,7 @@ export type ChatChannelOrderByWithAggregationInput = {
   targetTeams?: Prisma.SortOrderInput | Prisma.SortOrder
   targetRoles?: Prisma.SortOrderInput | Prisma.SortOrder
   targetUserIds?: Prisma.SortOrderInput | Prisma.SortOrder
+  deletedByUserIds?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ChatChannelCountOrderByAggregateInput
@@ -323,6 +330,7 @@ export type ChatChannelScalarWhereWithAggregatesInput = {
   targetTeams?: Prisma.JsonNullableWithAggregatesFilter<"ChatChannel">
   targetRoles?: Prisma.JsonNullableWithAggregatesFilter<"ChatChannel">
   targetUserIds?: Prisma.JsonNullableWithAggregatesFilter<"ChatChannel">
+  deletedByUserIds?: Prisma.JsonNullableWithAggregatesFilter<"ChatChannel">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ChatChannel"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ChatChannel"> | Date | string
 }
@@ -339,6 +347,7 @@ export type ChatChannelCreateInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   club: Prisma.ClubCreateNestedOneWithoutChatChannelsInput
@@ -358,6 +367,7 @@ export type ChatChannelUncheckedCreateInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutChannelInput
@@ -375,6 +385,7 @@ export type ChatChannelUpdateInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   club?: Prisma.ClubUpdateOneRequiredWithoutChatChannelsNestedInput
@@ -394,6 +405,7 @@ export type ChatChannelUncheckedUpdateInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.ChatMessageUncheckedUpdateManyWithoutChannelNestedInput
@@ -412,6 +424,7 @@ export type ChatChannelCreateManyInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -428,6 +441,7 @@ export type ChatChannelUpdateManyMutationInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -445,6 +459,7 @@ export type ChatChannelUncheckedUpdateManyInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -472,6 +487,7 @@ export type ChatChannelCountOrderByAggregateInput = {
   targetTeams?: Prisma.SortOrder
   targetRoles?: Prisma.SortOrder
   targetUserIds?: Prisma.SortOrder
+  deletedByUserIds?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -577,6 +593,7 @@ export type ChatChannelCreateWithoutClubInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.ChatMessageCreateNestedManyWithoutChannelInput
@@ -594,6 +611,7 @@ export type ChatChannelUncheckedCreateWithoutClubInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   messages?: Prisma.ChatMessageUncheckedCreateNestedManyWithoutChannelInput
@@ -641,6 +659,7 @@ export type ChatChannelScalarWhereInput = {
   targetTeams?: Prisma.JsonNullableFilter<"ChatChannel">
   targetRoles?: Prisma.JsonNullableFilter<"ChatChannel">
   targetUserIds?: Prisma.JsonNullableFilter<"ChatChannel">
+  deletedByUserIds?: Prisma.JsonNullableFilter<"ChatChannel">
   createdAt?: Prisma.DateTimeFilter<"ChatChannel"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ChatChannel"> | Date | string
 }
@@ -657,6 +676,7 @@ export type ChatChannelCreateWithoutMessagesInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   club: Prisma.ClubCreateNestedOneWithoutChatChannelsInput
@@ -675,6 +695,7 @@ export type ChatChannelUncheckedCreateWithoutMessagesInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -707,6 +728,7 @@ export type ChatChannelUpdateWithoutMessagesInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   club?: Prisma.ClubUpdateOneRequiredWithoutChatChannelsNestedInput
@@ -725,6 +747,7 @@ export type ChatChannelUncheckedUpdateWithoutMessagesInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -741,6 +764,7 @@ export type ChatChannelCreateManyClubInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -757,6 +781,7 @@ export type ChatChannelUpdateWithoutClubInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.ChatMessageUpdateManyWithoutChannelNestedInput
@@ -774,6 +799,7 @@ export type ChatChannelUncheckedUpdateWithoutClubInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.ChatMessageUncheckedUpdateManyWithoutChannelNestedInput
@@ -791,6 +817,7 @@ export type ChatChannelUncheckedUpdateManyWithoutClubInput = {
   targetTeams?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetRoles?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   targetUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  deletedByUserIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -839,6 +866,7 @@ export type ChatChannelSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   targetTeams?: boolean
   targetRoles?: boolean
   targetUserIds?: boolean
+  deletedByUserIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
@@ -859,6 +887,7 @@ export type ChatChannelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   targetTeams?: boolean
   targetRoles?: boolean
   targetUserIds?: boolean
+  deletedByUserIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
@@ -877,6 +906,7 @@ export type ChatChannelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   targetTeams?: boolean
   targetRoles?: boolean
   targetUserIds?: boolean
+  deletedByUserIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
@@ -895,11 +925,12 @@ export type ChatChannelSelectScalar = {
   targetTeams?: boolean
   targetRoles?: boolean
   targetUserIds?: boolean
+  deletedByUserIds?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ChatChannelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clubId" | "name" | "description" | "isPrivate" | "isCustom" | "canReply" | "creatorId" | "creatorName" | "targetTeams" | "targetRoles" | "targetUserIds" | "createdAt" | "updatedAt", ExtArgs["result"]["chatChannel"]>
+export type ChatChannelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clubId" | "name" | "description" | "isPrivate" | "isCustom" | "canReply" | "creatorId" | "creatorName" | "targetTeams" | "targetRoles" | "targetUserIds" | "deletedByUserIds" | "createdAt" | "updatedAt", ExtArgs["result"]["chatChannel"]>
 export type ChatChannelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   club?: boolean | Prisma.ClubDefaultArgs<ExtArgs>
   messages?: boolean | Prisma.ChatChannel$messagesArgs<ExtArgs>
@@ -931,6 +962,7 @@ export type $ChatChannelPayload<ExtArgs extends runtime.Types.Extensions.Interna
     targetTeams: runtime.JsonValue | null
     targetRoles: runtime.JsonValue | null
     targetUserIds: runtime.JsonValue | null
+    deletedByUserIds: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["chatChannel"]>
@@ -1370,6 +1402,7 @@ export interface ChatChannelFieldRefs {
   readonly targetTeams: Prisma.FieldRef<"ChatChannel", 'Json'>
   readonly targetRoles: Prisma.FieldRef<"ChatChannel", 'Json'>
   readonly targetUserIds: Prisma.FieldRef<"ChatChannel", 'Json'>
+  readonly deletedByUserIds: Prisma.FieldRef<"ChatChannel", 'Json'>
   readonly createdAt: Prisma.FieldRef<"ChatChannel", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ChatChannel", 'DateTime'>
 }

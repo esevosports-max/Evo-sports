@@ -84,3 +84,23 @@ export async function markAllAsReadAction() {
     return { success: false, error: e.message || "Erreur de mise à jour" }
   }
 }
+
+export async function deleteNotificationAction(notificationId: string) {
+  try {
+    const session = await auth()
+    if (!session || !session.user) {
+      throw new Error("Non autorisé")
+    }
+
+    const userId = session.user.id
+    await db.notification.delete({
+      where: { id: notificationId, userId }
+    })
+
+    revalidatePath("/dashboard")
+    return { success: true }
+  } catch (e: any) {
+    console.error("Error deleting notification:", e)
+    return { success: false, error: e.message || "Erreur de suppression" }
+  }
+}

@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { NextResponse } from "next/server"
+import { createPlanFeaturesSnapshot } from "@/lib/subscription"
 
 const PLAN_PRICES: Record<string, { monthly: number; yearly: number }> = {
   "1 Équipe": { monthly: 10000, yearly: 100000 },
@@ -60,6 +61,11 @@ export async function POST(req: Request) {
         expiresDate.setMonth(now.getMonth() + 1)
       }
 
+      const planObj = await db.subscriptionPlan.findFirst({
+        where: { name: serial.plan }
+      })
+      const features = planObj ? createPlanFeaturesSnapshot(planObj) : null
+
       // Start transaction to update both
       await db.$transaction([
         db.serialCode.update({
@@ -76,7 +82,8 @@ export async function POST(req: Request) {
             subscriptionStatus: "Actif",
             subscriptionPaid: true,
             subscriptionExpires: expiresDate,
-            subscriptionMethod: "SERIAL"
+            subscriptionMethod: "SERIAL",
+            subscriptionFeatures: (features as any) || undefined
           }
         })
       ])
