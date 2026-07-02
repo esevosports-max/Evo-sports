@@ -956,26 +956,20 @@ export default function MatchClient({
                       </div>
                     )}
 
-                    {/* PROGRAMME STATUS (NOT YET TIME) */}
-                    {match.status === "PROGRAMME" && !isTimeReached && (
-                      <div className="text-center md:text-right space-y-1">
-                        <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                          ⏱ Programmé
-                        </span>
-                        <p className="text-[9px] font-bold text-zinc-400 pt-1">
-                          Score modifiable à l&apos;heure du match
-                        </p>
-                      </div>
-                    )}
-
-                    {/* PROGRAMME STATUS (TIME REACHED - CAN START) */}
-                    {match.status === "PROGRAMME" && isTimeReached && (
+                    {/* PROGRAMME STATUS */}
+                    {match.status === "PROGRAMME" && (
                       <div className="text-center md:text-right w-full space-y-2">
-                        <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          Coup d&apos;envoi
-                        </span>
+                        {isTimeReached ? (
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Coup d&apos;envoi
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                            ⏱ Programmé
+                          </span>
+                        )}
                         {canManage ? (
                           <button
                             onClick={() => handleStartMatch(match.id)}
@@ -985,8 +979,8 @@ export default function MatchClient({
                             {loadingId === match.id ? "Démarrage..." : "Commencer le match ⚽"}
                           </button>
                         ) : (
-                          <p className="text-[9px] font-bold text-zinc-400">
-                            En attente de démarrage par le staff
+                          <p className="text-[9px] font-bold text-zinc-400 pt-1">
+                            {isTimeReached ? "En attente de démarrage par le staff" : "Score modifiable à l'heure du match"}
                           </p>
                         )}
                       </div>

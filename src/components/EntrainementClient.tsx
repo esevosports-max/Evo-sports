@@ -276,8 +276,9 @@ export default function EntrainementClient({
   // Calculate stats
   const totalDuration = activities.reduce((acc, curr) => acc + curr.duration, 0)
   const totalUa = activities.reduce((acc, curr) => acc + (curr.ua || 0), 0)
-  const totalRpe = activities.reduce((acc, curr) => acc + (curr.rpe || 0), 0)
-  const totalInm = activities.reduce((acc, curr) => acc + (curr.inm || 0), 0)
+  const totalRpe = "-"
+  const sumInmDuration = activities.reduce((acc, curr) => acc + ((curr.inm || 0) * curr.duration), 0)
+  const totalInm = totalDuration > 0 ? (sumInmDuration / totalDuration).toFixed(2) : "-"
   const totalPlayers = roster.length
   const presentCount = roster.filter((p) => p.present).length
   const absentCount = totalPlayers - presentCount
