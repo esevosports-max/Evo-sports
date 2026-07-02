@@ -152,7 +152,8 @@ export async function recordMatchResult(
   matchId: string,
   score: string,
   opponentName?: string,
-  attendances?: { playerId: string; status: "PRESENT" | "ABSENT" }[]
+  attendances?: { playerId: string; status: "PRESENT" | "ABSENT" }[],
+  details?: string
 ) {
   try {
     const session = await auth()
@@ -184,7 +185,8 @@ export async function recordMatchResult(
       data: {
         status: "TERMINE",
         score,
-        title: newTitle
+        title: newTitle,
+        details
       }
     })
 

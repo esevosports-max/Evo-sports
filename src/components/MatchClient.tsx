@@ -13,6 +13,7 @@ interface Match {
   status: "PROGRAMME" | "EN_COURS" | "TERMINE" | "N_A" | "EXPIRE"
   score?: string | null
   assignedTeam?: string | null
+  details?: string | null
 }
 
 interface PitchSlot {
@@ -56,6 +57,11 @@ export default function MatchClient({
   const [livePresences, setLivePresences] = useState<Record<string, "PRESENT" | "ABSENT">>({})
   const [liveTimeline, setLiveTimeline] = useState<string[]>([])
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PROGRAMME" | "EN_COURS" | "TERMINE" | "EXPIRE">("ALL")
+  const [locationFilter, setLocationFilter] = useState<"ALL" | "Domicile" | "Extérieur">("ALL")
+  const [liveRpe, setLiveRpe] = useState<number>(5)
+  const [liveInm, setLiveInm] = useState<number>(2)
+  const [consultMatchReport, setConsultMatchReport] = useState<Match | null>(null)
 
   // Keep track of time to dynamically update countdowns and "ready to start" state
   useEffect(() => {
@@ -109,6 +115,8 @@ export default function MatchClient({
           setLiveCards(parsed.cards || {})
           setLivePresences(parsed.presences || {})
           setLiveTimeline(parsed.timeline || [])
+          setLiveRpe(parsed.rpe || 5)
+          setLiveInm(parsed.inm || 2)
         }
       } catch (e) {
         console.error("Error restoring live match:", e)
@@ -128,13 +136,15 @@ export default function MatchClient({
         substitutes: liveSubstitutes,
         cards: liveCards,
         presences: livePresences,
-        timeline: liveTimeline
+        timeline: liveTimeline,
+        rpe: liveRpe,
+        inm: liveInm
       }
       localStorage.setItem("evo_active_live_match", JSON.stringify(data))
     } else {
       localStorage.removeItem("evo_active_live_match")
     }
-  }, [liveMatch, liveOpponent, liveHomeScore, liveAwayScore, livePeriod, liveSlots, liveSubstitutes, liveCards, livePresences, liveTimeline])
+  }, [liveMatch, liveOpponent, liveHomeScore, liveAwayScore, livePeriod, liveSlots, liveSubstitutes, liveCards, livePresences, liveTimeline, liveRpe, liveInm])
 
   // --- Live Match Action Handlers ---
   const startLiveTracking = (match: Match) => {
@@ -213,6 +223,8 @@ export default function MatchClient({
     setLiveCards({})
     setLivePresences(initialPresences)
     setLiveTimeline(["⚽ Début de la rencontre"])
+    setLiveRpe(5)
+    setLiveInm(2)
   }
 
   const handleSubstitute = (slotId: string, outPlayerId: string, inPlayerId: string) => {
@@ -324,6 +336,14 @@ export default function MatchClient({
     setSelectedPlayerId(null)
   }
 
+  const getMatchDuration = (period: string) => {
+    if (period === "1ère mi-temps") return 45
+    if (period === "2ème mi-temps") return 90
+    if (period === "Prolongations") return 120
+    if (period === "Tirs au but") return 120
+    return 90
+  }
+
   const handleCloseLiveMatch = async () => {
     if (!liveMatch) return
 
@@ -342,11 +362,42 @@ export default function MatchClient({
         status: livePresences[p.id] || "PRESENT"
       }))
 
+      // Compile starters (titulaires) and substitutes (sur le banc)
+      const starters = liveSlots
+        .map((slot) => {
+          const player = clubPlayers.find((p) => p.id === slot.playerId)
+          return player ? { playerId: player.id, name: player.user?.name || "Joueur", position: player.position || "MIL" } : null
+        })
+        .filter(Boolean)
+
+      const substitutes = liveSubstitutes
+        .map((subId) => {
+          const player = clubPlayers.find((p) => p.id === subId)
+          return player ? { playerId: player.id, name: player.user?.name || "Joueur", position: player.position || "MIL" } : null
+        })
+        .filter(Boolean)
+
+      const duration = getMatchDuration(livePeriod)
+      const ua = duration * liveRpe
+
+      const matchReport = {
+        rpe: liveRpe,
+        inm: liveInm,
+        ua: ua,
+        duration: duration,
+        period: livePeriod,
+        opponent: liveOpponent,
+        starters: starters,
+        substitutes: substitutes,
+        presences: livePresences
+      }
+
       const res = await recordMatchResult(
         liveMatch.id,
         scoreString,
         liveOpponent,
-        attendances
+        attendances,
+        JSON.stringify(matchReport)
       )
 
       if (res.success && res.match) {
@@ -501,7 +552,7 @@ export default function MatchClient({
         </div>
 
         {/* Configuration cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between gap-3">
             <div>
               <label className="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-500 tracking-widest">Nom de l&apos;équipe adverse</label>
@@ -545,25 +596,78 @@ export default function MatchClient({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3">
-            <label className="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-500 tracking-widest">Temps de jeu & Périodes</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {["1ère mi-temps", "2ème mi-temps", "Prolongations", "Tirs au but"].map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePeriodChange(p)}
-                  className={`rounded-xl py-2 px-1 text-[9px] font-black uppercase tracking-wider text-center transition-all cursor-pointer ${
-                    livePeriod === p
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/15"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
+          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3 flex flex-col justify-between">
+            <div>
+              <label className="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-500 tracking-widest">Temps de jeu & Périodes</label>
+              <div className="grid grid-cols-2 gap-2 mt-1.5">
+                {["1ère mi-temps", "2ème mi-temps", "Prolongations", "Tirs au but"].map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => handlePeriodChange(p)}
+                    className={`rounded-xl py-2 px-1 text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                      livePeriod === p
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/15"
+                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200"
+                    }`}
+                  >
+                    <span className="text-[9px] font-black uppercase tracking-wider">{p}</span>
+                    <span className="text-[8px] opacity-75 mt-0.5 font-bold uppercase">
+                      {p === "1ère mi-temps" && "45 min"}
+                      {p === "2ème mi-temps" && "45 min"}
+                      {p === "Prolongations" && "30 min"}
+                      {p === "Tirs au but" && "-"}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase text-center">
+            <div className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase text-center border-t border-zinc-100 dark:border-zinc-850 pt-2">
               Période active : <span className="text-blue-500 dark:text-blue-400 font-black">{livePeriod}</span>
+            </div>
+          </div>
+
+          {/* Indices de charge */}
+          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-3 flex flex-col justify-between">
+            <label className="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-500 tracking-widest">📊 Indices de Charge (Live)</label>
+            <div className="grid grid-cols-2 gap-3 text-xs font-semibold">
+              <div>
+                <label className="block text-[8px] font-black text-zinc-450 uppercase mb-1">Durée du Match</label>
+                <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-3 py-2 font-bold text-zinc-900 dark:text-white">
+                  {getMatchDuration(livePeriod)} min
+                </div>
+              </div>
+              <div>
+                <label className="block text-[8px] font-black text-zinc-450 uppercase mb-1">RPE (1-10)</label>
+                <select
+                  value={liveRpe}
+                  onChange={(e) => setLiveRpe(parseInt(e.target.value))}
+                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-2 py-2 text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-blue-500"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs font-semibold border-t border-zinc-100 dark:border-zinc-850 pt-2">
+              <div>
+                <label className="block text-[8px] font-black text-zinc-450 uppercase mb-1">INM (1-4)</label>
+                <select
+                  value={liveInm}
+                  onChange={(e) => setLiveInm(parseInt(e.target.value))}
+                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-2 py-2 text-xs font-bold text-zinc-900 dark:text-white outline-none focus:border-blue-500"
+                >
+                  {[1, 2, 3, 4].map((v) => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[8px] font-black text-zinc-450 uppercase mb-1">Charge UA</label>
+                <div className="rounded-xl border border-emerald-100 dark:border-emerald-950/20 bg-emerald-50/50 dark:bg-emerald-950/10 px-3 py-2 font-black text-emerald-600 dark:text-emerald-400">
+                  {getMatchDuration(livePeriod) * liveRpe} UA
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -812,6 +916,372 @@ export default function MatchClient({
     )
   }
 
+  const handleExportMatchToExcel = (match: Match, report: any) => {
+    const clubNameStr = clubName || "EVO FC"
+    const dateStr = match.date
+    const opponent = report?.opponent || match.title.replace(/^Match VS /i, "").replace(/^Match contre /i, "").trim()
+    const scoreStr = match.score || "N/A"
+    const location = match.location
+    const stadium = match.stadiumName
+    const team = match.assignedTeam || "Équipe"
+    const duration = report?.duration || 90
+    const rpe = report?.rpe || "-"
+    const inm = report?.inm || "-"
+    const ua = report?.ua || "-"
+    const period = report?.period || "Terminé"
+
+    const startersList = report?.starters || []
+    const benchList = report?.substitutes || []
+    const presencesMap = report?.presences || {}
+
+    let html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+          .club-title { font-size: 18px; font-weight: 950; color: #1e3a8a; text-transform: uppercase; margin-bottom: 2px; }
+          .doc-title { font-size: 14px; font-weight: 750; color: #1e293b; text-transform: uppercase; margin-bottom: 15px; }
+          .meta-label { font-weight: bold; color: #4b5563; }
+          table { border-collapse: collapse; width: 100%; margin-top: 15px; margin-bottom: 25px; }
+          th { background-color: #1e3a8a; color: white; border: 1px solid #d1d5db; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; }
+          td { border: 1px solid #e5e7eb; padding: 10px; font-size: 11px; }
+          .present { color: #059669; font-weight: bold; }
+          .absent { color: #dc2626; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="club-title">${clubNameStr}</div>
+        <div>Date : ${dateStr}</div>
+        <div class="doc-title">Bilan de Match Officiel</div>
+        <p><span class="meta-label">Match :</span> ${location === "Domicile" ? clubNameStr : opponent} VS ${location === "Domicile" ? opponent : clubNameStr}</p>
+        <p><span class="meta-label">Score :</span> ${scoreStr}</p>
+        <p><span class="meta-label">Catégorie :</span> ${team}</p>
+        <p><span class="meta-label">Stade :</span> ${stadium}</p>
+        <p><span class="meta-label">Durée totale :</span> ${duration} minutes</p>
+        <p><span class="meta-label">RPE :</span> ${rpe}/10</p>
+        <p><span class="meta-label">INM :</span> ${inm}/4</p>
+        <p><span class="meta-label">Charge de Match :</span> ${ua} UA</p>
+
+        <h3>1. JOUEURS TITULAIRES (STARTING XI)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50%">Nom & Prénom</th>
+              <th style="width: 25%">Poste</th>
+              <th style="width: 25%">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${startersList.map((player: any) => {
+              const status = presencesMap[player.playerId] || "PRESENT"
+              return `
+                <tr>
+                  <td>${player.name}</td>
+                  <td>${player.position}</td>
+                  <td class="${status === 'PRESENT' ? 'present' : 'absent'}">${status === 'PRESENT' ? 'Présent' : 'Absent'}</td>
+                </tr>
+              `
+            }).join("")}
+          </tbody>
+        </table>
+
+        <h3>2. REMPLAÇANTS SUR LE BANC (BENCH)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50%">Nom & Prénom</th>
+              <th style="width: 25%">Poste</th>
+              <th style="width: 25%">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${benchList.map((player: any) => {
+              const status = presencesMap[player.playerId] || "PRESENT"
+              return `
+                <tr>
+                  <td>${player.name}</td>
+                  <td>${player.position}</td>
+                  <td class="${status === 'PRESENT' ? 'present' : 'absent'}">${status === 'PRESENT' ? 'Présent' : 'Absent'}</td>
+                </tr>
+              `
+            }).join("")}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `
+
+    const blob = new Blob([html], { type: "application/vnd.ms-excel" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `bilan_match_${team.replace(/\s+/g, '_').toLowerCase()}_vs_${opponent.replace(/\s+/g, '_').toLowerCase()}_${dateStr}.xls`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const filteredMatches = matches.filter((match) => {
+    // Location filter
+    if (locationFilter !== "ALL" && match.location !== locationFilter) {
+      return false
+    }
+
+    // Status filter
+    if (statusFilter !== "ALL") {
+      if (statusFilter === "EXPIRE") {
+        return match.status === "EXPIRE" || match.status === "N_A"
+      }
+      if (match.status !== statusFilter) {
+        return false
+      }
+    }
+
+    return true
+  })
+
+  if (consultMatchReport) {
+    let report: any = null
+    if (consultMatchReport.details) {
+      try {
+        report = JSON.parse(consultMatchReport.details)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    const opponent = report?.opponent || consultMatchReport.title.replace(/^Match VS /i, "").replace(/^Match contre /i, "").trim()
+    const isHome = consultMatchReport.location === "Domicile"
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-150 pb-4 dark:border-zinc-800 select-none">
+          <div className="space-y-0.5">
+            <span className="bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider">
+              ✓ Rapport Clôturé & Verrouillé
+            </span>
+            <h2 className="text-xl font-black uppercase tracking-wider text-zinc-900 dark:text-white">
+              Bilan Officiel — {consultMatchReport.assignedTeam || "Équipe"}
+            </h2>
+            <p className="text-[9px] font-black text-zinc-400 dark:text-zinc-555 uppercase tracking-widest">
+              Consultation en lecture seule & Export réglementaire
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setConsultMatchReport(null)}
+              className="rounded-xl bg-zinc-950 hover:bg-zinc-900 text-white font-black uppercase text-[10px] tracking-wider px-4 py-2.5 transition-all active:scale-95 cursor-pointer dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 border border-zinc-950 dark:border-white shadow-sm"
+            >
+              ← Retour aux Matchs
+            </button>
+          </div>
+        </div>
+
+        {report ? (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* Sheet Preview Card (Left 2 cols) */}
+            <div className="xl:col-span-2 rounded-2xl border border-zinc-250 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900 shadow-lg space-y-8 relative overflow-hidden select-none">
+              
+              {/* Decorative print headers */}
+              <div className="border-4 double border-blue-800/20 p-6 space-y-6">
+                
+                {/* Meta details */}
+                <div className="flex justify-between items-start gap-4 pb-4 border-b-2 border-blue-850/15">
+                  <div className="space-y-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src="/logo.png" 
+                      alt="EVO SPORTS" 
+                      className="h-10 w-auto object-contain" 
+                    />
+                    <p className="text-[10px] text-zinc-400 font-black tracking-widest uppercase">
+                      Plateforme d&apos;Optimisation & Performance
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-xs font-black text-zinc-800 dark:text-white uppercase tracking-wider">
+                      Date : {new Date(consultMatchReport.date).toLocaleDateString("fr-FR", { dateStyle: "long" })}
+                    </p>
+                    <p className="text-[9px] text-zinc-400 font-black uppercase tracking-wider mt-0.5">
+                      Rapport de Match Officiel
+                    </p>
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div className="text-center py-4 bg-blue-500/5 border border-blue-500/10 rounded-xl space-y-2 flex flex-col items-center justify-center">
+                  <div className="flex items-center justify-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src="/logo.png" 
+                      alt="Logo Club" 
+                      className="h-5 w-auto object-contain rounded" 
+                    />
+                    <h4 className="text-sm font-black uppercase tracking-widest text-zinc-900 dark:text-white">
+                      Feuille de Match Officielle
+                    </h4>
+                  </div>
+                  <div className="text-center font-black text-xs uppercase tracking-wide text-zinc-800 dark:text-zinc-200">
+                    {isHome ? clubName : opponent} <span className="px-2 py-0.5 bg-blue-600 text-white rounded text-[10px] font-black">{consultMatchReport.score || "0 - 0"}</span> {isHome ? opponent : clubName}
+                  </div>
+                  <p className="text-[9px] font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest">
+                    Lieu : {consultMatchReport.stadiumName} ({consultMatchReport.location}) | Catégorie : {consultMatchReport.assignedTeam || "N/A"}
+                  </p>
+                </div>
+
+                {/* Table 1: Physical Data */}
+                <div className="space-y-3">
+                  <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-800 dark:text-white border-b pb-1">
+                    Données Physiques & Charge de Match
+                  </h5>
+
+                  <div className="rounded-xl border border-zinc-150 overflow-hidden dark:border-zinc-800">
+                    <table className="w-full text-left border-collapse text-[10px] font-semibold">
+                      <thead>
+                        <tr className="bg-blue-700 text-white font-black uppercase select-none">
+                          <th className="p-2.5">Indicateur</th>
+                          <th className="p-2.5 text-center">Valeur</th>
+                          <th className="p-2.5 text-center">Description / Échelle</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-zinc-150 dark:border-zinc-800 hover:bg-zinc-50/50">
+                          <td className="p-2.5 text-zinc-850 dark:text-zinc-200 uppercase font-black">Durée Totale</td>
+                          <td className="p-2.5 text-center text-zinc-600 font-bold">{report.duration} minutes</td>
+                          <td className="p-2.5 text-center text-zinc-600 font-bold">Temps effectif ou cumulé de jeu</td>
+                        </tr>
+                        <tr className="border-b border-zinc-150 dark:border-zinc-800 hover:bg-zinc-50/50">
+                          <td className="p-2.5 text-zinc-850 dark:text-zinc-200 uppercase font-black">Indice RPE Moyen</td>
+                          <td className="p-2.5 text-center text-zinc-600 font-bold">{report.rpe} / 10</td>
+                          <td className="p-2.5 text-center text-zinc-600 font-bold">Intensité perçue par le groupe</td>
+                        </tr>
+                        <tr className="border-b border-zinc-150 dark:border-zinc-800 hover:bg-zinc-50/50">
+                          <td className="p-2.5 text-zinc-850 dark:text-zinc-200 uppercase font-black">Indice Monotonie (INM)</td>
+                          <td className="p-2.5 text-center text-zinc-600 font-bold">{report.inm} / 4</td>
+                          <td className="p-2.5 text-center text-zinc-600 font-bold">Stabilité de la charge de match</td>
+                        </tr>
+                        <tr className="bg-zinc-50 font-black dark:bg-zinc-950">
+                          <td className="p-2.5 text-zinc-850 dark:text-white uppercase font-black">Charge Globale (UA)</td>
+                          <td className="p-2.5 text-center text-blue-600 font-extrabold">{report.ua} UA</td>
+                          <td className="p-2.5 text-center text-blue-600 font-extrabold">Unités Arbitraires (Durée x RPE)</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Table 2: Attendance checklist */}
+                <div className="space-y-3">
+                  <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-800 dark:text-white border-b pb-1">
+                    Registre des Présences & Roster du Match
+                  </h5>
+
+                  <div className="rounded-xl border border-zinc-150 overflow-hidden dark:border-zinc-800">
+                    <table className="w-full text-left border-collapse text-[10px] font-semibold">
+                      <thead>
+                        <tr className="bg-blue-700 text-white font-black uppercase select-none">
+                          <th className="p-2.5">Joueur</th>
+                          <th className="p-2.5">Poste</th>
+                          <th className="p-2.5">Type</th>
+                          <th className="p-2.5 text-right">Présence</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {report.starters && report.starters.map((player: any) => {
+                          const status = report.presences[player.playerId] || "PRESENT"
+                          return (
+                            <tr key={`starter-${player.playerId}`} className="border-b border-zinc-150 dark:border-zinc-800 hover:bg-zinc-50/50">
+                              <td className="p-2.5 text-zinc-800 dark:text-zinc-200 uppercase font-black">{player.name}</td>
+                              <td className="p-2.5 text-zinc-400 font-bold">{player.position}</td>
+                              <td className="p-2.5">
+                                <span className="bg-blue-100 text-blue-850 dark:bg-blue-900/40 dark:text-blue-300 rounded px-2 py-0.5 text-[8px] font-black uppercase">
+                                  Titulaire
+                                </span>
+                              </td>
+                              <td className="p-2.5 text-right">
+                                <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${status === "PRESENT" ? "bg-blue-500/10 text-blue-600" : "bg-red-500/10 text-red-655"}`}>
+                                  {status === "PRESENT" ? "Présent" : "Absent"}
+                                </span>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                        {report.substitutes && report.substitutes.map((player: any) => {
+                          const status = report.presences[player.playerId] || "PRESENT"
+                          return (
+                            <tr key={`sub-${player.playerId}`} className="border-b border-zinc-150 dark:border-zinc-800 last:border-0 hover:bg-zinc-50/50">
+                              <td className="p-2.5 text-zinc-800 dark:text-zinc-200 uppercase font-black">{player.name}</td>
+                              <td className="p-2.5 text-zinc-400 font-bold">{player.position}</td>
+                              <td className="p-2.5">
+                                <span className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 rounded px-2 py-0.5 text-[8px] font-black uppercase">
+                                  Remplaçant
+                                </span>
+                              </td>
+                              <td className="p-2.5 text-right">
+                                <span className={`rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider ${status === "PRESENT" ? "bg-blue-500/10 text-blue-600" : "bg-red-500/10 text-red-650"}`}>
+                                  {status === "PRESENT" ? "Présent" : "Absent"}
+                                </span>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Sidebar Exporter Controls (Right col) */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-wider text-zinc-850 dark:text-white pb-3 border-b border-zinc-100 dark:border-zinc-800">
+                  📥 Téléchargement Excel
+                </h3>
+
+                <p className="text-xs text-zinc-500 font-semibold leading-relaxed">
+                  Exportez cette feuille de match officielle au format `.xls` standard compatible
+                  avec Microsoft Excel, Google Sheets, et LibreOffice.
+                </p>
+
+                <button
+                  onClick={() => handleExportMatchToExcel(consultMatchReport, report)}
+                  className="w-full rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black uppercase text-[10px] tracking-wider py-3.5 shadow-md shadow-blue-600/10 active:scale-95 transition-all cursor-pointer flex items-center justify-center"
+                >
+                  Exporter en Excel
+                </button>
+              </div>
+
+              <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-6 dark:border-zinc-800 dark:bg-zinc-950 space-y-3 select-none">
+                <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-500">
+                  ⚙️ Données Exportées
+                </h4>
+                <ul className="text-xs text-zinc-650 dark:text-zinc-400 font-semibold space-y-1.5 list-disc list-inside">
+                  <li>Identité officielle du club ({clubName})</li>
+                  <li>Date de la rencontre & score final</li>
+                  <li>Adversaire, lieu et catégorie d&apos;équipe</li>
+                  <li>Indices RPE, Monotonie (INM) et charge UA</li>
+                  <li>Feuille d&apos;effectif avec indication des statuts (titulaires/remplaçants) et présences</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm text-center">
+            <span className="text-3xl">⚠️</span>
+            <p className="mt-4 text-sm font-black uppercase text-zinc-400">Aucun Bilan Enregistré</p>
+            <p className="mt-1 text-xs text-zinc-550 font-bold">Ce match a été clôturé avant l&apos;activation de la saisie des indices de charge.</p>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Header Banner */}
@@ -836,19 +1306,60 @@ export default function MatchClient({
 
       {/* Main List */}
       <div className="space-y-6">
-        <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-white pb-2 border-b border-zinc-150">
-          Calendrier et Résultats
-        </h3>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-zinc-150">
+          <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-white">
+            Calendrier et Résultats
+          </h3>
 
-        {matches.length === 0 ? (
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
+              {(["ALL", "PROGRAMME", "EN_COURS", "TERMINE", "EXPIRE"] as const).map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`rounded-md px-2.5 py-1 text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                    statusFilter === status
+                      ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-white"
+                      : "text-zinc-500 hover:text-zinc-850 dark:hover:text-zinc-200"
+                  }`}
+                >
+                  {status === "ALL" && "Tous"}
+                  {status === "PROGRAMME" && "Programmés"}
+                  {status === "EN_COURS" && "En cours"}
+                  {status === "TERMINE" && "Terminés"}
+                  {status === "EXPIRE" && "Expirés"}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700">
+              {(["ALL", "Domicile", "Extérieur"] as const).map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => setLocationFilter(loc)}
+                  className={`rounded-md px-2.5 py-1 text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                    locationFilter === loc
+                      ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-white"
+                      : "text-zinc-500 hover:text-zinc-850 dark:hover:text-zinc-200"
+                  }`}
+                >
+                  {loc === "ALL" ? "Tous Lieux" : loc}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {filteredMatches.length === 0 ? (
           <div className="rounded-2xl border border-zinc-200 bg-white p-12 text-center shadow-sm dark:border-zinc-850 dark:bg-zinc-950">
             <span className="text-3xl">📅</span>
-            <p className="mt-4 text-sm font-black uppercase text-zinc-400">Aucun match planifié</p>
-            <p className="mt-1 text-xs text-zinc-500">Planifiez vos rencontres en allant sur la page &quot;Planning du Club&quot;.</p>
+            <p className="mt-4 text-sm font-black uppercase text-zinc-400">Aucun match trouvé</p>
+            <p className="mt-1 text-xs text-zinc-550 font-bold">Essayez de modifier vos filtres ou planifiez de nouvelles rencontres dans le planning.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {matches.map((match) => {
+            {filteredMatches.map((match) => {
               // Grayscale flag for terminated, expired or N_A status
               const isGrayscale = match.status === "TERMINE" || match.status === "N_A" || match.status === "EXPIRE"
 
@@ -935,13 +1446,19 @@ export default function MatchClient({
                   <div className="flex flex-col items-center md:items-end shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-zinc-100 dark:border-zinc-800 w-full md:w-auto min-w-[200px] justify-center">
                     {/* TERMINE STATUS */}
                     {match.status === "TERMINE" && (
-                      <div className="text-center md:text-right space-y-2">
+                      <div className="text-center md:text-right space-y-2 w-full">
                         <span className="text-[10px] font-black uppercase text-zinc-400 bg-zinc-200 dark:bg-zinc-800 px-2.5 py-1 rounded-full">
                           ✓ Match Terminé
                         </span>
-                        <div className="text-2xl font-black text-zinc-700 dark:text-zinc-300 tracking-wider bg-zinc-200/50 dark:bg-zinc-850 px-4 py-2 rounded-xl border border-zinc-300/30">
+                        <div className="text-2xl font-black text-zinc-700 dark:text-zinc-300 tracking-wider bg-zinc-200/50 dark:bg-zinc-850 px-4 py-2 rounded-xl border border-zinc-300/30 text-center">
                           {match.score}
                         </div>
+                        <button
+                          onClick={() => setConsultMatchReport(match)}
+                          className="w-full mt-2 block rounded-xl bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 text-[10px] font-black uppercase tracking-wider py-2 px-3 shadow-sm transition-all active:scale-95 cursor-pointer text-center"
+                        >
+                          Consulter le Bilan 📊
+                        </button>
                       </div>
                     )}
 
