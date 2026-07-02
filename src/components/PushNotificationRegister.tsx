@@ -33,6 +33,24 @@ export default function PushNotificationRegister() {
           return
         }
 
+        // Create custom notification channel for Android with the referee whistle sound
+        if (cap.getPlatform() === "android") {
+          try {
+            await PushNotifications.createChannel({
+              id: "whistle",
+              name: "Referee Whistle",
+              description: "Notifications with a football referee whistle sound",
+              sound: "whistle",
+              importance: 5, // IMPORTANCE_HIGH (plays sound and shows heads-up)
+              visibility: 1, // VISIBILITY_PUBLIC
+              vibration: true,
+            })
+            console.log("Android notification channel 'whistle' created successfully.")
+          } catch (channelErr) {
+            console.error("Error creating Android notification channel:", channelErr)
+          }
+        }
+
         // 2. Register with FCM / APNS
         await PushNotifications.register()
 

@@ -104,10 +104,6 @@ export async function startMatch(matchId: string) {
     const matchStart = new Date(`${match.date}T${match.time}:00`)
     const now = new Date()
 
-    if (now < matchStart) {
-      throw new Error("Le match n'a pas encore commencé. Attendez l'heure du coup d'envoi.")
-    }
-
     // Check if already expired
     const diffMs = now.getTime() - matchStart.getTime()
     const diffMins = diffMs / (1000 * 60)

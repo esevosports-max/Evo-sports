@@ -59,7 +59,8 @@ export async function sendPushNotificationToUsers(
         data: payload.data,
         android: {
           notification: {
-            sound: "default",
+            sound: "whistle",
+            channelId: "whistle",
             clickAction: "FCM_PLUGIN_ACTIVITY", // Matches Capacitor native action
           },
         },

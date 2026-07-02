@@ -373,6 +373,7 @@ export default function MatchClient({
         setMatches((prev) =>
           prev.map((m) => (m.id === matchId ? (res.match as any) : m))
         )
+        startLiveTracking(res.match as any)
       } else {
         alert(res.error || "Impossible de démarrer le match.")
       }
