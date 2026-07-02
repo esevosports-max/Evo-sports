@@ -131,6 +131,13 @@ export default function DashboardSidebarClient({ user, club, signOutAction }: Si
           description: language === "EN" ? "Track player attendance and absence rates" : language === "AR" ? "متابعة حضور وغياب اللاعبين" : "Suivre la présence des joueurs",
           requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "JOUEUR", "MEDECIN", "MANAGER_EVO_SPORTS"]
         },
+        { 
+          href: "/dashboard/charge-de-travail", 
+          label: t("feat_workload_title"), 
+          icon: "📊", 
+          description: t("feat_workload_desc"),
+          requiredRoles: ["PRESIDENT", "DIRECTEUR_SPORTIF", "SECRETAIRE_GENERAL", "ENTRAINEUR_PRINCIPAL", "ENTRAINEUR_ADJOINT", "PREPARATEUR_PHYSIQUE", "ENTRAINEUR_GARDIENS", "MEDECIN", "MANAGER_EVO_SPORTS"]
+        },
       ]
 
   const isRoleAuthorized = (allowed?: string[]) => {

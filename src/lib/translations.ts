@@ -84,6 +84,9 @@ export const translations: Record<Language, Record<string, string>> = {
     feat_welfare_title: "Fiche Quotidienne",
     feat_welfare_sub: "Forme & RPE (Sommeil, stress)",
     feat_welfare_desc: "Collectez chaque matin les fiches de bien-être (qualité du sommeil, niveau de stress, fatigue, courbatures) pour mesurer le taux de fatigue globale.",
+    feat_workload_title: "Charge de travail",
+    feat_workload_sub: "Calcul & Suivi de charge",
+    feat_workload_desc: "Analyser et calculer la charge de travail hebdomadaire et mensuelle de l'équipe (RPE, monotonie, fitness, contrainte).",
 
     // Home Page Download
     download_title: "Télécharger notre application",
@@ -452,8 +455,11 @@ export const translations: Record<Language, Record<string, string>> = {
     feat_tests_sub: "Athletic Evaluation",
     feat_tests_desc: "Log and analyze critical athletic tests (VMA, VO2 Max, Sprint, CMJ, SJ, Illinois Agility) to optimize physical preparation.",
     feat_welfare_title: "Daily Wellness",
-    feat_welfare_sub: "Form & RPE (Sleep, stress)",
+    feat_welfare_sub: "Forme & RPE (Sleep, stress)",
     feat_welfare_desc: "Collect morning wellness sheets (sleep quality, stress, fatigue, soreness) to evaluate general fatigue.",
+    feat_workload_title: "Workload",
+    feat_workload_sub: "Workload Calculation",
+    feat_workload_desc: "Analyze and calculate weekly and monthly team workloads (RPE, monotonicity, fitness, strain).",
 
     // Home Page Download
     download_title: "Download Our Application",
@@ -823,6 +829,9 @@ export const translations: Record<Language, Record<string, string>> = {
     feat_welfare_title: "الاستبيان اليومي",
     feat_welfare_sub: "الحالة والجهد (النوم، الضغط)",
     feat_welfare_desc: "اجمع استمارات الحالة البدنية والنفسية كل صباح (جودة النوم، مستوى التوتر، التعب، آلام العضلات) لقياس مستوى الإجهاد العام.",
+    feat_workload_title: "حمولة العمل",
+    feat_workload_sub: "حساب ومتابعة الأحمال",
+    feat_workload_desc: "تحليل وحساب حمولة العمل الأسبوعية والشهرية للفريق (RPE، الرتابة، اللياقة، الإجهاد).",
 
     // Home Page Download
     download_title: "تحميل تطبيقنا الخاص",

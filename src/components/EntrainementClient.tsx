@@ -131,6 +131,19 @@ export default function EntrainementClient({
             activities: JSON.parse(savedDrills),
             roster: JSON.parse(savedRoster)
           }
+        } else if (t.details) {
+          try {
+            const parsed = JSON.parse(t.details)
+            loadedCompletedMap[t.id] = {
+              activities: Array.isArray(parsed) ? parsed : [],
+              roster: []
+            }
+          } catch (e) {
+            loadedCompletedMap[t.id] = {
+              activities: [],
+              roster: []
+            }
+          }
         } else {
           loadedCompletedMap[t.id] = {
             activities: [],
@@ -309,7 +322,7 @@ export default function EntrainementClient({
 
       // 2. Complete training in planning
       const { completeTraining } = await import("../app/dashboard/planning/actions")
-      const res = await completeTraining(selectedTraining.id)
+      const res = await completeTraining(selectedTraining.id, JSON.stringify(activities))
       if (!res.success) {
         alert(res.error || "Une erreur est survenue lors de la clôture.")
         return

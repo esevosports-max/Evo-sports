@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 
 import { getEvents, createEvent, deleteEvent, getClubTeams } from "@/app/dashboard/planning/actions"
+import { useLanguage } from "@/components/LanguageProvider"
 
 interface CalendarEvent {
   id: string
@@ -35,6 +36,19 @@ const LOCAL_ROLE_LABELS: Record<string, string> = {
 
 
 
+const monthNamesFr = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+]
+const monthNamesEn = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+]
+const monthNamesAr = [
+  "جانفي", "فيفري", "مارس", "أفريل", "ماي", "جوان",
+  "جويلية", "أوت", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+]
+
 export default function PlanningCalendarClient({
   roleName,
   userName,
@@ -42,12 +56,17 @@ export default function PlanningCalendarClient({
   roleName: string
   userName: string
 }) {
+  const { language } = useLanguage()
+
   // Local ISO date: YYYY-MM-DD
   const d = new Date()
   const year = d.getFullYear()
   const month = String(d.getMonth() + 1).padStart(2, "0")
   const day = String(d.getDate()).padStart(2, "0")
   const todayStr = `${year}-${month}-${day}`
+
+  const [currentYear, setCurrentYear] = useState(d.getFullYear())
+  const [currentMonth, setCurrentMonth] = useState(d.getMonth()) // 0-11
 
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -125,10 +144,28 @@ export default function PlanningCalendarClient({
   const isPresidentOrManager = ["PRESIDENT", "MANAGER_EVO_SPORTS"].includes(roleName)
   const userAllowedTeams = myAllowedTeams
 
-  // Generate calendar days for June 2026
-  // June 1st, 2026 is a Monday. June has 30 days.
-  const totalDays = 30
-  const startDayOffset = 0 // Monday (0 offset if we start grid on Monday)
+  // Generate calendar days dynamically in real time
+  const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate()
+  const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const startDayOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1
+
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11)
+      setCurrentYear(currentYear - 1)
+    } else {
+      setCurrentMonth(currentMonth - 1)
+    }
+  }
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0)
+      setCurrentYear(currentYear + 1)
+    } else {
+      setCurrentMonth(currentMonth + 1)
+    }
+  }
 
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -164,7 +201,8 @@ export default function PlanningCalendarClient({
   }
 
   const handleSelectDay = (dayNum: number) => {
-    const dayStr = `2026-06-${dayNum < 10 ? "0" + dayNum : dayNum}`
+    const monthStr = String(currentMonth + 1).padStart(2, "0")
+    const dayStr = `${currentYear}-${monthStr}-${dayNum < 10 ? "0" + dayNum : dayNum}`
     setSelectedDayString(dayStr)
     const dayEvts = events.filter((e) => e.date === dayStr)
     setSelectedDayEvents(dayEvts)
@@ -248,10 +286,30 @@ export default function PlanningCalendarClient({
         {/* Calendar Month Card (Left 2 cols) */}
         <div className="xl:col-span-2 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
           <div className="flex justify-between items-center pb-2 border-b border-zinc-150/75 dark:border-zinc-800">
-            <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-white">
-              Juin 2026
-            </h3>
-            <span className="text-[10px] font-bold text-zinc-400">Total : {events.length} Événements programmés</span>
+            <div className="flex items-center gap-3">
+              <button 
+                type="button"
+                onClick={handlePrevMonth}
+                className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all font-bold text-[10px] select-none cursor-pointer"
+                title="Mois précédent"
+              >
+                ◀
+              </button>
+              <h3 className="text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-white min-w-[130px] text-center">
+                {language === "EN" ? monthNamesEn[currentMonth] : language === "AR" ? monthNamesAr[currentMonth] : monthNamesFr[currentMonth]} {currentYear}
+              </h3>
+              <button 
+                type="button"
+                onClick={handleNextMonth}
+                className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all font-bold text-[10px] select-none cursor-pointer"
+                title="Mois suivant"
+              >
+                ▶
+              </button>
+            </div>
+            <span className="text-[10px] font-bold text-zinc-400">
+              Total : {events.filter(e => e.date.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`)).length} Événements
+            </span>
           </div>
 
           {/* Grid Headers */}
@@ -275,7 +333,8 @@ export default function PlanningCalendarClient({
             {/* Calendar Days */}
             {Array.from({ length: totalDays }).map((_, index) => {
               const dayNum = index + 1
-              const dayStr = `2026-06-${dayNum < 10 ? "0" + dayNum : dayNum}`
+              const monthStr = String(currentMonth + 1).padStart(2, "0")
+              const dayStr = `${currentYear}-${monthStr}-${dayNum < 10 ? "0" + dayNum : dayNum}`
               
               // Filter events for this day
               const dayEvts = events.filter((e) => {

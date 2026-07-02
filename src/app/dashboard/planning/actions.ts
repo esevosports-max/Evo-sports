@@ -392,7 +392,7 @@ export async function getClubTeams() {
   }
 }
 
-export async function completeTraining(id: string) {
+export async function completeTraining(id: string, details?: string) {
   try {
     const session = await auth()
     if (!session || !session.user) {
@@ -408,7 +408,8 @@ export async function completeTraining(id: string) {
     const updated = await db.calendarEvent.update({
       where: { id },
       data: {
-        status: "TERMINE"
+        status: "TERMINE",
+        details
       }
     })
 
